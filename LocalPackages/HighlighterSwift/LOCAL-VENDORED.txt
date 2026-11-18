@@ -1,0 +1,1 @@
+Vendored from smittytone/HighlighterSwift @ 958f30c (develop), MIT license. Local changes are marked LOCAL.

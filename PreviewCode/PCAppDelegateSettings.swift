@@ -85,8 +85,8 @@ extension AppDelegate {
     @IBAction
     private func doMoveSlider(sender: Any) {
 
-        let index = Int(self.fontSizeSlider.floatValue)
-        self.fontSizeLabel.stringValue = "\(Int(BUFFOON_CONSTANTS.FONT_SIZE_OPTIONS[index]))pt"
+        // LOCAL: the slider value is the font size itself, in 0.5pt steps
+        self.fontSizeLabel.stringValue = fontSizeText(sliderFontSize())
 
         // Enable the Apply button if something has changed
         self.applyButton.isEnabled = checkSettingsOnQuit()
@@ -95,23 +95,40 @@ extension AppDelegate {
 
     override func keyDown(with event: NSEvent) {
 
-        if (event.keyCode == 126 || event.keyCode == 124) && self.fontSizeSlider.floatValue < 6.0 {
-            self.fontSizeSlider.floatValue += 1
-            if self.fontSizeSlider.floatValue > 6.0 {
-                self.fontSizeSlider.floatValue = 6.0
-            }
-
+        // LOCAL: arrow keys move the font size by one 0.5pt step
+        let step = BUFFOON_CONSTANTS.FONT_SIZE_STEP
+        if event.keyCode == 126 || event.keyCode == 124 {
+            self.fontSizeSlider.doubleValue = min(sliderFontSize() + step, self.fontSizeSlider.maxValue)
             doMoveSlider(sender: self)
         }
 
-        if (event.keyCode == 125 || event.keyCode == 123) && self.fontSizeSlider.floatValue > 0.0 {
-            self.fontSizeSlider.floatValue -= 1
-            if self.fontSizeSlider.floatValue < 0.0 {
-                self.fontSizeSlider.floatValue = 0.0
-            }
-
+        if event.keyCode == 125 || event.keyCode == 123 {
+            self.fontSizeSlider.doubleValue = max(sliderFontSize() - step, self.fontSizeSlider.minValue)
             doMoveSlider(sender: self)
         }
+    }
+
+
+    /**
+     The font size selected by the slider, snapped to the nearest 0.5pt.
+
+     LOCAL
+     */
+    private func sliderFontSize() -> Double {
+
+        let step = BUFFOON_CONSTANTS.FONT_SIZE_STEP
+        return (self.fontSizeSlider.doubleValue / step).rounded() * step
+    }
+
+
+    /**
+     Format a font size for the readout, eg. `13pt` or `13.5pt`.
+
+     LOCAL
+     */
+    private func fontSizeText(_ size: Double) -> String {
+
+        return size == size.rounded() ? String(format: "%.0fpt", size) : String(format: "%.1fpt", size)
     }
 
 
@@ -286,9 +303,9 @@ extension AppDelegate {
     internal func displaySettings(_ settings: PCSettings) {
 
         // Set the font size slider
-        let index = BUFFOON_CONSTANTS.FONT_SIZE_OPTIONS.lastIndex(of: settings.fontSize) ?? 3
-        self.fontSizeSlider.floatValue = Float(index)
-        self.fontSizeLabel.stringValue = "\(Int(BUFFOON_CONSTANTS.FONT_SIZE_OPTIONS[index]))pt"
+        // LOCAL: the slider holds the font size directly (10-28pt in 0.5pt steps)
+        self.fontSizeSlider.doubleValue = Double(settings.fontSize)
+        self.fontSizeLabel.stringValue = fontSizeText(sliderFontSize())
 
         // FROM 1.1.0
         // Set the font name popup
@@ -343,15 +360,9 @@ extension AppDelegate {
         // FROM 2.0.0
         self.showLineNumbersSwitch.state = settings.doShowLineNumbers ? .on : .off
 
-        // FROM 2.3.0
-        var idx = 2
-        if settings.previewWindowScale == BUFFOON_CONSTANTS.SCALERS.WINDOW_SIZE_S {
-            idx = 0
-        } else if settings.previewWindowScale == BUFFOON_CONSTANTS.SCALERS.WINDOW_SIZE_M {
-            idx = 1
-        }
-
-        self.previewSizeAdvancedPopup.selectItem(at: idx)
+        // LOCAL: preview window size in points
+        self.previewWidthAdvancedText.stringValue = String(format: "%.0f", settings.previewWindowWidth)
+        self.previewHeightAdvancedText.stringValue = String(format: "%.0f", settings.previewWindowHeight)
         self.previewMarginSizeText.stringValue = String(format:"%.1f", settings.previewMarginWidth)
         self.tintThumbnailsAdvancedSwitch.state = settings.thumbnailMatchFinderMode ? .on : .off
     }
@@ -368,7 +379,7 @@ extension AppDelegate {
     internal func settingsFromDisplay() -> PCSettings {
 
         let displayedSettings = PCSettings()
-        displayedSettings.fontSize = BUFFOON_CONSTANTS.FONT_SIZE_OPTIONS[Int(self.fontSizeSlider.floatValue)]
+        displayedSettings.fontSize = CGFloat(sliderFontSize())
         displayedSettings.fontName = getPostScriptName() ?? BUFFOON_CONSTANTS.DEFAULTS.FONT
 
         if self.lightRadioButton.state == .on {
@@ -392,15 +403,11 @@ extension AppDelegate {
         // FROM 2.3.0
         // Advanced Settings
         displayedSettings.thumbnailMatchFinderMode = self.tintThumbnailsAdvancedSwitch.state == .on
-        let idx = self.previewSizeAdvancedPopup.indexOfSelectedItem
-        switch idx {
-            case 1:
-                displayedSettings.previewWindowScale = BUFFOON_CONSTANTS.SCALERS.WINDOW_SIZE_M
-            case 2:
-                displayedSettings.previewWindowScale = BUFFOON_CONSTANTS.SCALERS.WINDOW_SIZE_L
-            default:
-                displayedSettings.previewWindowScale = BUFFOON_CONSTANTS.SCALERS.WINDOW_SIZE_S
-        }
+        // LOCAL: preview window size in points (validated by `advancedValuesGood()`)
+        displayedSettings.previewWindowWidth = CGFloat(Double(self.previewWidthAdvancedText.stringValue.trimmingCharacters(in: .whitespacesAndNewlines))
+                                                       ?? BUFFOON_CONSTANTS.PREVIEW_WINDOW.WIDTH)
+        displayedSettings.previewWindowHeight = CGFloat(Double(self.previewHeightAdvancedText.stringValue.trimmingCharacters(in: .whitespacesAndNewlines))
+                                                        ?? BUFFOON_CONSTANTS.PREVIEW_WINDOW.HEIGHT)
 
         displayedSettings.previewMarginWidth = Double(self.previewMarginSizeText.stringValue) ?? BUFFOON_CONSTANTS.PREVIEW_SIZE.MARGIN_WIDTH
 
@@ -492,8 +499,10 @@ extension AppDelegate {
             settingsHaveChanged = self.currentSettings.thumbnailMatchFinderMode != displayedSettings.thumbnailMatchFinderMode
         }
 
+        // LOCAL
         if !settingsHaveChanged {
-            settingsHaveChanged = self.currentSettings.previewWindowScale != displayedSettings.previewWindowScale
+            settingsHaveChanged = self.currentSettings.previewWindowWidth != displayedSettings.previewWindowWidth ||
+                                  self.currentSettings.previewWindowHeight != displayedSettings.previewWindowHeight
         }
 
         if !settingsHaveChanged {
@@ -534,6 +543,16 @@ extension AppDelegate {
      */
     internal func advancedValuesGood() -> Bool {
 
+        // LOCAL: check the preview window size first
+        if let sizeWarning = windowSizeWarning() {
+            Task { @MainActor in
+                let alert = makeAlert("Something’s not right!", sizeWarning)
+                _ = await alert.beginSheetModal(for: self.advancedSettingsSheet)
+            }
+
+            return false
+        }
+
         let warningMessage: String
         if let previewMargin = Float(self.previewMarginSizeText.stringValue.trimmingCharacters(in: .whitespacesAndNewlines)) {
             if previewMargin >= 0.0 && previewMargin <= 256.0 {
@@ -551,6 +570,32 @@ extension AppDelegate {
         }
 
         return false
+    }
+
+
+    /**
+     Check the preview window width and height fields.
+
+     LOCAL
+
+     - Returns: A warning message if either value is not a number in range, otherwise `nil`.
+     */
+    private func windowSizeWarning() -> String? {
+
+        let limits = BUFFOON_CONSTANTS.PREVIEW_WINDOW.self
+        let fields: [(String, NSTextField, Double, Double)] = [
+            ("width", self.previewWidthAdvancedText, limits.WIDTH_MIN, limits.WIDTH_MAX),
+            ("height", self.previewHeightAdvancedText, limits.HEIGHT_MIN, limits.HEIGHT_MAX)
+        ]
+
+        for (name, field, minimum, maximum) in fields {
+            let text = field.stringValue.trimmingCharacters(in: .whitespacesAndNewlines)
+            guard let value = Double(text), value >= minimum, value <= maximum else {
+                return "The preview window \(name) must be a number in the range \(Int(minimum))-\(Int(maximum)) points"
+            }
+        }
+
+        return nil
     }
 
 

@@ -93,6 +93,9 @@ struct BUFFOON_CONSTANTS {
         static let PREVIEW_SHOW_MARGIN          = "com-bps-previewcode-do-show-margin"
         static let PREVIEW_MARGIN               = "com-bps-previewcode-preview-margin"
         static let PREVIEW_WINDOW_SCALE         = "com-bps-previewcode-window-scale"
+        // LOCAL
+        static let PREVIEW_WINDOW_WIDTH         = "com-bps-previewcode-window-width"
+        static let PREVIEW_WINDOW_HEIGHT        = "com-bps-previewcode-window-height"
         static let THUMB_MATCH_MODE             = "com-bps-previewcode-match-mode"
     }
     
@@ -106,8 +109,29 @@ struct BUFFOON_CONSTANTS {
     static let MAX_FEEDBACK_SIZE                = 512
     static let MAX_THUMBNAIL_READ_SIZE          = 1024
     static let FONT_SIZE_OPTIONS: [CGFloat]     = [10.0, 12.0, 14.0, 16.0, 18.0, 24.0, 28.0]
+    // LOCAL: font size slider step; its range is FONT_SIZE_OPTIONS.first...last
+    static let FONT_SIZE_STEP: Double           = 0.5
 
     // FROM 2.2.3
+    // LOCAL: Quick Look window size in points, set in Advanced Settings.
+    // Replaces the screen-fraction SCALERS below, which are no longer used.
+    struct PREVIEW_WINDOW {
+
+        static let WIDTH                        = 1000.0
+        static let HEIGHT                       = 800.0
+        static let WIDTH_MIN                    = 300.0
+        static let WIDTH_MAX                    = 6000.0
+        static let HEIGHT_MIN                   = 200.0
+        static let HEIGHT_MAX                   = 4000.0
+    }
+
+    // LOCAL: large files are highlighted in two steps (see PreviewViewController)
+    struct PROGRESSIVE {
+
+        static let MIN_LINES                    = 2000
+        static let FIRST_LINES                  = 300
+    }
+
     struct SCALERS {
 
         static let WINDOW_SIZE_L                = 0.75

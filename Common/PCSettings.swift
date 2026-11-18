@@ -28,7 +28,10 @@ final class PCSettings {
     // FROM 2.2.3
     public var doShowMargin: Bool                  = false                                                  // Advanced DEPRECATED
     public var previewMarginWidth: CGFloat         = BUFFOON_CONSTANTS.PREVIEW_SIZE.MARGIN_WIDTH    // Advanced
-    public var previewWindowScale: CGFloat         = BUFFOON_CONSTANTS.SCALERS.WINDOW_SIZE_L                // Advanced
+    public var previewWindowScale: CGFloat         = BUFFOON_CONSTANTS.SCALERS.WINDOW_SIZE_L                // Advanced (unused locally)
+    // LOCAL: Quick Look window size in points
+    public var previewWindowWidth: CGFloat         = BUFFOON_CONSTANTS.PREVIEW_WINDOW.WIDTH                 // Advanced
+    public var previewWindowHeight: CGFloat        = BUFFOON_CONSTANTS.PREVIEW_WINDOW.HEIGHT                // Advanced
     public var thumbnailMatchFinderMode: Bool      = false                                                  // Advanced
 
 
@@ -56,6 +59,16 @@ final class PCSettings {
             self.previewMarginWidth = CGFloat(defaults.float(forKey: BUFFOON_CONSTANTS.PREFS_IDS.PREVIEW_MARGIN))
             self.previewWindowScale = CGFloat(defaults.float(forKey: BUFFOON_CONSTANTS.PREFS_IDS.PREVIEW_WINDOW_SCALE))
             self.thumbnailMatchFinderMode = defaults.bool(forKey: BUFFOON_CONSTANTS.PREFS_IDS.THUMB_MATCH_MODE)
+
+            // LOCAL: fall back to the defaults when the keys have not been written yet
+            // (the extensions read settings without calling `registerSettings()`)
+            if defaults.object(forKey: BUFFOON_CONSTANTS.PREFS_IDS.PREVIEW_WINDOW_WIDTH) != nil {
+                self.previewWindowWidth = CGFloat(defaults.double(forKey: BUFFOON_CONSTANTS.PREFS_IDS.PREVIEW_WINDOW_WIDTH))
+            }
+
+            if defaults.object(forKey: BUFFOON_CONSTANTS.PREFS_IDS.PREVIEW_WINDOW_HEIGHT) != nil {
+                self.previewWindowHeight = CGFloat(defaults.double(forKey: BUFFOON_CONSTANTS.PREFS_IDS.PREVIEW_WINDOW_HEIGHT))
+            }
 
             // FROM 2.3.1
             // Apply corrections for theme name changes
@@ -89,6 +102,9 @@ final class PCSettings {
             defaults.setValue(self.previewMarginWidth, forKey: BUFFOON_CONSTANTS.PREFS_IDS.PREVIEW_MARGIN)
             defaults.setValue(self.previewWindowScale, forKey: BUFFOON_CONSTANTS.PREFS_IDS.PREVIEW_WINDOW_SCALE)
             defaults.setValue(self.thumbnailMatchFinderMode, forKey: BUFFOON_CONSTANTS.PREFS_IDS.THUMB_MATCH_MODE)
+            // LOCAL
+            defaults.setValue(self.previewWindowWidth, forKey: BUFFOON_CONSTANTS.PREFS_IDS.PREVIEW_WINDOW_WIDTH)
+            defaults.setValue(self.previewWindowHeight, forKey: BUFFOON_CONSTANTS.PREFS_IDS.PREVIEW_WINDOW_HEIGHT)
         }
     }
 
@@ -186,6 +202,15 @@ final class PCSettings {
                 defaults.setValue(BUFFOON_CONSTANTS.SCALERS.WINDOW_SIZE_L, forKey: BUFFOON_CONSTANTS.PREFS_IDS.PREVIEW_WINDOW_SCALE)
             }
             
+            // LOCAL: Preview window size in points
+            if defaults.object(forKey: BUFFOON_CONSTANTS.PREFS_IDS.PREVIEW_WINDOW_WIDTH) == nil {
+                defaults.setValue(BUFFOON_CONSTANTS.PREVIEW_WINDOW.WIDTH, forKey: BUFFOON_CONSTANTS.PREFS_IDS.PREVIEW_WINDOW_WIDTH)
+            }
+
+            if defaults.object(forKey: BUFFOON_CONSTANTS.PREFS_IDS.PREVIEW_WINDOW_HEIGHT) == nil {
+                defaults.setValue(BUFFOON_CONSTANTS.PREVIEW_WINDOW.HEIGHT, forKey: BUFFOON_CONSTANTS.PREFS_IDS.PREVIEW_WINDOW_HEIGHT)
+            }
+
             // Preview inset margin width
             if defaults.object(forKey: BUFFOON_CONSTANTS.PREFS_IDS.PREVIEW_SHOW_MARGIN) == nil {
                 defaults.setValue(false, forKey: BUFFOON_CONSTANTS.PREFS_IDS.PREVIEW_SHOW_MARGIN)

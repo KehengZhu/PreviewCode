@@ -95,7 +95,9 @@ final class AppDelegate: NSResponder,
     // Advanced Settings Sheet
     @IBOutlet weak var advancedSettingsSheet: NSWindow!
     @IBOutlet weak var applyAdvancedButton: NSButton!
-    @IBOutlet weak var previewSizeAdvancedPopup: NSPopUpButton!
+    // LOCAL: window width and height fields replace the Small/Medium/Large popup
+    @IBOutlet weak var previewWidthAdvancedText: NSTextField!
+    @IBOutlet weak var previewHeightAdvancedText: NSTextField!
     @IBOutlet weak var tintThumbnailsAdvancedSwitch: NSSwitch!
     @IBOutlet weak var tintThumbnailsAdvancedLabel: NSTextField!
     @IBOutlet weak var previewMarginSizeText: NSTextField!

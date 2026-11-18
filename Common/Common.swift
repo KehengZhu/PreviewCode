@@ -11,6 +11,60 @@ import UniformTypeIdentifiers
 import Highlighter
 
 
+/**
+ One `Highlighter` (a JavaScriptCore context with Highlight.js loaded) per
+ preview-extension process, so previews after the first skip the ~25 ms it
+ takes to build one.
+
+ LOCAL. All use of the highlighter happens on one serial queue, because previews
+ run on the main thread while a large file's full highlight (see
+ `PreviewViewController`) finishes in the background, and each user sets the
+ shared theme before highlighting.
+ */
+final class SharedHighlighter: @unchecked Sendable {
+
+    static let shared = SharedHighlighter()
+
+    private let queue = DispatchQueue(label: "com.bps.previewcode.highlighter", qos: .userInitiated)
+    // Only touched on `queue`
+    private var highlighter: Highlighter? = nil
+
+
+    /// Start building the highlighter in the background, eg. while Quick Look sets up the view.
+    func warmUp() {
+
+        self.queue.async { _ = self.loaded() }
+    }
+
+
+    /// Run `body` with the highlighter on its queue and wait. Never call from `body`.
+    func sync<T>(_ body: (Highlighter) -> T?) -> T? {
+
+        return self.queue.sync {
+            guard let hltr = self.loaded() else { return nil }
+            return body(hltr)
+        }
+    }
+
+
+    /// Run `body` with the highlighter on its queue without waiting.
+    func async(_ body: @escaping (Highlighter?) -> Void) {
+
+        self.queue.async { body(self.loaded()) }
+    }
+
+
+    private func loaded() -> Highlighter? {
+
+        if self.highlighter == nil {
+            self.highlighter = Highlighter()
+        }
+
+        return self.highlighter
+    }
+}
+
+
 // FROM 1.1.0
 // Implement as a class
 final internal class Common {
@@ -28,6 +82,9 @@ final internal class Common {
     private  var highlighter: Highlighter?      = nil
     // FROM 2.0.0
     private  var isThumbnail: Bool              = false
+    // LOCAL: use `SharedHighlighter` rather than an instance-owned highlighter
+    private  var usesSharedHighlighter: Bool    = false
+    private  var highlightJsThemeName: String   = ""
 
     /*
      Replace the following string with your own team ID. This is used to
@@ -39,10 +96,11 @@ final internal class Common {
     
     // MARK: - Lifecycle Functions
 
-    init?(forThumbnail: Bool) {
+    init?(forThumbnail: Bool, sharedHighlighter: Bool = false) {
 
         // Set local values with default properties
         var highlightJsThemeName: String
+        self.usesSharedHighlighter = sharedHighlighter && !forThumbnail
 
         // Read in the user preferences to update the above values
         self.settings.loadSettings(self.appSuiteName)
@@ -81,19 +139,42 @@ final internal class Common {
             self.font = NSFont.systemFont(ofSize: self.settings.fontSize)
         }
 
+        self.highlightJsThemeName = highlightJsThemeName
+
+        // LOCAL: the preview extension shares one highlighter per process
+        if self.usesSharedHighlighter {
+            guard let background = SharedHighlighter.shared.sync({ (hltr: Highlighter) -> NSColor? in
+                self.configure(hltr)
+                return hltr.theme.themeBackgroundColour
+            }) else { return nil }
+
+            self.themeBackgroundColour = background
+            return
+        }
+
         // Instantiate the instance's highlighter
         self.highlighter = Highlighter()
         guard let hltr = self.highlighter else { return nil }
-        hltr.setTheme(highlightJsThemeName)
-        // We can be sure `self.font` is not nil from the previous `if let...` block
+        configure(hltr)
+        self.themeBackgroundColour = hltr.theme.themeBackgroundColour
+    }
+
+
+    /**
+     Apply this instance's theme, font and line spacing to a highlighter.
+
+     LOCAL: split out so the shared highlighter can be set up for each preview.
+     */
+    private func configure(_ hltr: Highlighter) {
+
+        hltr.setTheme(self.highlightJsThemeName)
+        // We can be sure `self.font` is not nil: `init` always sets it
         hltr.theme.setCodeFont(self.font!)
 
         // Requires HighligherSwift 1.1.3
-        if !forThumbnail {
+        if !self.isThumbnail {
             hltr.theme.lineSpacing = (self.settings.lineSpacing - 1.0) * self.settings.fontSize
         }
-
-        self.themeBackgroundColour = hltr.theme.themeBackgroundColour
     }
 
     
@@ -112,8 +193,71 @@ final internal class Common {
 
         // Run the specified code string through Highlightr/Highlight.js
         var renderedString: NSAttributedString? = nil
-        
-        if let hltr = self.highlighter {
+
+        // LOCAL: with the shared highlighter, set it up and render on its queue
+        if self.usesSharedHighlighter {
+            renderedString = SharedHighlighter.shared.sync { (hltr: Highlighter) -> NSAttributedString? in
+                self.configure(hltr)
+                return self.render(codeFileString, language, hltr)
+            }
+        } else if let hltr = self.highlighter {
+            renderedString = render(codeFileString, language, hltr)
+        }
+
+        return finish(renderedString, language)
+    }
+
+
+    /**
+     Highlight code on the shared highlighter's queue and pass the result to
+     `completion` on that queue, without blocking the caller.
+
+     LOCAL: used to finish highlighting large files after the first screen is shown.
+     Only for instances created with `sharedHighlighter: true`.
+
+     - Parameters:
+        - codeFileString: The raw source code.
+        - language:       The source code language, eg. `swift`.
+        - completion:     Receives the rendered source.
+     */
+    func getAttributedStringInBackground(_ codeFileString: String, _ language: String,
+                                         completion: @escaping (NSAttributedString) -> Void) {
+
+        SharedHighlighter.shared.async { hltr in
+            var renderedString: NSAttributedString? = nil
+            if let hltr = hltr {
+                self.configure(hltr)
+                renderedString = self.render(codeFileString, language, hltr)
+            }
+
+            completion(self.finish(renderedString, language))
+        }
+    }
+
+
+    /**
+     The attributes the theme gives plain, unhighlighted code.
+
+     LOCAL. Only for instances created with `sharedHighlighter: true`.
+     */
+    func plainTextAttributes() -> [NSAttributedString.Key: Any] {
+
+        return SharedHighlighter.shared.sync { (hltr: Highlighter) -> [NSAttributedString.Key: Any]? in
+            self.configure(hltr)
+            return hltr.plainTextAttributes()
+        } ?? [.font: self.font!]
+    }
+
+
+    /**
+     Run Highlight.js over the code, with line numbers if the user wants them.
+
+     LOCAL: split out of `getAttributedString()`.
+     */
+    private func render(_ codeFileString: String, _ language: String, _ hltr: Highlighter) -> NSAttributedString? {
+
+        var renderedString: NSAttributedString? = nil
+        do {
             if !self.isThumbnail && self.settings.doShowLineNumbers {
                 // FROM 2.2.0
                 // Use line numbering from HighlighterSwift
@@ -122,10 +266,10 @@ final internal class Common {
                 lnd.minWidth = 2
 
                 // Use our theme mode to specify the colour of the line numbers
-                lnd.usingDarkTheme = self.settings.themeDisplayMode == BUFFOON_CONSTANTS.DISPLAY_MODE.DARK
-                if self.settings.themeDisplayMode == BUFFOON_CONSTANTS.DISPLAY_MODE.AUTO {
-                    lnd.usingDarkTheme = !NSApp.inLightMode
-                }
+                // LOCAL: `isThemeDark` was worked out in `init` (on the main thread) from
+                // the same mode setting and, in auto mode, from NSApp's appearance; this
+                // function may run on the shared highlighter's background queue
+                lnd.usingDarkTheme = self.isThemeDark
 
                 // Render with line numbers
                 renderedString = hltr.highlight(codeFileString, as: language, doFastRender: true, lineNumbering: lnd)
@@ -134,6 +278,17 @@ final internal class Common {
                 renderedString = hltr.highlight(codeFileString, as: language)
             }
         }
+
+        return renderedString
+    }
+
+
+    /**
+     Return the rendered code, or an error message if rendering failed.
+
+     LOCAL: split out of `getAttributedString()`.
+     */
+    private func finish(_ renderedString: NSAttributedString?, _ language: String) -> NSAttributedString {
 
         // If the rendered string is good, return it
         if let ras = renderedString {
@@ -186,6 +341,7 @@ final internal class Common {
     func updateTheme(_ themeData: String) {
         
         let themeName = setTheme(themeData)
+        self.highlightJsThemeName = themeName
         if let hltr = self.highlighter {
             hltr.setTheme(themeName)
             self.themeBackgroundColour = hltr.theme.themeBackgroundColour
