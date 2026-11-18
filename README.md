@@ -8,33 +8,6 @@ Quick Look previews and Finder thumbnails for source code, Markdown notes and Ju
 
 Quicklook Anything is based on [PreviewCode](https://github.com/smittytone/PreviewCode) by Tony Smith; see [Credits](#credits).
 
-## Fast
-
-Previews appear the moment you press Space. Quicklook Anything is tuned for speed:
-
-- **Markdown and notebooks render in under 10 ms** once Quick Look is running. The renderer page is loaded ahead of time and kept warm, so a preview only has to parse and draw the file; the first preview after the extension starts takes about 0.1 s.
-- **Code files preview in a few milliseconds.** Long files show their first screen highlighted at once and finish highlighting in the background.
-- **Long notes and notebooks** draw the first screen first and the rest a chunk at a time, so even very large files open without a wait.
-- **Math uses KaTeX**, which typesets in one synchronous pass, instead of MathJax, which Obsidian's own Quick Look extension loads for every preview.
-
-Times measured with the extensions' own logging on an Apple silicon Mac, using the sample files in [`docs/samples`](docs/samples).
-
-## Screenshots
-
-**Code** (`primes.py`, Atom One Light theme)
-
-![Quick Look preview of a Python file](docs/screenshots/code.png)
-
-**Markdown** (`notes.md`: frontmatter, math, a callout, a table, code and tasks)
-
-![Quick Look preview of a Markdown note](docs/screenshots/markdown.png)
-
-**Jupyter notebook** (`damping.ipynb`: Markdown, code cells and a plot)
-
-![Quick Look preview of a Jupyter notebook](docs/screenshots/notebook.png)
-
-The sample files are in [`docs/samples`](docs/samples), so you can try them yourself.
-
 ## Install
 
 Paste this into Terminal:
@@ -62,6 +35,33 @@ The app is signed but not notarized by Apple. macOS does not apply its download 
 ```sh
 curl -fsSL https://raw.githubusercontent.com/KehengZhu/QuicklookAnything/main/install.sh | zsh -s -- --uninstall
 ```
+
+## Fast
+
+Previews appear the moment you press Space. Quicklook Anything is tuned for speed:
+
+- **Markdown and notebooks render in under 10 ms** once Quick Look is running. The renderer page is loaded ahead of time and kept warm, so a preview only has to parse and draw the file; the first preview after the extension starts takes about 0.1 s.
+- **Code files preview in a few milliseconds.** Long files show their first screen highlighted at once and finish highlighting in the background.
+- **Long notes and notebooks** draw the first screen first and the rest a chunk at a time, so even very large files open without a wait.
+- **Math uses KaTeX**, which typesets in one synchronous pass, instead of MathJax, which Obsidian's own Quick Look extension loads for every preview.
+
+Times measured with the extensions' own logging on an Apple silicon Mac, using the sample files in [`docs/samples`](docs/samples).
+
+## Screenshots
+
+**Code**: `primes.py` in Finder's Quick Look (select it and press Space)
+
+![Quick Look preview of a Python file](docs/screenshots/code.png)
+
+**Markdown**: `notes.md`, with frontmatter, math, a callout, a table, code and tasks
+
+![Quick Look preview of a Markdown note](docs/screenshots/markdown.png)
+
+**Jupyter notebook**: `damping.ipynb`, with Markdown, code cells and a plot
+
+![Quick Look preview of a Jupyter notebook](docs/screenshots/notebook.png)
+
+The **Open with** button still names each file's usual app: Quicklook Anything never changes default apps. The sample files are in [`docs/samples`](docs/samples), so you can try them yourself.
 
 ## Usage
 
