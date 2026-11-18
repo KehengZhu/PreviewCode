@@ -18,6 +18,8 @@ curl -fsSL https://raw.githubusercontent.com/KehengZhu/QuicklookAnything/main/in
 
 Run the same command again to upgrade; your settings are kept.
 
+It works from any shell (bash, fish, …): every Mac has zsh, and piping into `bash` or `sh` instead also works.
+
 Requires macOS 13 (Ventura) or later, on Apple silicon or Intel. Nothing else (no Xcode, Homebrew or Obsidian) is needed.
 
 ### What the installer changes

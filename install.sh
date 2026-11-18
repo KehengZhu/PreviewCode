@@ -17,6 +17,17 @@
 # Uses only tools that ship with macOS, so it works without Xcode, the command
 # line tools or Homebrew.
 
+# The script is written for zsh, which every Mac since macOS 10.15 has at
+# /bin/zsh whatever the user's own shell is. When it is run by another shell
+# (`| bash`, `| sh`, `bash install.sh`), hand it to zsh: rerun the file, or,
+# when it came through a pipe, fetch it again. Keep this block POSIX sh.
+if [ -z "${ZSH_VERSION:-}" ]; then
+    case "$0" in
+        *.sh) [ -f "$0" ] && exec /bin/zsh "$0" "$@" ;;
+    esac
+    exec /bin/zsh -c "$(curl -fsSL https://raw.githubusercontent.com/KehengZhu/QuicklookAnything/main/install.sh)" install.sh "$@"
+fi
+
 # Everything runs from main(), called on the last line, so a download cut short
 # by `curl | zsh` runs nothing.
 main() {
