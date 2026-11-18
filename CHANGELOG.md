@@ -1,4 +1,15 @@
-## Release Notes
+## Quicklook Anything
+
+- 1.0.0 *18 November 2026*
+    - First release under the name Quicklook Anything, forked from PreviewCode 2.3.3.
+    - Add a Markdown and Jupyter notebook previewer: Obsidian-flavored Markdown, KaTeX math, highlighted code and notebook outputs.
+    - Faster previews of long files; window size and finer font size settings.
+    - Preview `.in` input files, MATLAB `.m` files, `.tex` files typed by TeXShop, and `.lua` files typed by MacTeX.
+    - One-line installer that also upgrades and uninstalls; universal build for Apple silicon and Intel.
+
+## PreviewCode Release Notes
+
+The release notes below are from [PreviewCode](https://github.com/smittytone/PreviewCode) by Tony Smith.
 
 - 2.3.3 *24 October 2026*
     - Improve Code Thumbnailer’s thread safety.

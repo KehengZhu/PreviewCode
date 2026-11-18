@@ -77,7 +77,7 @@ final class MarkdownPreviewController: NSViewController, QLPreviewingController 
         self.view.addSubview(renderer)
 
         guard await renderer.waitUntilLoaded() else {
-            throw NSError(domain: "com.bps.PreviewCode.Markdown-Previewer", code: 1,
+            throw NSError(domain: "io.github.kehengzhu.QuicklookAnything.Markdown-Previewer", code: 1,
                           userInfo: [NSLocalizedDescriptionKey: "The Markdown renderer failed to load"])
         }
 

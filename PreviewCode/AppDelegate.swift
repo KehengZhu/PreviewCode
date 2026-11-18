@@ -154,7 +154,7 @@ final class AppDelegate: NSResponder,
         // Disable the Help menu Spotlight features
         NSApplication.shared.helpMenu = NSMenu(title: "Dummy")
 
-        self.infoButton.toolTip = "About \(BUFFOON_CONSTANTS.APP_NAME) 2"
+        self.infoButton.toolTip = "About \(BUFFOON_CONSTANTS.APP_NAME)"
         self.settingsButton.toolTip = "Set preview styles and content"
         self.feedbackButton.toolTip = "Send feedback to the developer"
         self.infoButton.alphaValue = 1.0
@@ -310,9 +310,11 @@ final class AppDelegate: NSResponder,
 
         // Depending on the menu selected, set the load path
         if item == self.helpMenuOnlineHelp {
-            path += "#how-to-use-previewcode"
+            path += "#usage"
         } else if item == self.helpMenuAcknowledgments {
-            path += "#acknowledgements"
+            path += "#credits"
+        } else if item == self.helpMenuReportBug {
+            path += "/issues"
         } else if item == self.helpMenuAppStoreRating {
             path = BUFFOON_CONSTANTS.APP_STORE + "?action=write-review"
         } else if item == self.helpMenuHighlightr {
@@ -343,9 +345,9 @@ final class AppDelegate: NSResponder,
         
         let path: String
         if sender as? NSButton == self.advancedHelpButton {
-            path = BUFFOON_CONSTANTS.MAIN_URL + "#advanced-settings"
+            path = BUFFOON_CONSTANTS.MAIN_URL + "#settings"
         } else {
-            path = BUFFOON_CONSTANTS.MAIN_URL + "#customise-the-preview"
+            path = BUFFOON_CONSTANTS.MAIN_URL + "#settings"
         }
 
         // Open the selected website

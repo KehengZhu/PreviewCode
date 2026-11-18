@@ -98,12 +98,12 @@ struct BUFFOON_CONSTANTS {
         static let THUMB_MATCH_MODE             = "com-bps-previewcode-match-mode"
     }
     
-    static let APP_CODE_PREVIEWER               = "com.bps.PreviewCode.Code-Previewer"
+    static let APP_CODE_PREVIEWER               = "io.github.kehengzhu.QuicklookAnything.Code-Previewer"
     static let FILE_CODE_SAMPLE                 = "code-sample"
     static let FILE_THEME_LIST                  = "themes-list"
     static let SUITE_NAME                       = ".suite.preview-code"
     static let APP_STORE                        = "https://apps.apple.com/gb/app/previewcode/id1571797683"
-    static let MAIN_URL                         = "https://smittytone.net/previewcode/index.html"
+    static let MAIN_URL                         = "https://github.com/KehengZhu/QuicklookAnything"
     static let LINE_BREAK                       = "\n"
     static let MAX_FEEDBACK_SIZE                = 512
     static let MAX_THUMBNAIL_READ_SIZE          = 1024
@@ -132,7 +132,7 @@ struct BUFFOON_CONSTANTS {
     }
 
     // FROM 2.3.3
-    static let APP_NAME                         = "PreviewCode"
+    static let APP_NAME                         = "Quicklook Anything"
 
     struct PREVIEW_SIZE {
 

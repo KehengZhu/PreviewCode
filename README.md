@@ -1,26 +1,54 @@
-# PreviewCode 2.3.3
+# Quicklook Anything
 
-*PreviewCode* provides macOS QuickLook file previews and Finder icon thumbnails for more than 50 programming and scripting languages, header files, and data files.
+Quick Look previews and Finder thumbnails for source code, Markdown notes and Jupyter notebooks on macOS. Select a file in Finder and press Space.
 
-It is not exhaustive, nor is it intended to be. It is, however, intended to support [the most popular languages](#languages) used by Mac-based developers, whether for use on a Mac or on other platforms.
+- **Code**: syntax-highlighted previews and thumbnails for more than 50 languages and data formats, with 100 themes and your choice of monospace font.
+- **Markdown**: Obsidian-flavored notes with KaTeX math, GFM tables, highlighted code blocks, wikilinks, embedded images, callouts, `==highlights==`, `#tags`, task lists and frontmatter properties.
+- **Jupyter notebooks** (`.ipynb`): Markdown cells, highlighted code cells and their outputs, including images.
 
-[![PreviewCode App Store QR code](qr-code.jpg)](https://apps.apple.com/gb/app/previewcode/id1571797683?mt=12)
+Quicklook Anything is based on [PreviewCode](https://github.com/smittytone/PreviewCode) by Tony Smith; see [Credits](#credits).
 
-## Installation and Usage ##
+## Install
 
-Just run the host app once to register the extensions &mdash; you can quit the app as soon as it has launched. We recommend logging out of your Mac and back in again at this point. Now you can preview source code files using QuickLook (select an icon and hit Space), and Finder’s preview pane and **Info** panels.
+Paste this into Terminal:
 
-You can disable and re-enable the Code Previewer and Code Thumbnailer extensions at any time in **System Preferences > Extensions > Quick Look**.
+```sh
+curl -fsSL https://raw.githubusercontent.com/KehengZhu/QuicklookAnything/main/install.sh | zsh
+```
 
-### Adjusting the Preview
+Run the same command again to upgrade; your settings are kept.
 
-Open the main app and click on **Show Preview Preferences**, or select **Preferences...** from the **PreviewCode** menu.
+Requires macOS 13 (Ventura) or later, on Apple silicon or Intel. Nothing else (no Xcode, Homebrew or Obsidian) is needed.
 
-You can select from a range of text sizes, choose a monospace font, select the font’s style — regular, bold, italic, etc. — choose your preferred line spacing, and pick which theme you would like previews to use. One hundred themes are included, and you can view all of them, or just dark or light ones.
+### What the installer changes
 
-*PreviewCode* will allow you to select a dark theme or a light one. These will be applied whatever UI mode your Mac is set to. If you select auto mode, you choose two themes, one light, the other dark. These will be applied automatically based on the current UI mode.
+- Copies **Quicklook Anything.app** to `/Applications` (or `~/Applications` if you cannot write to `/Applications`) and registers its Quick Look extensions.
+- Turns off other Quick Look extensions for Markdown and Jupyter notebooks (Obsidian's, for example), and the App Store PreviewCode's, so they do not compete with these previews. Uninstalling turns them back on.
+- Never changes which app opens a file: double-clicking a file opens it in the same app as before.
 
-## Languages
+The app is signed but not notarized by Apple. macOS does not apply its download check (Gatekeeper) to files fetched by `curl`, so the installer runs without a warning; it checks the download's code signature itself before installing.
+
+### Uninstall
+
+```sh
+curl -fsSL https://raw.githubusercontent.com/KehengZhu/QuicklookAnything/main/install.sh | zsh -s -- --uninstall
+```
+
+## Usage
+
+Select a file in Finder and press Space, or use Finder's preview pane (**View > Show Preview**) or **Get Info**. Finder icons for code files show a thumbnail of their contents.
+
+You can turn the extensions off and on in **System Settings > General > Login Items & Extensions > Quick Look**.
+
+## Settings
+
+Open **Quicklook Anything** from Applications to choose the theme (one for light mode and one for dark, or a single theme for both), the font, its size and style, line spacing, and the Quick Look window size.
+
+Markdown notes and notebooks follow the system's light or dark mode. Images embedded in a note are found next to the note, in its Obsidian vault, or anywhere in the vault by name; for vaults outside iCloud Drive's Obsidian folder, only images next to the note can be shown.
+
+## Supported Files
+
+Markdown (`.md`, `.markdown`) and Jupyter notebooks (`.ipynb`), plus:
 
 ### Compiled Languages
 
@@ -102,34 +130,32 @@ You can select from a range of text sizes, choose a monospace font, select the f
 - Twig (`.twig`)
 - XML Localization Interchange File Format (`.xlf`, `.xliff`)
 
-## Known Issues ##
+## Known Issues
 
-1. *PreviewCode* will not render TypeScript `.ts` files. This is because the `.ts` file extension is pre-set on macOS to MPEG-2 transport stream video files. The `.tsx` and `.typescript` extensions are supported. We are actively investigating solutions to this problem.
-1. *PreviewCode* will not render Clojure `.edn` files. This is because the `.edn` file extension is pre-set on macOS to an Adobe digital rights management product.
-1. *PreviewCode* will not render Elixir `.exs` files if *GarageBand* and/or *Logic Pro* is installed on your Mac. This is because these apps use this file extension for EXS24 instrument files.
-1. Previews displayed on external displays, or on Macs with connected to multiple monitors, may intermittently not be scrollable if you’re using a third-party mouse. Workaround: a MacBook’s built-in trackpad will be able to scroll.
-1. Deselecting code in the preview is not immediate: the highlight clears after ~1s. We are investigating fixes.
+1. TypeScript `.ts` files are not previewed: macOS reserves `.ts` for MPEG-2 video. `.tsx` and `.typescript` work.
+1. Clojure `.edn` files are not previewed: macOS reserves `.edn` for an Adobe format.
+1. Elixir `.exs` files are not previewed when GarageBand or Logic Pro is installed, since those apps use `.exs` for instrument files.
 
-## Source Code
+## Building from Source
 
-This repository contains the primary source code for *PreviewCode*. Certain graphical assets, code components and data files are not included. To build *PreviewCode* from scratch, you will need to add these files yourself or remove them from your fork.
+You need Xcode and an Apple Development certificate.
 
-The files `REPLACE_WITH_YOUR_FUNCTIONS` and `REPLACE_WITH_YOUR_CODES` must be replaced with your own files. The former will contain your `sendFeedback(_ feedback: String) -> URLSessionTask?` function. The latter your Developer Team ID, used as the App Suite identifier prefix.
+- `LocalBuild/build-install.sh` builds the app and installs it on this Mac with `install.sh`.
+- `LocalBuild/release.sh` builds it and publishes a GitHub release, which the install command then fetches. Set the version in the Xcode project (`MARKETING_VERSION`) first.
 
-You will need to generate your own `Assets.xcassets` file containing the app icon, `app_logo.png` and theme screenshots.
+## Credits
 
-You will need to create your own `new` directory containing your own `new.html` file.
+Quicklook Anything is a fork of [PreviewCode](https://github.com/smittytone/PreviewCode) by [Tony Smith](https://github.com/smittytone), which provides the code previews, thumbnails and settings app. Thank you, Tony, for building it and releasing it under the MIT License. If you only need code previews, consider the original [PreviewCode on the Mac App Store](https://apps.apple.com/app/previewcode/id1571797683).
 
-## Acknowledgements
+It also builds on:
 
-*PreviewCode* makes use of [HighlighterSwift](https://github.com/smittytone/HighlighterSwift) which provides a Swift wrapper for [Highlight.js](https://github.com/highlightjs/highlight.js) and is derived from [Highlightr](https://github.com/raspu/Highlightr).
+- [HighlighterSwift](https://github.com/smittytone/HighlighterSwift) by Tony Smith, derived from [Highlightr](https://github.com/raspu/Highlightr) by Juan Pablo Illanes (MIT)
+- [Highlight.js](https://github.com/highlightjs/highlight.js) by Josh Goebel and contributors (BSD-3-Clause)
+- [markdown-it](https://github.com/markdown-it/markdown-it) (MIT)
+- [KaTeX](https://github.com/KaTeX/KaTeX) (MIT)
 
-## Release Notes ##
+Their license texts ship with the app and are in [`Code Previewer/Licences.md`](Code%20Previewer/Licences.md) and [`Markdown Previewer/Web/lib/LICENSES.txt`](Markdown%20Previewer/Web/lib/LICENSES.txt).
 
-Please see the [CHANGELOG](./CHANGELOG.md)
+## License
 
-## Copyright and Credits ##
-
-Primary app code and UI design &copy; 2026, Tony Smith.
-
-Code portions &copy; 2016 Juan Pablo Illanes.<br />Code portions &copy; 2006-25, Josh Goebel and Other Contributors
+[MIT](LICENSE.md). Release notes are in the [CHANGELOG](CHANGELOG.md).

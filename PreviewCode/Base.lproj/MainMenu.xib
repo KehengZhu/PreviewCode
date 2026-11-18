@@ -77,9 +77,9 @@
         <customObject id="YLy-65-1bz" customClass="NSFontManager"/>
         <menu title="Main Menu" systemMenu="main" id="AYu-sK-qS6">
             <items>
-                <menuItem title="PreviewCode" id="1Xt-HY-uBw">
+                <menuItem title="Quicklook Anything" id="1Xt-HY-uBw">
                     <modifierMask key="keyEquivalentModifierMask"/>
-                    <menu key="submenu" title="PreviewCode" systemMenu="apple" autoenablesItems="NO" id="uQy-DD-JDr">
+                    <menu key="submenu" title="Quicklook Anything" systemMenu="apple" autoenablesItems="NO" id="uQy-DD-JDr">
                         <items>
                             <menuItem title="Preferences…" image="gearshape.fill" catalog="system" keyEquivalent="," id="BOF-NM-1cW">
                                 <connections>
@@ -92,7 +92,7 @@
                                 <menu key="submenu" title="Services" systemMenu="services" id="hz9-B4-Xy5"/>
                             </menuItem>
                             <menuItem isSeparatorItem="YES" id="4je-JR-u6R"/>
-                            <menuItem title="Hide PreviewCode" keyEquivalent="h" id="Olw-nP-bQN">
+                            <menuItem title="Hide Quicklook Anything" keyEquivalent="h" id="Olw-nP-bQN">
                                 <connections>
                                     <action selector="hide:" target="-1" id="PnN-Uc-m68"/>
                                 </connections>
@@ -110,7 +110,7 @@
                                 </connections>
                             </menuItem>
                             <menuItem isSeparatorItem="YES" id="kCx-OE-vgT"/>
-                            <menuItem title="Quit PreviewCode" keyEquivalent="q" id="4sb-4s-VLi">
+                            <menuItem title="Quit Quicklook Anything" keyEquivalent="q" id="4sb-4s-VLi">
                                 <connections>
                                     <action selector="doClose:" target="Voe-Tx-rLC" id="xIJ-eJ-fE6"/>
                                 </connections>
@@ -244,10 +244,10 @@
                             <menuItem title="Report a Bug..." image="ant" catalog="system" id="9jb-nj-WtE">
                                 <modifierMask key="keyEquivalentModifierMask"/>
                                 <connections>
-                                    <action selector="doShowFeedbackWithSender:" target="Voe-Tx-rLC" id="M21-xu-8b6"/>
+                                    <action selector="doShowSitesWithSender:" target="Voe-Tx-rLC" id="M21-xu-8b6"/>
                                 </connections>
                             </menuItem>
-                            <menuItem title="Rate this App..." image="star" catalog="system" id="jLd-Pw-5jM">
+                            <menuItem title="Rate this App..." hidden="YES" image="star" catalog="system" id="jLd-Pw-5jM">
                                 <modifierMask key="keyEquivalentModifierMask"/>
                                 <connections>
                                     <action selector="doShowSitesWithSender:" target="Voe-Tx-rLC" id="Nqd-Nm-YPb"/>
@@ -341,7 +341,7 @@ DQ
             </view>
             <point key="canvasLocation" x="599" y="-803"/>
         </window>
-        <window title="PreviewCode 2" allowsToolTipsWhenApplicationIsInactive="NO" autorecalculatesKeyViewLoop="NO" visibleAtLaunch="NO" frameAutosaveName="" animationBehavior="default" titlebarAppearsTransparent="YES" titleVisibility="hidden" id="hiI-0R-QAN" userLabel="PreviewCode 2">
+        <window title="Quicklook Anything" allowsToolTipsWhenApplicationIsInactive="NO" autorecalculatesKeyViewLoop="NO" visibleAtLaunch="NO" frameAutosaveName="" animationBehavior="default" titlebarAppearsTransparent="YES" titleVisibility="hidden" id="hiI-0R-QAN" userLabel="PreviewCode 2">
             <windowStyleMask key="styleMask" titled="YES" closable="YES" miniaturizable="YES"/>
             <windowPositionMask key="initialPositionMask" leftStrut="YES" rightStrut="YES" topStrut="YES" bottomStrut="YES"/>
             <rect key="contentRect" x="0.0" y="717" width="800" height="400"/>
@@ -372,7 +372,7 @@ DQ
                                             </constraints>
                                             <textFieldCell key="cell" controlSize="mini" allowsUndo="NO" alignment="left" id="GzG-al-ptw">
                                                 <font key="font" metaFont="menu" size="9"/>
-                                                <string key="title">PreviewCode © 2026, Tony Smith. 
+                                                <string key="title">Quicklook Anything © 2026, Keheng Zhu. Based on PreviewCode © 2026, Tony Smith (MIT License).
 Contains Highlight.js © 2006-25, Josh Goebel and Other Contributors; and Highlightr © 2016, Juan Pablo Illanes</string>
                                                 <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
                                                 <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>

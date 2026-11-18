@@ -146,7 +146,7 @@
 		3BE0EBA2266A845B00C9924E /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		3BE0EBA3266A845B00C9924E /* Code_Thumbnailer.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Code_Thumbnailer.entitlements; sourceTree = "<group>"; };
 		3BFBEC3B2664058400B4E70C /* PCThemeTableCellView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PCThemeTableCellView.swift; sourceTree = "<group>"; };
-		3BFD78142663E16D002AD588 /* PreviewCode.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = PreviewCode.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		3BFD78142663E16D002AD588 /* Quicklook Anything.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Quicklook Anything.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		3BFD78172663E16D002AD588 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		3BFD781C2663E16E002AD588 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = Base; path = Base.lproj/MainMenu.xib; sourceTree = "<group>"; };
 		3BFD781E2663E16E002AD588 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -280,7 +280,7 @@
 		3BFD78152663E16D002AD588 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				3BFD78142663E16D002AD588 /* PreviewCode.app */,
+				3BFD78142663E16D002AD588 /* Quicklook Anything.app */,
 				3BFD78242663E16E002AD588 /* PreviewCodeTests.xctest */,
 				3BFD782F2663E16E002AD588 /* PreviewCodeUITests.xctest */,
 				3BFD78452663E27D002AD588 /* Code Previewer.appex */,
@@ -394,7 +394,7 @@
 				3B1108B726714ADA00A36A48 /* Highlighter */,
 			);
 			productName = PreviewCode;
-			productReference = 3BFD78142663E16D002AD588 /* PreviewCode.app */;
+			productReference = 3BFD78142663E16D002AD588 /* Quicklook Anything.app */;
 			productType = "com.apple.product-type.application";
 		};
 		3BFD78232663E16E002AD588 /* PreviewCodeTests */ = {
@@ -713,7 +713,7 @@
 				CODE_SIGN_IDENTITY = "Apple Development";
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Developer ID Application";
 				CODE_SIGN_STYLE = Manual;
-				CURRENT_PROJECT_VERSION = 153;
+				CURRENT_PROJECT_VERSION = 1;
 				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_TEAM = "";
 				"DEVELOPMENT_TEAM[sdk=macosx*]" = BTT85F79L9;
@@ -730,9 +730,9 @@
 					"@executable_path/../../../../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 12.4;
-				MARKETING_VERSION = 2.3.3;
+				MARKETING_VERSION = 1.0.0;
 				OTHER_SWIFT_FLAGS = "";
-				PRODUCT_BUNDLE_IDENTIFIER = "com.bps.PreviewCode.Code-Thumbnailer";
+				PRODUCT_BUNDLE_IDENTIFIER = "io.github.kehengzhu.QuicklookAnything.Code-Thumbnailer";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				REGISTER_APP_GROUPS = NO;
@@ -749,7 +749,7 @@
 				CODE_SIGN_IDENTITY = "Apple Development";
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Developer ID Application";
 				CODE_SIGN_STYLE = Manual;
-				CURRENT_PROJECT_VERSION = 153;
+				CURRENT_PROJECT_VERSION = 1;
 				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_TEAM = "";
 				"DEVELOPMENT_TEAM[sdk=macosx*]" = BTT85F79L9;
@@ -763,9 +763,9 @@
 					"@executable_path/../../../../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 12.4;
-				MARKETING_VERSION = 2.3.3;
+				MARKETING_VERSION = 1.0.0;
 				OTHER_SWIFT_FLAGS = "";
-				PRODUCT_BUNDLE_IDENTIFIER = "com.bps.PreviewCode.Code-Thumbnailer";
+				PRODUCT_BUNDLE_IDENTIFIER = "io.github.kehengzhu.QuicklookAnything.Code-Thumbnailer";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				REGISTER_APP_GROUPS = NO;
@@ -919,7 +919,7 @@
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Developer ID Application";
 				CODE_SIGN_STYLE = Manual;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 153;
+				CURRENT_PROJECT_VERSION = 1;
 				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_TEAM = "";
 				"DEVELOPMENT_TEAM[sdk=macosx*]" = BTT85F79L9;
@@ -927,9 +927,9 @@
 				ENABLE_HARDENED_RUNTIME = YES;
 				GCC_PREPROCESSOR_DEFINITIONS = "TARGET_IS_PC=1";
 				INFOPLIST_FILE = PreviewCode/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = PreviewCode;
+				INFOPLIST_KEY_CFBundleDisplayName = "Quicklook Anything";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.developer-tools";
-				INFOPLIST_KEY_NSHumanReadableCopyright = "Copyright © 2023 Tony Smith. All rights reserved.";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "© 2026 Keheng Zhu. Based on PreviewCode © Tony Smith. MIT License.";
 				INFOPLIST_KEY_NSMainNibFile = MainMenu;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -938,11 +938,12 @@
 				LOCALIZATION_EXPORT_SUPPORTED = NO;
 				LOCALIZED_STRING_SWIFTUI_SUPPORT = NO;
 				MACOSX_DEPLOYMENT_TARGET = 12.4;
-				MARKETING_VERSION = 2.3.3;
+				MARKETING_VERSION = 1.0.0;
 				OTHER_LDFLAGS = "";
 				OTHER_SWIFT_FLAGS = "-D TARGET_IS_PC";
-				PRODUCT_BUNDLE_IDENTIFIER = com.bps.PreviewCode;
-				PRODUCT_NAME = "$(TARGET_NAME)";
+				PRODUCT_BUNDLE_IDENTIFIER = io.github.kehengzhu.QuicklookAnything;
+				PRODUCT_MODULE_NAME = PreviewCode;
+				PRODUCT_NAME = "Quicklook Anything";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				REGISTER_APP_GROUPS = NO;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
@@ -964,7 +965,7 @@
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Developer ID Application";
 				CODE_SIGN_STYLE = Manual;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 153;
+				CURRENT_PROJECT_VERSION = 1;
 				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_TEAM = "";
 				"DEVELOPMENT_TEAM[sdk=macosx*]" = BTT85F79L9;
@@ -972,9 +973,9 @@
 				ENABLE_HARDENED_RUNTIME = YES;
 				GCC_PREPROCESSOR_DEFINITIONS = "TARGET_IS_PC=1";
 				INFOPLIST_FILE = PreviewCode/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = PreviewCode;
+				INFOPLIST_KEY_CFBundleDisplayName = "Quicklook Anything";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.developer-tools";
-				INFOPLIST_KEY_NSHumanReadableCopyright = "Copyright © 2023 Tony Smith. All rights reserved.";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "© 2026 Keheng Zhu. Based on PreviewCode © Tony Smith. MIT License.";
 				INFOPLIST_KEY_NSMainNibFile = MainMenu;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -983,12 +984,13 @@
 				LOCALIZATION_EXPORT_SUPPORTED = NO;
 				LOCALIZED_STRING_SWIFTUI_SUPPORT = NO;
 				MACOSX_DEPLOYMENT_TARGET = 12.4;
-				MARKETING_VERSION = 2.3.3;
+				MARKETING_VERSION = 1.0.0;
 				ONLY_ACTIVE_ARCH = NO;
 				OTHER_LDFLAGS = "";
 				OTHER_SWIFT_FLAGS = "-D TARGET_IS_PC";
-				PRODUCT_BUNDLE_IDENTIFIER = com.bps.PreviewCode;
-				PRODUCT_NAME = "$(TARGET_NAME)";
+				PRODUCT_BUNDLE_IDENTIFIER = io.github.kehengzhu.QuicklookAnything;
+				PRODUCT_MODULE_NAME = PreviewCode;
+				PRODUCT_NAME = "Quicklook Anything";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				REGISTER_APP_GROUPS = NO;
 				SWIFT_STRICT_CONCURRENCY = complete;
@@ -1010,10 +1012,10 @@
 					"@loader_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 11.3;
-				PRODUCT_BUNDLE_IDENTIFIER = com.bps.PreviewCodeTests;
+				PRODUCT_BUNDLE_IDENTIFIER = io.github.kehengzhu.QuicklookAnythingTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/PreviewCode.app/Contents/MacOS/PreviewCode";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Quicklook Anything.app/Contents/MacOS/Quicklook Anything";
 			};
 			name = Debug;
 		};
@@ -1031,10 +1033,10 @@
 					"@loader_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 11.3;
-				PRODUCT_BUNDLE_IDENTIFIER = com.bps.PreviewCodeTests;
+				PRODUCT_BUNDLE_IDENTIFIER = io.github.kehengzhu.QuicklookAnythingTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/PreviewCode.app/Contents/MacOS/PreviewCode";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Quicklook Anything.app/Contents/MacOS/Quicklook Anything";
 			};
 			name = Release;
 		};
@@ -1051,7 +1053,7 @@
 					"@loader_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 11.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.bps.PreviewCodeUITests;
+				PRODUCT_BUNDLE_IDENTIFIER = io.github.kehengzhu.QuicklookAnythingUITests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;
 				TEST_TARGET_NAME = PreviewCode;
@@ -1071,7 +1073,7 @@
 					"@loader_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 11.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.bps.PreviewCodeUITests;
+				PRODUCT_BUNDLE_IDENTIFIER = io.github.kehengzhu.QuicklookAnythingUITests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;
 				TEST_TARGET_NAME = PreviewCode;
@@ -1085,7 +1087,7 @@
 				CODE_SIGN_IDENTITY = "Apple Development";
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Developer ID Application";
 				CODE_SIGN_STYLE = Manual;
-				CURRENT_PROJECT_VERSION = 153;
+				CURRENT_PROJECT_VERSION = 1;
 				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_TEAM = "";
 				"DEVELOPMENT_TEAM[sdk=macosx*]" = BTT85F79L9;
@@ -1099,13 +1101,13 @@
 				);
 				LIBRARY_SEARCH_PATHS = "";
 				MACOSX_DEPLOYMENT_TARGET = 12.4;
-				MARKETING_VERSION = 2.3.3;
+				MARKETING_VERSION = 1.0.0;
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-ObjC",
 				);
 				"OTHER_LDFLAGS[arch=*]" = "$(inherited)";
-				PRODUCT_BUNDLE_IDENTIFIER = "com.bps.PreviewCode.Code-Previewer";
+				PRODUCT_BUNDLE_IDENTIFIER = "io.github.kehengzhu.QuicklookAnything.Code-Previewer";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				REGISTER_APP_GROUPS = NO;
@@ -1122,7 +1124,7 @@
 				CODE_SIGN_IDENTITY = "Apple Development";
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Developer ID Application";
 				CODE_SIGN_STYLE = Manual;
-				CURRENT_PROJECT_VERSION = 153;
+				CURRENT_PROJECT_VERSION = 1;
 				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_TEAM = "";
 				"DEVELOPMENT_TEAM[sdk=macosx*]" = BTT85F79L9;
@@ -1136,12 +1138,12 @@
 				);
 				LIBRARY_SEARCH_PATHS = "";
 				MACOSX_DEPLOYMENT_TARGET = 12.4;
-				MARKETING_VERSION = 2.3.3;
+				MARKETING_VERSION = 1.0.0;
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-ObjC",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = "com.bps.PreviewCode.Code-Previewer";
+				PRODUCT_BUNDLE_IDENTIFIER = "io.github.kehengzhu.QuicklookAnything.Code-Previewer";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				REGISTER_APP_GROUPS = NO;
@@ -1158,7 +1160,7 @@
 				CODE_SIGN_IDENTITY = "Apple Development";
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Developer ID Application";
 				CODE_SIGN_STYLE = Manual;
-				CURRENT_PROJECT_VERSION = 153;
+				CURRENT_PROJECT_VERSION = 1;
 				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_TEAM = "";
 				"DEVELOPMENT_TEAM[sdk=macosx*]" = BTT85F79L9;
@@ -1172,13 +1174,13 @@
 				);
 				LIBRARY_SEARCH_PATHS = "";
 				MACOSX_DEPLOYMENT_TARGET = 13.0;
-				MARKETING_VERSION = 2.3.3;
+				MARKETING_VERSION = 1.0.0;
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-ObjC",
 				);
 				"OTHER_LDFLAGS[arch=*]" = "$(inherited)";
-				PRODUCT_BUNDLE_IDENTIFIER = "com.bps.PreviewCode.Markdown-Previewer";
+				PRODUCT_BUNDLE_IDENTIFIER = "io.github.kehengzhu.QuicklookAnything.Markdown-Previewer";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				REGISTER_APP_GROUPS = NO;
@@ -1195,7 +1197,7 @@
 				CODE_SIGN_IDENTITY = "Apple Development";
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Developer ID Application";
 				CODE_SIGN_STYLE = Manual;
-				CURRENT_PROJECT_VERSION = 153;
+				CURRENT_PROJECT_VERSION = 1;
 				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_TEAM = "";
 				"DEVELOPMENT_TEAM[sdk=macosx*]" = BTT85F79L9;
@@ -1209,12 +1211,12 @@
 				);
 				LIBRARY_SEARCH_PATHS = "";
 				MACOSX_DEPLOYMENT_TARGET = 13.0;
-				MARKETING_VERSION = 2.3.3;
+				MARKETING_VERSION = 1.0.0;
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-ObjC",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = "com.bps.PreviewCode.Markdown-Previewer";
+				PRODUCT_BUNDLE_IDENTIFIER = "io.github.kehengzhu.QuicklookAnything.Markdown-Previewer";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				REGISTER_APP_GROUPS = NO;

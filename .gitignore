@@ -91,3 +91,4 @@ iOSInjectionProject/
 
 # Local build output (LocalBuild/build-install.sh)
 LocalBuild/DerivedData/
+LocalBuild/dist/

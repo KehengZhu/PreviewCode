@@ -71,6 +71,7 @@
 				<string>com.dxo.dop</string>
 				<string>com.psion.opl-source</string>
 				<string>org.lua</string>
+				<string>org.tug.lua</string>
 				<string>org.clojure</string>
 				<string>org.tug</string>
 				<string>org.asciidoc</string>

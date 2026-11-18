@@ -25,7 +25,7 @@ extension AppDelegate {
         self.darkThemeLabel.toolTip = self.darkThemeIcon.toolTip
         self.lightThemeIcon.toolTip = "The light theme you have selected"
         self.lightThemeLabel.toolTip = self.lightThemeIcon.toolTip
-        self.themeHelpLabel.toolTip = "Which theme mode PreviewCode will apply"
+        self.themeHelpLabel.toolTip = "Which theme mode Quicklook Anything will apply"
         self.settingsHelpButton.toolTip = "Get online help for this page"
         self.defaultsButton.toolTip = "Restore default settings"
         // FROM 2.3.0

@@ -14,7 +14,7 @@ import UniformTypeIdentifiers
 import os
 
 
-let mdLog = Logger(subsystem: "com.bps.PreviewCode.Markdown-Previewer", category: "preview")
+let mdLog = Logger(subsystem: "io.github.kehengzhu.QuicklookAnything.Markdown-Previewer", category: "preview")
 
 func uptimeMs() -> Double {
     Double(clock_gettime_nsec_np(CLOCK_UPTIME_RAW)) / 1e6

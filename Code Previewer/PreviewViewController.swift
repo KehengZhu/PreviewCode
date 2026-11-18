@@ -12,7 +12,7 @@ import os
 
 
 // LOCAL: debug-level messages (not kept on disk unless debug logging is enabled)
-private let previewLog = Logger(subsystem: "com.bps.PreviewCode.Code-Previewer", category: "preview")
+private let previewLog = Logger(subsystem: "io.github.kehengzhu.QuicklookAnything.Code-Previewer", category: "preview")
 
 
 class PreviewViewController: NSViewController,
