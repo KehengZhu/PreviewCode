@@ -161,6 +161,17 @@ final class AppDelegate: NSResponder,
         self.settingsButton.alphaValue = 1.0
         self.feedbackButton.alphaValue = 1.0
 
+        // LOCAL: no feedback server, so hide the Feedback tab and collapse its
+        // slot (width and leading gap) so the other tab buttons stay right-aligned
+        self.feedbackButton.isHidden = true
+        for constraint in self.feedbackButton.constraints where constraint.firstAttribute == .width {
+            constraint.constant = 0
+        }
+        for constraint in self.feedbackButton.superview?.constraints ?? []
+            where constraint.firstItem === self.feedbackButton && constraint.firstAttribute == .leading {
+            constraint.constant = 0
+        }
+
         // FROM 2.0.0
         // Configure the tab manager
         self.tabManager.parent = self
@@ -412,10 +423,10 @@ final class AppDelegate: NSResponder,
             .foregroundColor: NSColor.labelColor
         ]
 
-        let infoText = NSMutableAttributedString(string: "You need only run this app once, to register its JSON Previewer and JSON Thumbnailer application extensions with macOS. You can then manage these extensions in ", attributes: bodyAtts)
-        let boldText = NSAttributedString(string: "System Settings > Extensions > Quick Look", attributes: boldAtts)
+        let infoText = NSMutableAttributedString(string: "Select a file in Finder and press Space to preview it. Use the gear tab to choose the theme, font and window size. You can turn the extensions off and on in ", attributes: bodyAtts)
+        let boldText = NSAttributedString(string: "System Settings > General > Login Items & Extensions > Quick Look", attributes: boldAtts)
         infoText.append(boldText)
-        infoText.append(NSAttributedString(string: ".\n\nCases where previews cannot be rendered can usually be resolved by logging out of your Mac, logging in again and running this app once more.", attributes: bodyAtts))
+        infoText.append(NSAttributedString(string: ".\n\nIf previews stop appearing, run the install command again: it re-registers the extensions.", attributes: bodyAtts))
         text.attributedStringValue = infoText
     }
 
