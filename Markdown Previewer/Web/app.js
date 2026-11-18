@@ -7,7 +7,11 @@
  *  plus Obsidian's wikilinks, embeds, callouts, ==highlights==, #tags,
  *  %%comments%%, task lists and frontmatter properties.
  *
- *  The native side calls `qlRender(text, path)` once per preview. The page stays
+ *  Jupyter notebooks (`.ipynb`) go through notebook.js, which renders their
+ *  Markdown cells with the same Markdown setup.
+ *
+ *  The native side calls `qlRender(url, path, kind)` once per preview; the page
+ *  fetches the file's text from `url` (served by the extension). The page stays
  *  loaded between previews, so everything here is set up only once.
  */
 (() => {
@@ -343,15 +347,23 @@
 	 * Entry points for the native side
 	 */
 
-	window.qlRender = async (text, path) => {
+	function renderMarkdown(text) {
+		const {body, props} = splitFrontmatter(text);
+		return (props !== null ? renderProperties(props) : '') + md.render(body);
+	}
+
+	window.qlRender = async (url, path, kind) => {
 		const t0 = performance.now();
+		const text = await (await fetch(url)).text();
+		const tFetch = performance.now();
 		docPath = path || '';
 		macros = {};
-		const {body, props} = splitFrontmatter(text);
-		const html = (props !== null ? renderProperties(props) : '') + md.render(body);
+		const isNotebook = kind === 'notebook';
+		const html = isNotebook ? renderNotebook(JSON.parse(text), {md, escapeHTML}) : renderMarkdown(text);
 		const t1 = performance.now();
 
 		const root = document.getElementById('doc');
+		root.classList.toggle('notebook', isNotebook);
 		root.innerHTML = html;
 		makeCallouts(root);
 		makeTaskLists(root);
@@ -367,7 +379,8 @@
 		// Let KaTeX's web fonts load before the first paint, but never wait long
 		await Promise.race([document.fonts.ready, new Promise(r => setTimeout(r, 250))]);
 		const t3 = performance.now();
-		return {parse: Math.round(t1 - t0), dom: Math.round(t2 - t1), fonts: Math.round(t3 - t2), length: html.length};
+		return {fetch: Math.round(tFetch - t0), parse: Math.round(t1 - tFetch), dom: Math.round(t2 - t1),
+			fonts: Math.round(t3 - t2), length: html.length};
 	};
 
 	window.qlClear = () => { document.getElementById('doc').textContent = ''; };

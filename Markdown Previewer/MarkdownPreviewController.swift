@@ -3,7 +3,7 @@
  *  Markdown Previewer (LOCAL)
  *
  *  Quick Look previews of Markdown notes (Obsidian flavored, with KaTeX math)
- *  rendered in a reused web view. Replaces Obsidian's own Quick Look extension,
+ *  and Jupyter notebooks, rendered in a reused web view. Replaces Obsidian's own Quick Look extension,
  *  which loads a new web view and renders math with MathJax on every preview.
  */
 
@@ -55,10 +55,14 @@ final class MarkdownPreviewController: NSViewController, QLPreviewingController 
     func preparePreviewOfFile(at url: URL) async throws {
 
         let start = uptimeMs()
-        let data = try Data(contentsOf: url)
-        let text = String(data: data, encoding: .utf8)
-            ?? String(data: data, encoding: .utf16)
-            ?? String(decoding: data, as: UTF8.self)
+        var data = try Data(contentsOf: url)
+        let isNotebook = url.pathExtension.lowercased() == "ipynb"
+
+        // The page reads UTF-8; notebooks always are, notes nearly always
+        if !isNotebook, String(data: data, encoding: .utf8) == nil,
+           let text = String(data: data, encoding: .utf16) {
+            data = Data(text.utf8)
+        }
 
         // The Quick Look window size set in PreviewCode's Advanced Settings
         let settings = PCSettings()
@@ -78,16 +82,26 @@ final class MarkdownPreviewController: NSViewController, QLPreviewingController 
         }
 
         let loaded = uptimeMs()
-        let result = try await renderer.callAsyncJavaScript("return await qlRender(text, path)",
-                                                           arguments: ["text": text, "path": url.path],
-                                                           in: nil,
-                                                           contentWorld: .page)
+        let docURL = AssetSchemeHandler.shared.publish(data)
+        defer { AssetSchemeHandler.shared.unpublish(docURL) }
+        let result: Any?
+        do {
+            result = try await renderer.callAsyncJavaScript("return await qlRender(url, path, kind)",
+                                                            arguments: ["url": docURL, "path": url.path,
+                                                                        "kind": isNotebook ? "notebook" : "markdown"],
+                                                            in: nil,
+                                                            contentWorld: .page)
+        } catch {
+            mdLog.error("Rendering \(url.lastPathComponent, privacy: .public) failed: \(error, privacy: .public)")
+            throw error
+        }
+
         let timings = (result as? [String: Any]) ?? [:]
         mdLog.debug("""
             Rendered \(url.lastPathComponent, privacy: .public) (\(data.count) B): \
             total \(uptimeMs() - start, format: .fixed(precision: 1)) ms, \
             wait for page \(loaded - start, format: .fixed(precision: 1)) ms (warm: \(wasLoaded)), \
-            parse \(timings["parse"] as? Int ?? -1) ms, DOM \(timings["dom"] as? Int ?? -1) ms, fonts \(timings["fonts"] as? Int ?? -1) ms
+            fetch \(timings["fetch"] as? Int ?? -1) ms, parse \(timings["parse"] as? Int ?? -1) ms, DOM \(timings["dom"] as? Int ?? -1) ms, fonts \(timings["fonts"] as? Int ?? -1) ms
             """)
     }
 }

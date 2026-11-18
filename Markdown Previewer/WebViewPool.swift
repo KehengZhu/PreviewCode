@@ -202,8 +202,10 @@ final class WebViewPool {
 // MARK: - qlmd: scheme
 
 /**
- Serves the renderer page (`qlmd://app/...`) and images a note refers to
- (`qlmd://asset/?name=...&from=<note path>`).
+ Serves the renderer page (`qlmd://app/...`), the file being previewed
+ (`qlmd://app/doc/<token>`, registered with `publish(_:)`; same origin as the
+ page, so `fetch` needs no CORS headers), and images a note refers
+ to (`qlmd://asset/?name=...&from=<note path>`).
 
  Images are looked up as Obsidian does: relative to the note, relative to the
  vault root, then by file name anywhere in the vault. Reading outside the
@@ -224,14 +226,49 @@ final class AssetSchemeHandler: NSObject, WKURLSchemeHandler, @unchecked Sendabl
     private var vaultRoots: [String: URL?] = [:]
     private var vaultIndexes: [URL: (built: Date, files: [String: [URL]])] = [:]
 
-    // Tasks WebKit has not stopped; touched on the main thread only
+    // Tasks WebKit has not stopped, and documents being previewed; main thread only
     private var activeTasks = Set<ObjectIdentifier>()
+    private var documents: [String: Data] = [:]
+
+
+    /**
+     Make a previewed file's contents available to the page, which fetches them
+     itself: passing a large string through `callAsyncJavaScript` costs more.
+
+     - Returns: The URL the page fetches.
+     */
+    @MainActor
+    func publish(_ data: Data) -> String {
+
+        let token = UUID().uuidString
+        documents[token] = data
+        return "\(Self.scheme)://app/doc/\(token)"
+    }
+
+
+    @MainActor
+    func unpublish(_ url: String) {
+
+        documents[(url as NSString).lastPathComponent] = nil
+    }
 
 
     func webView(_ webView: WKWebView, start urlSchemeTask: WKURLSchemeTask) {
 
         guard let url = urlSchemeTask.request.url else {
             urlSchemeTask.didFailWithError(URLError(.badURL))
+            return
+        }
+
+        if url.host == "app" && url.path.hasPrefix("/doc/") {
+            guard let data = documents[url.lastPathComponent] else {
+                urlSchemeTask.didFailWithError(URLError(.fileDoesNotExist))
+                return
+            }
+
+            urlSchemeTask.didReceive(URLResponse(url: url, mimeType: "text/plain", expectedContentLength: data.count, textEncodingName: "utf-8"))
+            urlSchemeTask.didReceive(data)
+            urlSchemeTask.didFinish()
             return
         }
 

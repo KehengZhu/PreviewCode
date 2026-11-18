@@ -154,3 +154,39 @@ table.properties th { color: var(--text-muted); font-weight: 500; }
 
 /* Skip layout of blocks below the first screen: halves layout time for long notes */
 .markdown > * { content-visibility: auto; contain-intrinsic-size: auto 2em; }
+
+/* Jupyter notebooks (notebook.js): a prompt column, then the cell */
+.markdown.notebook { max-width: 980px; padding-left: 16px; }
+.nb-cell, .nb-output { display: grid; grid-template-columns: 4.6em minmax(0, 1fr); column-gap: 10px; }
+.nb-cell { margin: 14px 0 4px; }
+.nb-output { margin: 2px 0; }
+.nb-prompt {
+	font: 12px/1.45 "SF Mono", Menlo, monospace;
+	color: var(--text-muted);
+	text-align: right;
+	padding-top: 11px;
+	white-space: nowrap;
+}
+.nb-markdown .nb-prompt, .nb-output .nb-prompt:empty { padding-top: 0; }
+.nb-body > :first-child { margin-top: 0; }
+.nb-body > :last-child { margin-bottom: 0; }
+pre.nb-input { margin: 0; }
+.nb-output-body { min-width: 0; overflow-x: auto; }
+.nb-output-body pre { margin: 0; padding: 4px 0; background: none; font-size: 13px; line-height: 1.4; }
+.nb-stderr { background: rgba(233, 49, 71, 0.07) !important; padding: 4px 8px !important; }
+.nb-error { background: rgba(233, 49, 71, 0.07) !important; padding: 8px !important; border-radius: 4px; }
+.nb-image { display: block; max-width: 100%; height: auto; margin: 4px 0; }
+.nb-html table { display: table; font-size: 13px; margin: 4px 0; }
+.nb-html th, .nb-html td { padding: 2px 8px; }
+.nb-html tbody tr:nth-child(odd) { background: var(--background-alt); }
+.nb-unsupported { color: var(--text-muted); font-style: italic; }
+
+.ansi-bold { font-weight: 700; }
+.ansi-black { color: #3e424d; }  .ansi-black-bg { background: #3e424d; }
+.ansi-red { color: #e75c58; }    .ansi-red-bg { background: #e75c58; }
+.ansi-green { color: #00a250; }  .ansi-green-bg { background: #00a250; }
+.ansi-yellow { color: #b8860b; } .ansi-yellow-bg { background: #ddb62b; }
+.ansi-blue { color: #208ffb; }   .ansi-blue-bg { background: #208ffb; }
+.ansi-magenta { color: #d160c4; } .ansi-magenta-bg { background: #d160c4; }
+.ansi-cyan { color: #60c6c8; }   .ansi-cyan-bg { background: #60c6c8; }
+.ansi-white { color: #a0a0a0; }  .ansi-white-bg { background: #c5c1b4; }
