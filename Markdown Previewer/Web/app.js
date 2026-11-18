@@ -121,9 +121,10 @@
 			const inner = src.slice(open + 2, end);
 			if (!inner || inner.includes('\n')) return false;
 			if (!silent) {
-				const bar = inner.indexOf('|');
-				const target = (bar < 0 ? inner : inner.slice(0, bar)).trim();
-				const alias = bar < 0 ? '' : inner.slice(bar + 1).trim();
+				// In a table the alias bar is written (or escaped below) as \|
+				const m = /\\?\|/.exec(inner);
+				const target = (m ? inner.slice(0, m.index) : inner).trim();
+				const alias = m ? inner.slice(m.index + m[0].length).trim() : '';
 				const token = state.push('html_inline', '', 0);
 				token.content = embed ? renderEmbed(target, alias) : renderWikilink(target, alias);
 			}
@@ -347,24 +348,50 @@
 	 * Entry points for the native side
 	 */
 
-	function renderMarkdown(text) {
-		const {body, props} = splitFrontmatter(text);
-		return (props !== null ? renderProperties(props) : '') + md.render(body);
+	/*
+	 * Progressive rendering: a long note's math turns into megabytes of KaTeX
+	 * HTML, and a large notebook's images into megabytes of data URIs; parsing
+	 * and laying that out dominates the preview time. So render the first
+	 * screen, show it, and append the rest a chunk per frame. A note is
+	 * tokenized up front (cheap), so reference links and \newcommand macros
+	 * still apply across chunks.
+	 */
+
+	const FIRST_CHUNK = 3000;    // source characters: more than a screenful
+	const LATER_CHUNK = 20000;   // Markdown: about 0.5 MB of HTML with math
+	const LATER_CELLS = 400000;  // notebooks: mostly base64 images, cheaper per character
+	let generation = 0;          // bumped per preview; stale chunks stop
+
+	// Split items 0..<count into [start, end) ranges of about `later` characters,
+	// the first about FIRST_CHUNK, ending only where `canEndAfter(i)`
+	function chunkRanges(count, sizeOf, canEndAfter, later) {
+		const ranges = [];
+		let start = 0, chars = 0, size = FIRST_CHUNK;
+		for (let i = 0; i < count; i++) {
+			chars += sizeOf(i);
+			if (chars >= size && canEndAfter(i)) {
+				ranges.push([start, i + 1]);
+				start = i + 1;
+				chars = 0;
+				size = later;
+			}
+		}
+		if (start < count) ranges.push([start, count]);
+		return ranges;
 	}
 
-	window.qlRender = async (url, path, kind) => {
-		const t0 = performance.now();
-		const text = await (await fetch(url)).text();
-		const tFetch = performance.now();
-		docPath = path || '';
-		macros = {};
-		const isNotebook = kind === 'notebook';
-		const html = isNotebook ? renderNotebook(JSON.parse(text), {md, escapeHTML}) : renderMarkdown(text);
-		const t1 = performance.now();
+	// A table row splits cells at every |, even inside [[link|alias]]; escape those
+	function escapeTableWikilinks(text) {
+		if (!text.includes('[[')) return text;
+		return text.replace(/^[ \t]*\|.*\[\[.*$/gm, line =>
+			line.replace(/\[\[[^\]\n]*\]\]/g, link => link.replace(/(^|[^\\])\|/g, '$1\\|')));
+	}
 
-		const root = document.getElementById('doc');
-		root.classList.toggle('notebook', isNotebook);
-		root.innerHTML = html;
+	// HTML -> post-processed fragment, ready to append
+	function fragment(html) {
+		const template = document.createElement('template');
+		template.innerHTML = html;
+		const root = template.content;
 		makeCallouts(root);
 		makeTaskLists(root);
 		fixImages(root);
@@ -372,6 +399,63 @@
 		for (const p of root.querySelectorAll('p')) {
 			if (!p.firstElementChild && !p.textContent.trim()) p.remove();
 		}
+		return root;
+	}
+
+	const nextFrame = () => new Promise(r => setTimeout(r, 0));
+
+	// Notebook output images: `images` holds the sources of <img data-image="index">
+	function loadImages(root, images) {
+		for (const img of root.querySelectorAll('img[data-image]')) {
+			img.src = images[img.dataset.image];
+			img.removeAttribute('data-image');
+		}
+	}
+
+	async function appendRest(root, render, ranges, images, gen) {
+		// After the first paint (the timeout in case the view is hidden and never paints)
+		await new Promise(r => { requestAnimationFrame(() => setTimeout(r, 0)); setTimeout(r, 50); });
+		if (gen !== generation) return;
+		if (images) loadImages(root, images);
+		for (const range of ranges) {
+			await nextFrame();
+			if (gen !== generation) return;
+			root.append(fragment(render(range)));
+			if (images) loadImages(root, images);
+		}
+	}
+
+	window.qlRender = async (url, path, kind) => {
+		const gen = ++generation;
+		const t0 = performance.now();
+		const text = await (await fetch(url)).text();
+		const tFetch = performance.now();
+		docPath = path || '';
+		macros = {};
+		const isNotebook = kind === 'notebook';
+		let html = '', render, ranges, images = null;
+		if (isNotebook) {
+			const notebook = renderNotebook(JSON.parse(text), {md, escapeHTML});
+			render = ([a, b]) => notebook.render(a, b);
+			images = notebook.images;
+			ranges = chunkRanges(notebook.sizes.length, i => notebook.sizes[i], () => true, LATER_CELLS);
+		} else {
+			const {body, props} = splitFrontmatter(text);
+			const env = {};
+			const tokens = md.parse(escapeTableWikilinks(body), env);
+			render = ([a, b]) => md.renderer.render(tokens.slice(a, b), md.options, env);
+			// Chunks end only after a top-level block
+			ranges = chunkRanges(tokens.length, i => tokens[i].content.length,
+				i => tokens[i].level === 0 && tokens[i].nesting <= 0, LATER_CHUNK);
+			if (props !== null) html = renderProperties(props);
+		}
+		if (ranges.length) html += render(ranges.shift());
+		const t1 = performance.now();
+
+		const root = document.getElementById('doc');
+		root.classList.toggle('notebook', isNotebook);
+		root.textContent = '';
+		root.append(fragment(html));
 		document.scrollingElement.scrollTop = 0;
 		void root.offsetHeight;   // style and layout now, not at first paint
 		const t2 = performance.now();
@@ -379,11 +463,12 @@
 		// Let KaTeX's web fonts load before the first paint, but never wait long
 		await Promise.race([document.fonts.ready, new Promise(r => setTimeout(r, 250))]);
 		const t3 = performance.now();
+		if (ranges.length || images) appendRest(root, render, ranges, images, gen);
 		return {fetch: Math.round(tFetch - t0), parse: Math.round(t1 - tFetch), dom: Math.round(t2 - t1),
-			fonts: Math.round(t3 - t2), length: html.length};
+			fonts: Math.round(t3 - t2), length: html.length, chunks: ranges.length + 1};
 	};
 
-	window.qlClear = () => { document.getElementById('doc').textContent = ''; };
+	window.qlClear = () => { generation++; document.getElementById('doc').textContent = ''; };
 
 	/*
 	 * Warm-up, while the page waits in the pool: load KaTeX's fonts and run the
@@ -413,4 +498,7 @@
 		void root.offsetHeight;
 		root.textContent = '';
 	} catch (e) { /* warm-up only */ }
+
+	// Ready to render: tell the extension now rather than at the load event's delayed notice
+	try { webkit.messageHandlers.ready.postMessage(true); } catch (e) { /* not in the extension */ }
 })();

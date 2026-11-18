@@ -39,7 +39,11 @@ final class RendererWebView: WKWebView, WKNavigationDelegate {
 
         let config = WKWebViewConfiguration()
         config.setURLSchemeHandler(AssetSchemeHandler.shared, forURLScheme: AssetSchemeHandler.scheme)
+        // The page says when its scripts have run: about 50 ms before `didFinish`
+        let ready = ReadyMessageHandler()
+        config.userContentController.add(ready, name: "ready")
         super.init(frame: NSRect(x: 0, y: 0, width: 1000, height: 800), configuration: config)
+        ready.view = self
         self.navigationDelegate = self
         self.allowsMagnification = true
         load(URLRequest(url: URL(string: "\(AssetSchemeHandler.scheme)://app/index.html")!))
@@ -66,14 +70,16 @@ final class RendererWebView: WKWebView, WKNavigationDelegate {
     }
 
 
-    private func finishLoading(ok: Bool) {
+    fileprivate func finishLoading(ok: Bool) {
 
+        guard !isLoaded && !isBroken else { return }
         isLoaded = ok
         isBroken = !ok
         mdLog.debug("Renderer page \(ok ? "loaded" : "failed") in \(uptimeMs() - self.created, format: .fixed(precision: 1)) ms")
         let waiters = loadWaiters
         loadWaiters = []
         waiters.forEach { $0.resume() }
+        if ok { WebViewPool.shared.viewDidLoad() }
     }
 
 
@@ -131,6 +137,21 @@ final class RendererWebView: WKWebView, WKNavigationDelegate {
 }
 
 
+/**
+ Receives the page's `ready` message. A separate object, because the content
+ controller keeps its handlers alive and the web view owns the controller.
+ */
+private final class ReadyMessageHandler: NSObject, WKScriptMessageHandler {
+
+    weak var view: RendererWebView?
+
+    func userContentController(_ controller: WKUserContentController, didReceive message: WKScriptMessage) {
+
+        MainActor.assumeIsolated { view?.finishLoading(ok: true) }
+    }
+}
+
+
 // MARK: - Pool
 
 @MainActor
@@ -139,20 +160,36 @@ final class WebViewPool {
     static let shared = WebViewPool()
 
     // Loaded or loading views waiting for a preview. Each holds a WebContent
-    // process (about 35-75 MB), so keep one: Quick Look renders the neighboring
-    // files ahead of time, which hides the cost of loading any extra view.
+    // process (about 35-75 MB). Keep two: Finder in column view asks for two
+    // previews of a note at once (the Quick Look panel and the preview column),
+    // and with one spare the second loaded a page from scratch, about 110 ms.
     private var spares: [RendererWebView] = []
-    private let maxSpares = 1
+    private let maxSpares = 2
 
 
     /**
      Make sure a renderer view is loading, so the next preview finds it ready.
+
+     Loads one view at a time, and the next once that one is ready, so loading
+     never competes with the preview in progress for more than one process.
      */
     func warmUp() {
 
         spares.removeAll { $0.isBroken }
-        if spares.isEmpty {
+        if spares.isEmpty || (spares.count < maxSpares && spares.allSatisfy { $0.isLoaded }) {
             spares.append(RendererWebView())
+        }
+    }
+
+
+    /**
+     A view finished loading: load the next spare, after the preview that may
+     be rendering in it has had the CPU.
+     */
+    func viewDidLoad() {
+
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+            self.warmUp()
         }
     }
 
@@ -172,8 +209,8 @@ final class WebViewPool {
             view = RendererWebView()
         }
 
-        // Quick Look prefetches the neighboring files, so have the next view ready
-        // soon, but start it after this preview has had the CPU
+        // The next preview may come soon (Quick Look prefetches neighboring
+        // files), so refill, but after this preview has had the CPU
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) {
             self.warmUp()
         }

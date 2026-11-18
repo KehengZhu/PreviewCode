@@ -16,18 +16,45 @@ import Highlighter
  preview-extension process, so previews after the first skip the ~25 ms it
  takes to build one.
 
- LOCAL. All use of the highlighter happens on one serial queue, because previews
- run on the main thread while a large file's full highlight (see
- `PreviewViewController`) finishes in the background, and each user sets the
- shared theme before highlighting.
+ LOCAL. All use of a highlighter happens on its serial queue, because each user
+ sets the shared theme before highlighting. Previews use `shared`; a large
+ file's full highlight (see `PreviewViewController`) uses `background`, so the
+ next preview never waits for it (a 900 KB file takes about 250 ms).
  */
 final class SharedHighlighter: @unchecked Sendable {
 
-    static let shared = SharedHighlighter()
+    static let shared = SharedHighlighter(label: "com.bps.previewcode.highlighter", qos: .userInitiated)
+    // Built on first use, ie. when a large file is first previewed
+    static let background = SharedHighlighter(label: "com.bps.previewcode.highlighter.background", qos: .utility)
 
-    private let queue = DispatchQueue(label: "com.bps.previewcode.highlighter", qos: .userInitiated)
+    private let queue: DispatchQueue
     // Only touched on `queue`
     private var highlighter: Highlighter? = nil
+    // The last result, only touched on `queue`: Finder asks for two previews of a
+    // file at once (Quick Look panel and column view), so a large file's full
+    // highlight is wanted twice
+    private var lastResult: (key: String, code: String, result: NSAttributedString)? = nil
+
+
+    private init(label: String, qos: DispatchQoS) {
+
+        self.queue = DispatchQueue(label: label, qos: qos)
+    }
+
+
+    /// The last result for `code` rendered with settings `key`, if any. Call on the queue, ie. from `body`.
+    func cachedResult(_ code: String, _ key: String) -> NSAttributedString? {
+
+        guard let last = self.lastResult, last.key == key, last.code == code else { return nil }
+        return last.result
+    }
+
+
+    /// Remember a result. Call on the queue, ie. from `body`.
+    func cache(_ result: NSAttributedString, _ code: String, _ key: String) {
+
+        self.lastResult = (key, code, result)
+    }
 
 
     /// Start building the highlighter in the background, eg. while Quick Look sets up the view.
@@ -230,14 +257,26 @@ final internal class Common {
     func getAttributedStringInBackground(_ codeFileString: String, _ language: String,
                                          completion: @escaping (NSAttributedString) -> Void) {
 
-        SharedHighlighter.shared.async { hltr in
+        let highlighter = SharedHighlighter.background
+        let key = [language, self.highlightJsThemeName, self.font!.fontName, "\(self.font!.pointSize)",
+                   "\(self.settings.lineSpacing)", "\(self.settings.doShowLineNumbers)", "\(self.isThemeDark)"].joined(separator: "|")
+        highlighter.async { hltr in
+            if let cached = highlighter.cachedResult(codeFileString, key) {
+                completion(cached)
+                return
+            }
+
             var renderedString: NSAttributedString? = nil
             if let hltr = hltr {
                 self.configure(hltr)
                 renderedString = self.render(codeFileString, language, hltr)
             }
 
-            completion(self.finish(renderedString, language))
+            let result = self.finish(renderedString, language)
+            if renderedString != nil {
+                highlighter.cache(result, codeFileString, key)
+            }
+            completion(result)
         }
     }
 
@@ -413,7 +452,11 @@ final internal class Common {
         if sourceFileUTI.hasSuffix(".typescript") { return "typescript" }
         // FROM 1.3.5
         if sourceFileUTI.contains("asciidoc") { return "makefile" }
-        if sourceFileUTI.hasSuffix(".tug") { return "tex" }
+        // LOCAL: the system UTI is `org.tug.tex`, which the old `.tug` suffix test missed
+        if sourceFileUTI.hasPrefix("org.tug.") || sourceFileUTI.hasSuffix(".tug") { return "tex" }
+        // LOCAL: `.m` is both Objective-C and MATLAB; MATLAB's own UTI is plainly MATLAB
+        if sourceFileUTI == "com.mathworks.matlab-source" { return "matlab" }
+        if sourceFileExtension == "m" { return isObjectiveC(sourceFilePath) ? "objectivec" : "matlab" }
         if sourceFileUTI.hasSuffix(".lua") { return "lua" }
         if sourceFileUTI.hasSuffix(".clojure") { return "clojure" }
         if sourceFileUTI.hasSuffix(".javascript-xml") { return "javascript" }
@@ -485,6 +528,23 @@ final internal class Common {
         }
         
         return sourceLanguage
+    }
+
+
+    /**
+     LOCAL: Tell an Objective-C `.m` file from a MATLAB one by its first 8 KB.
+
+     Objective-C files nearly always import a header or declare a class;
+     MATLAB never uses `#import`, `#include` or `@interface`-style directives.
+     */
+    private func isObjectiveC(_ path: String) -> Bool {
+
+        guard let handle = FileHandle(forReadingAtPath: path) else { return false }
+        defer { try? handle.close() }
+        guard let data = try? handle.read(upToCount: 8192),
+              let head = String(data: data, encoding: .utf8) ?? String(data: data, encoding: .isoLatin1) else { return false }
+        return head.range(of: #"(?m)^\s*(#\s*(import|include)\b|@(interface|implementation|protocol|import)\b)"#,
+                          options: .regularExpression) != nil
     }
 
 

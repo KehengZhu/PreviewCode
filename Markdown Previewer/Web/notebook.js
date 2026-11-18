@@ -2,7 +2,8 @@
  *  notebook.js
  *  Markdown Previewer (LOCAL)
  *
- *  Renders a Jupyter notebook (nbformat 4) to HTML: Markdown cells through the
+ *  Renders a Jupyter notebook (nbformat 4) to HTML, a range of cells at a time
+ *  (so app.js can show the first screen first): Markdown cells through the
  *  page's Markdown setup (so math, callouts and so on work as in notes), code
  *  cells highlighted in the kernel's language, and their outputs: text streams,
  *  errors with ANSI colors, images, HTML, LaTeX, Markdown and JSON.
@@ -15,9 +16,13 @@
 
 function renderNotebook(nb, {md, escapeHTML}) {
 
+	// Returns `sizes`, each cell's size in source and output characters,
+	// `render(a, b)`, the HTML of cells a..<b, and `images`, the sources of
+	// their <img data-image="index"> output images
 	if (!Array.isArray(nb.cells)) {
 		const version = nb.nbformat ? 'nbformat ' + nb.nbformat : 'this format';
-		return '<p class="nb-unsupported">Notebooks in ' + escapeHTML(version) + ' cannot be previewed.</p>';
+		const message = '<p class="nb-unsupported">Notebooks in ' + escapeHTML(version) + ' cannot be previewed.</p>';
+		return {sizes: [message.length], render: () => message, images: []};
 	}
 
 	const meta = nb.metadata || {};
@@ -95,9 +100,9 @@ function renderNotebook(nb, {md, escapeHTML}) {
 		const scripted = html !== null && /<script\b/i.test(html);
 
 		if (html !== null && !scripted) return '<div class="nb-html">' + html + '</div>';
-		if (image) return '<img class="nb-image" loading="lazy" decoding="async" src="data:' + image + ';base64,' + text(data[image]).replace(/\s/g, '') + '">';
+		if (image) return imageTag('data:' + image + ';base64,' + text(data[image]).replace(/\s/g, ''));
 		if (data['image/svg+xml'] !== undefined) {
-			return '<img class="nb-image" decoding="async" src="data:image/svg+xml;charset=utf-8,' + encodeURIComponent(text(data['image/svg+xml'])) + '">';
+			return imageTag('data:image/svg+xml;charset=utf-8,' + encodeURIComponent(text(data['image/svg+xml'])));
 		}
 		if (data['text/latex'] !== undefined) return '<div class="nb-latex">' + md.render(text(data['text/latex'])) + '</div>';
 		if (data['text/markdown'] !== undefined) return '<div class="nb-md">' + md.render(text(data['text/markdown'])) + '</div>';
@@ -106,6 +111,24 @@ function renderNotebook(nb, {md, escapeHTML}) {
 		}
 		if (data['text/plain'] !== undefined) return '<pre class="nb-text">' + ansiToHTML(text(data['text/plain'])) + '</pre>';
 		return scripted ? '<p class="nb-unsupported">Interactive output (needs JavaScript)</p>' : '';
+	}
+
+	// Images stay out of the HTML: a 10 MB plot's data URI takes the HTML parser
+	// about 45 ms and setting it as `src` another 40, so app.js sets `src` after
+	// the first paint. A PNG's size is in its header, so its box is right from
+	// the start and nothing moves when it loads.
+	const images = [];
+	function imageTag(uri) {
+		let size = '';
+		const png = /^data:image\/png;base64,(.{32})/.exec(uri);
+		if (png) {
+			try {
+				const b = atob(png[1]);
+				const u32 = i => ((b.charCodeAt(i) << 24) | (b.charCodeAt(i + 1) << 16) | (b.charCodeAt(i + 2) << 8) | b.charCodeAt(i + 3)) >>> 0;
+				if (b.slice(12, 16) === 'IHDR') size = ' width="' + u32(16) + '" height="' + u32(20) + '"';
+			} catch (e) { /* no size */ }
+		}
+		return '<img class="nb-image" loading="lazy" decoding="async"' + size + ' data-image="' + (images.push(uri) - 1) + '">';
 	}
 
 	// Progress bars rewrite their line with \r; keep only the final state of each line
@@ -172,7 +195,23 @@ function renderNotebook(nb, {md, escapeHTML}) {
 		return 'rgb(' + level(Math.floor(i / 36)) + ',' + level(Math.floor(i / 6) % 6) + ',' + level(i % 6) + ')';
 	}
 
-	return nb.cells.map(cell =>
-		cell.cell_type === 'markdown' ? markdownCell(cell) : cell.cell_type === 'code' ? codeCell(cell) : rawCell(cell)
-	).join('');
+	const length = value => Array.isArray(value) ? value.reduce((n, s) => n + String(s).length, 0)
+		: typeof value === 'string' ? value.length : 0;
+	function cellSize(cell) {
+		let n = length(cell.source);
+		for (const out of cell.outputs || []) {
+			n += length(out.text) + length(out.traceback);
+			for (const value of Object.values(out.data || {})) n += length(value);
+		}
+		return n;
+	}
+
+	const renderCell = cell =>
+		cell.cell_type === 'markdown' ? markdownCell(cell) : cell.cell_type === 'code' ? codeCell(cell) : rawCell(cell);
+
+	return {
+		sizes: nb.cells.map(cellSize),
+		render: (a, b) => nb.cells.slice(a, b).map(renderCell).join(''),
+		images,
+	};
 }

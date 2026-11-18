@@ -101,7 +101,8 @@ final class MarkdownPreviewController: NSViewController, QLPreviewingController 
             Rendered \(url.lastPathComponent, privacy: .public) (\(data.count) B): \
             total \(uptimeMs() - start, format: .fixed(precision: 1)) ms, \
             wait for page \(loaded - start, format: .fixed(precision: 1)) ms (warm: \(wasLoaded)), \
-            fetch \(timings["fetch"] as? Int ?? -1) ms, parse \(timings["parse"] as? Int ?? -1) ms, DOM \(timings["dom"] as? Int ?? -1) ms, fonts \(timings["fonts"] as? Int ?? -1) ms
+            fetch \(timings["fetch"] as? Int ?? -1) ms, parse \(timings["parse"] as? Int ?? -1) ms, DOM \(timings["dom"] as? Int ?? -1) ms, fonts \(timings["fonts"] as? Int ?? -1) ms, \
+            chunks \(timings["chunks"] as? Int ?? 1)
             """)
     }
 }

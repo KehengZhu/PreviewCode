@@ -58,6 +58,8 @@ class PreviewViewController: NSViewController,
          * This is the main entry point for macOS' preview system
          */
 
+        let start = Double(clock_gettime_nsec_np(CLOCK_UPTIME_RAW)) / 1e6
+
         // Get the file contents as a string
         guard let data = try? Data(contentsOf: url, options: [.uncached]) else {
             throw makeError(BUFFOON_CONSTANTS.ERRORS.CODES.FILE_WONT_OPEN)
@@ -154,10 +156,16 @@ class PreviewViewController: NSViewController,
         if highlightRestLater {
             common.getAttributedStringInBackground(code, language) { [weak self] fullCode in
                 DispatchQueue.main.async {
-                    self?.applyHighlighting(fullCode)
+                    self?.applyHighlighting(fullCode, since: start)
                 }
             }
         }
+
+        previewLog.debug("""
+            Previewed \(url.lastPathComponent, privacy: .public) (\(data.count) B, \(language, privacy: .public)): \
+            \(Double(clock_gettime_nsec_np(CLOCK_UPTIME_RAW)) / 1e6 - start, format: .fixed(precision: 1)) ms\
+            \(highlightRestLater ? ", first screens only" : "", privacy: .public)
+            """)
     }
 
 
@@ -208,8 +216,9 @@ class PreviewViewController: NSViewController,
 
      - Parameters:
         - fullCode: The whole file, highlighted.
+        - start:    When the preview started (uptime, ms), for the log.
      */
-    private func applyHighlighting(_ fullCode: NSAttributedString) {
+    private func applyHighlighting(_ fullCode: NSAttributedString, since start: Double) {
 
         guard let renderTextStorage = self.renderTextView?.textStorage,
               renderTextStorage.length == fullCode.length,
@@ -223,7 +232,10 @@ class PreviewViewController: NSViewController,
             renderTextStorage.setAttributes(attributes, range: range)
         }
         renderTextStorage.endEditing()
-        previewLog.debug("Full highlight applied to \(fullCode.length) characters")
+        previewLog.debug("""
+            Full highlight applied to \(fullCode.length) characters, \
+            \(Double(clock_gettime_nsec_np(CLOCK_UPTIME_RAW)) / 1e6 - start, format: .fixed(precision: 1)) ms after the preview started
+            """)
     }
 
 
