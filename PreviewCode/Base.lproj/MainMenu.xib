@@ -1108,7 +1108,7 @@ running this app once more.</string>
                         <buttonCell key="cell" type="square" title="Button" bezelStyle="shadowlessSquare" imagePosition="only" alignment="center" imageScaling="proportionallyUpOrDown" inset="2" id="OB9-lp-kOK">
                             <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
                             <font key="font" metaFont="system"/>
-                            <imageReference key="image" image="envelope.circle.fill" catalog="system" symbolScale="default" renderingMode="template"/>
+                            <imageReference key="image" image="doc.circle.fill" catalog="system" symbolScale="default" renderingMode="template"/>
                         </buttonCell>
                         <color key="bezelColor" red="0.0" green="0.32549019610000002" blue="0.52941176469999995" alpha="1" colorSpace="calibratedRGB"/>
                         <color key="contentTintColor" red="0.0" green="0.32549019610000002" blue="0.52941176469999995" alpha="1" colorSpace="calibratedRGB"/>

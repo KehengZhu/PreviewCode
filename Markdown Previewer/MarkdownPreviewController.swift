@@ -64,7 +64,7 @@ final class MarkdownPreviewController: NSViewController, QLPreviewingController 
             data = Data(text.utf8)
         }
 
-        // The Quick Look window size set in PreviewCode's Advanced Settings
+        // The Quick Look window size (Advanced Settings) and text sizes (Markdown tab)
         let settings = PCSettings()
         settings.loadSettings(MNU_SECRETS.PID + BUFFOON_CONSTANTS.SUITE_NAME)
         self.preferredContentSize = NSSize(width: settings.previewWindowWidth, height: settings.previewWindowHeight)
@@ -86,9 +86,11 @@ final class MarkdownPreviewController: NSViewController, QLPreviewingController 
         defer { AssetSchemeHandler.shared.unpublish(docURL) }
         let result: Any?
         do {
-            result = try await renderer.callAsyncJavaScript("return await qlRender(url, path, kind)",
+            result = try await renderer.callAsyncJavaScript("return await qlRender(url, path, kind, fontSize, codeFontSize)",
                                                             arguments: ["url": docURL, "path": url.path,
-                                                                        "kind": isNotebook ? "notebook" : "markdown"],
+                                                                        "kind": isNotebook ? "notebook" : "markdown",
+                                                                        "fontSize": Double(settings.mdFontSize),
+                                                                        "codeFontSize": Double(settings.mdCodeFontSize)],
                                                             in: nil,
                                                             contentWorld: .page)
         } catch {

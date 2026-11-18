@@ -33,7 +33,7 @@ body {
 	margin: 0;
 	color: var(--text);
 	background: var(--background);
-	font: 16px/1.6 -apple-system, BlinkMacSystemFont, "Helvetica Neue", sans-serif;
+	font: var(--md-font-size, 16px)/1.6 -apple-system, BlinkMacSystemFont, "Helvetica Neue", sans-serif;
 	-webkit-font-smoothing: antialiased;
 	overflow-wrap: break-word;
 }
@@ -98,7 +98,7 @@ pre {
 	line-height: 1.45;
 }
 
-pre code, pre code.hljs { background: none; padding: 0; font-size: 13px; }
+pre code, pre code.hljs { background: none; padding: 0; font-size: var(--md-code-font-size, 13px); }
 
 table { border-collapse: collapse; display: block; overflow-x: auto; }
 th, td { border: 1px solid var(--border); padding: 4px 10px; }
@@ -161,7 +161,7 @@ table.properties th { color: var(--text-muted); font-weight: 500; }
 .nb-cell { margin: 14px 0 4px; }
 .nb-output { margin: 2px 0; }
 .nb-prompt {
-	font: 12px/1.45 "SF Mono", Menlo, monospace;
+	font: calc(var(--md-code-font-size, 13px) - 1px)/1.45 "SF Mono", Menlo, monospace;
 	color: var(--text-muted);
 	text-align: right;
 	padding-top: 11px;
@@ -172,11 +172,11 @@ table.properties th { color: var(--text-muted); font-weight: 500; }
 .nb-body > :last-child { margin-bottom: 0; }
 pre.nb-input { margin: 0; }
 .nb-output-body { min-width: 0; overflow-x: auto; }
-.nb-output-body pre { margin: 0; padding: 4px 0; background: none; font-size: 13px; line-height: 1.4; }
+.nb-output-body pre { margin: 0; padding: 4px 0; background: none; font-size: var(--md-code-font-size, 13px); line-height: 1.4; }
 .nb-stderr { background: rgba(233, 49, 71, 0.07) !important; padding: 4px 8px !important; }
 .nb-error { background: rgba(233, 49, 71, 0.07) !important; padding: 8px !important; border-radius: 4px; }
 .nb-image { display: block; max-width: 100%; height: auto; margin: 4px 0; }
-.nb-html table { display: table; font-size: 13px; margin: 4px 0; }
+.nb-html table { display: table; font-size: var(--md-code-font-size, 13px); margin: 4px 0; }
 .nb-html th, .nb-html td { padding: 2px 8px; }
 .nb-html tbody tr:nth-child(odd) { background: var(--background-alt); }
 .nb-unsupported { color: var(--text-muted); font-style: italic; }

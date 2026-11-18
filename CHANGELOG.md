@@ -1,5 +1,12 @@
 ## Quicklook Anything
 
+- 1.1.0 *18 November 2026*
+    - Settings in three tabs: General, Code and Markdown & Notebook. Changes save as you make them, so there is no Apply button, and the app opens on the Code tab.
+    - Set the Markdown and notebook text size and code block size.
+    - The Quick Look window size moves to General; the preview margin and thumbnail option move to Code, replacing the Advanced sheet.
+    - Code text is 13 pt by default.
+    - Previews use the default settings right after installation, before the app has been opened.
+    - README: screenshots, sample files and render times.
 - 1.0.0 *18 November 2026*
     - First release under the name Quicklook Anything, forked from PreviewCode 2.3.3.
     - Add a Markdown and Jupyter notebook previewer: Obsidian-flavored Markdown, KaTeX math, highlighted code and notebook outputs.

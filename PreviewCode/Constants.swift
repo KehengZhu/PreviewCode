@@ -60,8 +60,12 @@ struct BUFFOON_CONSTANTS {
 
         static let FONT                         = "Menlo-Regular"
         static let FONT_NAME                    = "Menlo"
-        static let FONT_SIZE                    = 16.0
+        // LOCAL: 13pt, the size of code in Markdown previews (was 16pt)
+        static let FONT_SIZE                    = 13.0
         static let LINE_SPACING                 = 1.0
+        // LOCAL: Markdown and notebook previews: body text and code blocks
+        static let MD_FONT_SIZE                 = 16.0
+        static let MD_CODE_FONT_SIZE            = 13.0
         static let LANGUAGE_UTI                 = "swift-source"
         static let LANGUAGE                     = "swift"
         // FROM 2.0.0
@@ -96,6 +100,9 @@ struct BUFFOON_CONSTANTS {
         static let PREVIEW_WINDOW_WIDTH         = "com-bps-previewcode-window-width"
         static let PREVIEW_WINDOW_HEIGHT        = "com-bps-previewcode-window-height"
         static let THUMB_MATCH_MODE             = "com-bps-previewcode-match-mode"
+        // LOCAL: Markdown and notebook previews
+        static let MD_FONT_SIZE                 = "com-bps-previewcode-md-font-size"
+        static let MD_CODE_FONT_SIZE            = "com-bps-previewcode-md-code-font-size"
     }
     
     static let APP_CODE_PREVIEWER               = "io.github.kehengzhu.QuicklookAnything.Code-Previewer"

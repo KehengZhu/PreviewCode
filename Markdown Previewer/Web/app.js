@@ -10,7 +10,7 @@
  *  Jupyter notebooks (`.ipynb`) go through notebook.js, which renders their
  *  Markdown cells with the same Markdown setup.
  *
- *  The native side calls `qlRender(url, path, kind)` once per preview; the page
+ *  The native side calls `qlRender(url, path, kind, fontSize, codeFontSize)` once per preview; the page
  *  fetches the file's text from `url` (served by the extension). The page stays
  *  loaded between previews, so everything here is set up only once.
  */
@@ -425,8 +425,12 @@
 		}
 	}
 
-	window.qlRender = async (url, path, kind) => {
+	window.qlRender = async (url, path, kind, fontSize, codeFontSize) => {
 		const gen = ++generation;
+		// Text sizes from the app's Markdown settings; style.css falls back to 16px and 13px
+		const rootStyle = document.documentElement.style;
+		if (fontSize > 0) rootStyle.setProperty('--md-font-size', `${fontSize}px`);
+		if (codeFontSize > 0) rootStyle.setProperty('--md-code-font-size', `${codeFontSize}px`);
 		const t0 = performance.now();
 		const text = await (await fetch(url)).text();
 		const tFetch = performance.now();

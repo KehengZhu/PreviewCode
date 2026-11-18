@@ -8,6 +8,33 @@ Quick Look previews and Finder thumbnails for source code, Markdown notes and Ju
 
 Quicklook Anything is based on [PreviewCode](https://github.com/smittytone/PreviewCode) by Tony Smith; see [Credits](#credits).
 
+## Fast
+
+Previews appear the moment you press Space. Quicklook Anything is tuned for speed:
+
+- **Markdown and notebooks render in under 10 ms** once Quick Look is running. The renderer page is loaded ahead of time and kept warm, so a preview only has to parse and draw the file; the first preview after the extension starts takes about 0.1 s.
+- **Code files preview in a few milliseconds.** Long files show their first screen highlighted at once and finish highlighting in the background.
+- **Long notes and notebooks** draw the first screen first and the rest a chunk at a time, so even very large files open without a wait.
+- **Math uses KaTeX**, which typesets in one synchronous pass, instead of MathJax, which Obsidian's own Quick Look extension loads for every preview.
+
+Times measured with the extensions' own logging on an Apple silicon Mac, using the sample files in [`docs/samples`](docs/samples).
+
+## Screenshots
+
+**Code** (`primes.py`, Atom One Light theme)
+
+![Quick Look preview of a Python file](docs/screenshots/code.png)
+
+**Markdown** (`notes.md`: frontmatter, math, a callout, a table, code and tasks)
+
+![Quick Look preview of a Markdown note](docs/screenshots/markdown.png)
+
+**Jupyter notebook** (`damping.ipynb`: Markdown, code cells and a plot)
+
+![Quick Look preview of a Jupyter notebook](docs/screenshots/notebook.png)
+
+The sample files are in [`docs/samples`](docs/samples), so you can try them yourself.
+
 ## Install
 
 Paste this into Terminal:
@@ -44,7 +71,13 @@ You can turn the extensions off and on in **System Settings > General > Login It
 
 ## Settings
 
-Open **Quicklook Anything** from Applications to choose the theme (one for light mode and one for dark, or a single theme for both), the font, its size and style, line spacing, and the Quick Look window size.
+Open **Quicklook Anything** from Applications. It has three tabs, and every change saves as you make it:
+
+- **General**: the Quick Look window size, used by every preview, and a shortcut to turn the extensions on or off.
+- **Code**: text size (13 pt by default), font and style, line spacing, line numbers, the theme (one for light mode and one for dark, or a single theme for both), the preview margin, and whether thumbnails follow light or dark mode.
+- **Markdown & Notebook**: the body text size (16 pt) and the code block size (13 pt), which also sets notebook code cells and outputs.
+
+![The Code settings tab](docs/screenshots/settings-code.png)
 
 Markdown notes and notebooks follow the system's light or dark mode. Images embedded in a note are found next to the note, in its Obsidian vault, or anywhere in the vault by name; for vaults outside iCloud Drive's Obsidian folder, only images next to the note can be shown.
 

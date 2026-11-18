@@ -66,9 +66,6 @@ extension AppDelegate {
             self.tintThumbnailsAdvancedSwitch.isEnabled = false
         }
 
-        // Enable the Apply button if something has changed
-        self.applyButton.isEnabled = checkSettingsOnQuit()
-
         // Make the table the first responder
         self.window.makeFirstResponder(self)
     }
@@ -88,14 +85,16 @@ extension AppDelegate {
         // LOCAL: the slider value is the font size itself, in 0.5pt steps
         self.fontSizeLabel.stringValue = fontSizeText(sliderFontSize())
 
-        // Enable the Apply button if something has changed
-        self.applyButton.isEnabled = checkSettingsOnQuit()
+        // LOCAL: save the change
+        autosaveSettings()
     }
 
 
     override func keyDown(with event: NSEvent) {
 
-        // LOCAL: arrow keys move the font size by one 0.5pt step
+        // LOCAL: arrow keys move the font size by one 0.5pt step, on the Settings tab
+        guard let item = self.mainTabView.selectedTabViewItem,
+              self.mainTabView.indexOfTabViewItem(item) == 1 else { return }
         let step = BUFFOON_CONSTANTS.FONT_SIZE_STEP
         if event.keyCode == 126 || event.keyCode == 124 {
             self.fontSizeSlider.doubleValue = min(sliderFontSize() + step, self.fontSizeSlider.maxValue)
@@ -156,14 +155,14 @@ extension AppDelegate {
                 // because a different font has been selected
                 setStylePopup(self.fontFacePopup.titleOfSelectedItem ?? "Regular")
 
-                // Enable the Apply button if something has changed
-                self.applyButton.isEnabled = checkSettingsOnQuit()
+                // LOCAL: save the change
+                autosaveSettings()
                 return
             }
         }
 
-        // Enable the Apply button if something has changed back
-        self.applyButton.isEnabled = checkSettingsOnQuit()
+        // LOCAL: save the change
+        autosaveSettings()
     }
 
 
@@ -178,8 +177,8 @@ extension AppDelegate {
     @IBAction
     internal func doChangeValue(sender: Any) {
 
-        // Enable the Apply button if something has changed
-        self.applyButton.isEnabled = checkSettingsOnQuit()
+        // LOCAL: save the change
+        autosaveSettings()
     }
 
 
@@ -204,8 +203,8 @@ extension AppDelegate {
         // Update the UI
         setThemeControls()
 
-        // Enable the Apply button if something has changed
-        self.applyButton.isEnabled = checkSettingsOnQuit()
+        // LOCAL: save the change
+        autosaveSettings()
     }
 
 
@@ -285,8 +284,15 @@ extension AppDelegate {
     @IBAction
     internal func doApplyDefaultSettings(sender: Any) {
 
-        displaySettings(PCSettings())
+        // LOCAL: reset the Code tab only, keeping the other tabs' values, and save
+        let defaults = PCSettings()
+        defaults.mdFontSize = self.currentSettings.mdFontSize
+        defaults.mdCodeFontSize = self.currentSettings.mdCodeFontSize
+        defaults.previewWindowWidth = self.currentSettings.previewWindowWidth
+        defaults.previewWindowHeight = self.currentSettings.previewWindowHeight
+        displaySettings(defaults)
         willShowSettingsPage()
+        autosaveSettings()
     }
 
 
@@ -365,6 +371,13 @@ extension AppDelegate {
         self.previewHeightAdvancedText.stringValue = String(format: "%.0f", settings.previewWindowHeight)
         self.previewMarginSizeText.stringValue = String(format:"%.1f", settings.previewMarginWidth)
         self.tintThumbnailsAdvancedSwitch.state = settings.thumbnailMatchFinderMode ? .on : .off
+
+        // LOCAL: Markdown tab
+        if self.mdFontSizeSlider != nil {
+            self.mdFontSizeSlider.doubleValue = Double(settings.mdFontSize)
+            self.mdCodeSizeSlider.doubleValue = Double(settings.mdCodeFontSize)
+            updateMarkdownLabels()
+        }
     }
 
 
@@ -411,6 +424,12 @@ extension AppDelegate {
 
         displayedSettings.previewMarginWidth = Double(self.previewMarginSizeText.stringValue) ?? BUFFOON_CONSTANTS.PREVIEW_SIZE.MARGIN_WIDTH
 
+        // LOCAL: Markdown tab
+        if self.mdFontSizeSlider != nil {
+            displayedSettings.mdFontSize = CGFloat(snappedSize(self.mdFontSizeSlider))
+            displayedSettings.mdCodeFontSize = CGFloat(snappedSize(self.mdCodeSizeSlider))
+        }
+
         return displayedSettings
     }
 
@@ -437,6 +456,7 @@ extension AppDelegate {
 
         // Use the loaded settings to update the Settings UI
         displaySettings(self.currentSettings)
+        self.settingsLoaded = true
     }
 
 
@@ -510,6 +530,12 @@ extension AppDelegate {
                                    !(displayedSettings.previewMarginWidth.isClose(to: self.currentSettings.previewMarginWidth))
         }
 
+        // LOCAL
+        if !settingsHaveChanged {
+            settingsHaveChanged = self.currentSettings.mdFontSize != displayedSettings.mdFontSize ||
+                                  self.currentSettings.mdCodeFontSize != displayedSettings.mdCodeFontSize
+        }
+
         return settingsHaveChanged
     }
 
@@ -529,6 +555,8 @@ extension AppDelegate {
         if advancedValuesGood() {
             self.window.endSheet(self.advancedSettingsSheet)
             willShowSettingsPage()
+            // LOCAL: save the change
+            autosaveSettings()
         }
     }
 
@@ -1072,8 +1100,8 @@ extension AppDelegate {
         }
 
         // FROM 2.2.1
-        // Enable the Apply button if something has changed
-        self.applyButton.isEnabled = checkSettingsOnQuit()
+        // LOCAL: save the change
+        autosaveSettings()
     }
 
 
@@ -1119,6 +1147,29 @@ extension AppDelegate {
      FROM 2.3.0
     */
     func controlTextDidEndEditing(_ obj: Notification) {
+
+        // LOCAL: the preview window size fields (General tab): restore the stored
+        // values when the new ones are out of range, then save
+        let field = obj.object as? NSTextField
+        if field === self.previewWidthAdvancedText || field === self.previewHeightAdvancedText {
+            if windowSizeWarning() != nil {
+                NSSound.beep()
+                self.previewWidthAdvancedText.stringValue = String(format: "%.0f", self.currentSettings.previewWindowWidth)
+                self.previewHeightAdvancedText.stringValue = String(format: "%.0f", self.currentSettings.previewWindowHeight)
+            }
+            autosaveSettings()
+            return
+        }
+
+        clampMarginField()
+        autosaveSettings()
+    }
+
+
+    /**
+     Keep the preview margin field's value within range.
+     */
+    private func clampMarginField() {
 
         if let doubleValue = Double(self.previewMarginSizeText.stringValue) {
             let min = Double(BUFFOON_CONSTANTS.PREVIEW_SIZE.MARGIN_WIDTH_MIN).rounded(.towardZero)
@@ -1292,4 +1343,311 @@ extension AppDelegate {
 
     }
 
+}
+
+
+// MARK: - Autosave and the Markdown Tab (LOCAL)
+
+extension AppDelegate {
+
+    /**
+     Save the settings shown in the UI if they differ from the stored ones.
+     Settings save as they change, so there is no Apply button. Nothing is
+     saved before the stored settings have been loaded into the UI.
+     */
+    internal func autosaveSettings() {
+
+        guard self.settingsLoaded else { return }
+        if checkSettingsOnQuit() {
+            saveSettings()
+        }
+    }
+
+
+    /**
+     Build the Markdown tab: text sizes for Markdown notes and Jupyter notebooks.
+     It replaces the Feedback tab, whose controls are hidden but kept, because
+     their outlets are still referenced.
+     */
+    internal func buildMarkdownPage() {
+
+        guard self.mainTabView.numberOfTabViewItems > 2,
+              let page = self.mainTabView.tabViewItem(at: 2).view else { return }
+        for view in page.subviews {
+            view.isHidden = true
+        }
+
+        let body = addSizeRow("Markdown and Notebook Text Size", to: page, below: page.topAnchor, gap: 0)
+        self.mdFontSizeSlider = body.slider
+        self.mdFontSizeLabel = body.value
+
+        let code = addSizeRow("Code Block Text Size", to: page, below: body.bottom, gap: 24)
+        self.mdCodeSizeSlider = code.slider
+        self.mdCodeSizeLabel = code.value
+
+        let note = NSTextField(wrappingLabelWithString: "These sizes apply to Markdown notes and Jupyter notebooks. "
+                               + "The code block size also sets notebook code cells and outputs. "
+                               + "Source code files use the settings in the Code tab.")
+        note.textColor = .secondaryLabelColor
+        note.translatesAutoresizingMaskIntoConstraints = false
+        page.addSubview(note)
+
+        let defaultsButton = NSButton(title: "Defaults", target: self, action: #selector(doApplyMarkdownDefaults(_:)))
+        defaultsButton.toolTip = "Restore the default Markdown text sizes"
+        defaultsButton.translatesAutoresizingMaskIntoConstraints = false
+        page.addSubview(defaultsButton)
+
+        NSLayoutConstraint.activate([
+            note.topAnchor.constraint(equalTo: code.bottom, constant: 24),
+            note.leadingAnchor.constraint(equalTo: page.leadingAnchor, constant: 20),
+            note.trailingAnchor.constraint(equalTo: page.trailingAnchor, constant: -20),
+            defaultsButton.leadingAnchor.constraint(equalTo: page.leadingAnchor, constant: 20),
+            defaultsButton.bottomAnchor.constraint(equalTo: page.bottomAnchor, constant: -20),
+        ])
+
+        self.mdFontSizeSlider.doubleValue = BUFFOON_CONSTANTS.DEFAULTS.MD_FONT_SIZE
+        self.mdCodeSizeSlider.doubleValue = BUFFOON_CONSTANTS.DEFAULTS.MD_CODE_FONT_SIZE
+        updateMarkdownLabels()
+    }
+
+
+    /**
+     Add a titled text size slider, laid out like the Settings tab's, below `anchor`.
+
+     - Returns: The slider, its value readout, and the bottom of the row.
+     */
+    private func addSizeRow(_ title: String, to page: NSView, below anchor: NSLayoutYAxisAnchor,
+                            gap: CGFloat) -> (slider: NSSlider, value: NSTextField, bottom: NSLayoutYAxisAnchor) {
+
+        func label(_ text: String, size: CGFloat) -> NSTextField {
+            let field = NSTextField(labelWithString: text)
+            field.font = .systemFont(ofSize: size)
+            field.translatesAutoresizingMaskIntoConstraints = false
+            page.addSubview(field)
+            return field
+        }
+
+        let titleLabel = label(title, size: NSFont.systemFontSize)
+        let valueLabel = label("", size: NSFont.systemFontSize)
+        valueLabel.alignment = .right
+        let smallA = label("A", size: NSFont.smallSystemFontSize)
+        let largeA = label("A", size: 24)
+
+        let slider = NSSlider(value: BUFFOON_CONSTANTS.DEFAULTS.MD_FONT_SIZE,
+                              minValue: Double(BUFFOON_CONSTANTS.FONT_SIZE_MIN),
+                              maxValue: Double(BUFFOON_CONSTANTS.FONT_SIZE_MAX),
+                              target: self, action: #selector(doMoveMarkdownSlider(_:)))
+        slider.numberOfTickMarks = self.fontSizeSlider.numberOfTickMarks
+        slider.tickMarkPosition = self.fontSizeSlider.tickMarkPosition
+        slider.allowsTickMarkValuesOnly = true
+        slider.isContinuous = true
+        if #available(macOS 26.0, *) {
+            slider.tintProminence = .secondary
+        }
+        slider.translatesAutoresizingMaskIntoConstraints = false
+        page.addSubview(slider)
+
+        NSLayoutConstraint.activate([
+            titleLabel.topAnchor.constraint(equalTo: anchor, constant: gap),
+            titleLabel.leadingAnchor.constraint(equalTo: page.leadingAnchor, constant: 20),
+            valueLabel.firstBaselineAnchor.constraint(equalTo: titleLabel.firstBaselineAnchor),
+            valueLabel.trailingAnchor.constraint(equalTo: page.trailingAnchor, constant: -20),
+            slider.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 8),
+            slider.leadingAnchor.constraint(equalTo: page.leadingAnchor, constant: 20),
+            slider.trailingAnchor.constraint(equalTo: page.trailingAnchor, constant: -20),
+            smallA.topAnchor.constraint(equalTo: slider.bottomAnchor, constant: 4),
+            smallA.leadingAnchor.constraint(equalTo: slider.leadingAnchor),
+            largeA.lastBaselineAnchor.constraint(equalTo: smallA.lastBaselineAnchor),
+            largeA.trailingAnchor.constraint(equalTo: slider.trailingAnchor),
+        ])
+
+        return (slider, valueLabel, largeA.bottomAnchor)
+    }
+
+
+    /**
+     A text size slider's value, snapped to the nearest 0.5pt.
+     */
+    internal func snappedSize(_ slider: NSSlider) -> Double {
+
+        let step = BUFFOON_CONSTANTS.FONT_SIZE_STEP
+        return (slider.doubleValue / step).rounded() * step
+    }
+
+
+    internal func updateMarkdownLabels() {
+
+        self.mdFontSizeLabel.stringValue = fontSizeText(snappedSize(self.mdFontSizeSlider))
+        self.mdCodeSizeLabel.stringValue = fontSizeText(snappedSize(self.mdCodeSizeSlider))
+    }
+
+
+    @objc
+    private func doMoveMarkdownSlider(_ sender: NSSlider) {
+
+        updateMarkdownLabels()
+        autosaveSettings()
+    }
+
+
+    @objc
+    private func doApplyMarkdownDefaults(_ sender: Any) {
+
+        self.mdFontSizeSlider.doubleValue = BUFFOON_CONSTANTS.DEFAULTS.MD_FONT_SIZE
+        self.mdCodeSizeSlider.doubleValue = BUFFOON_CONSTANTS.DEFAULTS.MD_CODE_FONT_SIZE
+        updateMarkdownLabels()
+        autosaveSettings()
+    }
+}
+
+
+// MARK: - Tab Bar, General Tab and Code Tab Layout (LOCAL)
+
+extension AppDelegate {
+
+    /**
+     Replace the round tab icons with a tab bar of three peers:
+     General, Code and Markdown & Notebook.
+     */
+    internal func buildTabBar() {
+
+        guard let header = self.settingsButton.superview else { return }
+        for button in [self.infoButton, self.settingsButton, self.feedbackButton] {
+            button?.isHidden = true
+        }
+
+        let bar = NSSegmentedControl(labels: ["General",
+                                              "Code (.py .js .c .sh .swift …)",
+                                              "Markdown & Notebook (.md .ipynb)"],
+                                     trackingMode: .selectOne, target: self, action: #selector(doSelectTab(_:)))
+        bar.segmentDistribution = .fit
+        bar.setToolTip("Quick Look window size, extensions and version", forSegment: 0)
+        bar.setToolTip("Source code and data files: more than 50 languages", forSegment: 1)
+        bar.setToolTip("Markdown notes and Jupyter notebooks", forSegment: 2)
+        bar.translatesAutoresizingMaskIntoConstraints = false
+        header.addSubview(bar)
+        NSLayoutConstraint.activate([
+            bar.centerXAnchor.constraint(equalTo: header.centerXAnchor),
+            bar.centerYAnchor.constraint(equalTo: self.settingsButton.centerYAnchor),
+        ])
+
+        bar.selectedSegment = 1
+        self.tabBar = bar
+    }
+
+
+    /**
+     The General tab (formerly About): settings for every kind of preview, the
+     Quick Look window size from the old Advanced sheet, and a way to the
+     system's extension settings, above the version and credits.
+     */
+    internal func buildGeneralPage() {
+
+        guard let page = self.mainTabView.tabViewItem(at: 0).view,
+              let width = self.previewWidthAdvancedText,
+              let height = self.previewHeightAdvancedText else { return }
+
+        let title = makeLabel("Quick Look Window Size", in: page, weight: .semibold)
+        let times = makeLabel("×", in: page)
+        let points = makeLabel("points", in: page)
+        let note = makeLabel("For every preview: code, Markdown and notebooks. A new size shows the next time Quick Look opens.",
+                             in: page, size: NSFont.smallSystemFontSize)
+        note.textColor = .secondaryLabelColor
+        moveField(width, to: page, width: 64)
+        moveField(height, to: page, width: 64)
+        width.delegate = self
+        height.delegate = self
+
+        let extensionsButton = NSButton(title: "Quick Look Extensions…", target: self,
+                                        action: NSSelectorFromString("doOpenSysPrefsWithSender:"))
+        extensionsButton.toolTip = "Turn the Quick Look extensions on or off in System Settings"
+        extensionsButton.translatesAutoresizingMaskIntoConstraints = false
+        page.addSubview(extensionsButton)
+
+        NSLayoutConstraint.activate([
+            title.topAnchor.constraint(equalTo: self.versionLabel.bottomAnchor, constant: 28),
+            title.leadingAnchor.constraint(equalTo: page.leadingAnchor, constant: 20),
+            width.leadingAnchor.constraint(equalTo: title.trailingAnchor, constant: 12),
+            width.firstBaselineAnchor.constraint(equalTo: title.firstBaselineAnchor),
+            times.leadingAnchor.constraint(equalTo: width.trailingAnchor, constant: 6),
+            times.firstBaselineAnchor.constraint(equalTo: title.firstBaselineAnchor),
+            height.leadingAnchor.constraint(equalTo: times.trailingAnchor, constant: 6),
+            height.firstBaselineAnchor.constraint(equalTo: title.firstBaselineAnchor),
+            points.leadingAnchor.constraint(equalTo: height.trailingAnchor, constant: 6),
+            points.firstBaselineAnchor.constraint(equalTo: title.firstBaselineAnchor),
+            extensionsButton.trailingAnchor.constraint(equalTo: page.trailingAnchor, constant: -20),
+            extensionsButton.centerYAnchor.constraint(equalTo: width.centerYAnchor),
+            note.topAnchor.constraint(equalTo: width.bottomAnchor, constant: 6),
+            note.leadingAnchor.constraint(equalTo: title.leadingAnchor),
+        ])
+    }
+
+
+    /**
+     Put the code-only options from the old Advanced sheet (preview margin,
+     thumbnail appearance) on the Code tab's bottom row, and drop its button.
+     */
+    internal func rearrangeCodePage() {
+
+        guard let page = self.mainTabView.tabViewItem(at: 1).view,
+              let margin = self.previewMarginSizeText,
+              let tintSwitch = self.tintThumbnailsAdvancedSwitch,
+              let tintLabel = self.tintThumbnailsAdvancedLabel else { return }
+
+        func allSubviews(_ view: NSView) -> [NSView] {
+            view.subviews + view.subviews.flatMap { allSubviews($0) }
+        }
+        for case let button as NSButton in allSubviews(page) where button.title.hasPrefix("Advanced") {
+            button.isHidden = true
+        }
+
+        let marginLabel = makeLabel("Margin", in: page)
+        let points = makeLabel("points", in: page)
+        moveField(margin, to: page, width: 48)
+        moveField(tintSwitch, to: page, width: nil)
+        moveField(tintLabel, to: page, width: nil)
+        tintLabel.stringValue = "Thumbnails follow light or dark mode"
+        tintLabel.font = .systemFont(ofSize: NSFont.systemFontSize)
+        tintLabel.toolTip = "Needs macOS 26.1 or later"
+
+        NSLayoutConstraint.activate([
+            marginLabel.leadingAnchor.constraint(equalTo: self.defaultsButton.trailingAnchor, constant: 24),
+            marginLabel.centerYAnchor.constraint(equalTo: self.defaultsButton.centerYAnchor),
+            margin.leadingAnchor.constraint(equalTo: marginLabel.trailingAnchor, constant: 8),
+            margin.firstBaselineAnchor.constraint(equalTo: marginLabel.firstBaselineAnchor),
+            points.leadingAnchor.constraint(equalTo: margin.trailingAnchor, constant: 6),
+            points.firstBaselineAnchor.constraint(equalTo: marginLabel.firstBaselineAnchor),
+            tintSwitch.trailingAnchor.constraint(equalTo: page.trailingAnchor, constant: -20),
+            tintSwitch.centerYAnchor.constraint(equalTo: self.defaultsButton.centerYAnchor),
+            tintLabel.trailingAnchor.constraint(equalTo: tintSwitch.leadingAnchor, constant: -8),
+            tintLabel.centerYAnchor.constraint(equalTo: tintSwitch.centerYAnchor),
+        ])
+    }
+
+
+    private func makeLabel(_ text: String, in page: NSView, size: CGFloat = NSFont.systemFontSize,
+                           weight: NSFont.Weight = .regular) -> NSTextField {
+
+        let label = NSTextField(labelWithString: text)
+        label.font = .systemFont(ofSize: size, weight: weight)
+        label.translatesAutoresizingMaskIntoConstraints = false
+        page.addSubview(label)
+        return label
+    }
+
+
+    /**
+     Move a control from the old Advanced sheet to a tab, dropping its old
+     layout. Its outlet keeps pointing at it.
+     */
+    private func moveField(_ view: NSView, to page: NSView, width: CGFloat?) {
+
+        view.removeFromSuperview()
+        view.removeConstraints(view.constraints.filter { $0.firstAttribute == .width && $0.secondItem == nil })
+        view.translatesAutoresizingMaskIntoConstraints = false
+        page.addSubview(view)
+        if let width {
+            view.widthAnchor.constraint(equalToConstant: width).isActive = true
+        }
+    }
 }

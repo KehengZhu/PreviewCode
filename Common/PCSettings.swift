@@ -32,6 +32,9 @@ final class PCSettings {
     public var previewWindowWidth: CGFloat         = BUFFOON_CONSTANTS.PREVIEW_WINDOW.WIDTH                 // Advanced
     public var previewWindowHeight: CGFloat        = BUFFOON_CONSTANTS.PREVIEW_WINDOW.HEIGHT                // Advanced
     public var thumbnailMatchFinderMode: Bool      = false                                                  // Advanced
+    // LOCAL: Markdown and notebook previews
+    public var mdFontSize: CGFloat                 = CGFloat(BUFFOON_CONSTANTS.DEFAULTS.MD_FONT_SIZE)
+    public var mdCodeFontSize: CGFloat             = CGFloat(BUFFOON_CONSTANTS.DEFAULTS.MD_CODE_FONT_SIZE)
 
 
     // MARK: Retrieve and Persist Functions
@@ -46,17 +49,27 @@ final class PCSettings {
 
         // The suite name is the app group name, set in each extension's entitlements, and the host app's
         if let defaults = UserDefaults(suiteName: suite) {
-            self.fontName = defaults.string(forKey: BUFFOON_CONSTANTS.PREFS_IDS.PREVIEW_FONT_NAME) ?? BUFFOON_CONSTANTS.DEFAULTS.FONT
-            self.fontSize = CGFloat(defaults.float(forKey: BUFFOON_CONSTANTS.PREFS_IDS.PREVIEW_FONT_SIZE))
-            self.lineSpacing = CGFloat(defaults.float(forKey: BUFFOON_CONSTANTS.PREFS_IDS.PREVIEW_LINE_SPACING))
-            self.darkThemeName = defaults.string(forKey: BUFFOON_CONSTANTS.PREFS_IDS.PREVIEW_DARK_NAME) ?? BUFFOON_CONSTANTS.DEFAULTS.DARK_THEME
-            self.lightThemeName = defaults.string(forKey: BUFFOON_CONSTANTS.PREFS_IDS.PREVIEW_LIGHT_NAME) ?? BUFFOON_CONSTANTS.DEFAULTS.LIGHT_THEME
-            self.themeDisplayMode = defaults.integer(forKey: BUFFOON_CONSTANTS.PREFS_IDS.PREVIEW_THEME_MODE)
-            self.doShowLineNumbers = defaults.bool(forKey: BUFFOON_CONSTANTS.PREFS_IDS.PREVIEW_SHOW_LINE_NUMBERS)
+            // LOCAL: keep each default until its key has been written. The extensions
+            // read settings without `registerSettings()`, so right after installation,
+            // before the app has been opened, there are no keys at all.
+            let ids = BUFFOON_CONSTANTS.PREFS_IDS.self
+            func number(_ key: String) -> CGFloat? {
+                (defaults.object(forKey: key) as? NSNumber).map { CGFloat($0.doubleValue) }
+            }
+
+            self.fontName = defaults.string(forKey: ids.PREVIEW_FONT_NAME) ?? self.fontName
+            self.fontSize = number(ids.PREVIEW_FONT_SIZE) ?? self.fontSize
+            self.lineSpacing = number(ids.PREVIEW_LINE_SPACING) ?? self.lineSpacing
+            self.darkThemeName = defaults.string(forKey: ids.PREVIEW_DARK_NAME) ?? self.darkThemeName
+            self.lightThemeName = defaults.string(forKey: ids.PREVIEW_LIGHT_NAME) ?? self.lightThemeName
+            self.themeDisplayMode = (defaults.object(forKey: ids.PREVIEW_THEME_MODE) as? Int) ?? self.themeDisplayMode
+            self.doShowLineNumbers = defaults.bool(forKey: ids.PREVIEW_SHOW_LINE_NUMBERS)
             // FROM 2.2.3
-            self.doShowMargin = defaults.bool(forKey: BUFFOON_CONSTANTS.PREFS_IDS.PREVIEW_SHOW_MARGIN)
-            self.previewMarginWidth = CGFloat(defaults.float(forKey: BUFFOON_CONSTANTS.PREFS_IDS.PREVIEW_MARGIN))
-            self.thumbnailMatchFinderMode = defaults.bool(forKey: BUFFOON_CONSTANTS.PREFS_IDS.THUMB_MATCH_MODE)
+            self.doShowMargin = defaults.bool(forKey: ids.PREVIEW_SHOW_MARGIN)
+            self.previewMarginWidth = number(ids.PREVIEW_MARGIN) ?? self.previewMarginWidth
+            self.thumbnailMatchFinderMode = defaults.bool(forKey: ids.THUMB_MATCH_MODE)
+            self.mdFontSize = number(ids.MD_FONT_SIZE) ?? self.mdFontSize
+            self.mdCodeFontSize = number(ids.MD_CODE_FONT_SIZE) ?? self.mdCodeFontSize
 
             // LOCAL: keep the defaults when the keys have not been written yet
             // (the extensions read settings without calling `registerSettings()`)
@@ -102,6 +115,8 @@ final class PCSettings {
             // LOCAL
             defaults.setValue(self.previewWindowWidth, forKey: BUFFOON_CONSTANTS.PREFS_IDS.PREVIEW_WINDOW_WIDTH)
             defaults.setValue(self.previewWindowHeight, forKey: BUFFOON_CONSTANTS.PREFS_IDS.PREVIEW_WINDOW_HEIGHT)
+            defaults.setValue(self.mdFontSize, forKey: BUFFOON_CONSTANTS.PREFS_IDS.MD_FONT_SIZE)
+            defaults.setValue(self.mdCodeFontSize, forKey: BUFFOON_CONSTANTS.PREFS_IDS.MD_CODE_FONT_SIZE)
         }
     }
 
@@ -120,7 +135,7 @@ final class PCSettings {
         if let defaults = UserDefaults(suiteName: suite) {
             // Check if each preference value exists -- set if it doesn't
             // Preview body font size, stored as a CGFloat
-            // Default: 16.0
+            // Default: 13.0
             let codeFontSizeDefault: Any? = defaults.object(forKey: BUFFOON_CONSTANTS.PREFS_IDS.PREVIEW_FONT_SIZE)
             if codeFontSizeDefault == nil {
                 defaults.setValue(CGFloat(BUFFOON_CONSTANTS.DEFAULTS.FONT_SIZE),

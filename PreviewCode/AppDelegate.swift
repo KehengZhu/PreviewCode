@@ -126,6 +126,15 @@ final class AppDelegate: NSResponder,
     // FROM 2.3.0
     internal var themePopover: NSPopover?       = nil
     internal var buttonClicked: NSButton?       = nil
+    // LOCAL: the Markdown tab's controls, built in code by `buildMarkdownPage()`
+    internal var mdFontSizeSlider: NSSlider!    = nil
+    internal var mdFontSizeLabel: NSTextField!  = nil
+    internal var mdCodeSizeSlider: NSSlider!    = nil
+    internal var mdCodeSizeLabel: NSTextField!  = nil
+    // LOCAL: settings save as they change, but only once they have been loaded
+    internal var settingsLoaded: Bool           = false
+    // LOCAL: the tab bar: General, Code, Markdown & Notebook
+    internal var tabBar: NSSegmentedControl!    = nil
 
     /*
      Replace the following string with your own team ID. This is used to
@@ -156,21 +165,19 @@ final class AppDelegate: NSResponder,
 
         self.infoButton.toolTip = "About \(BUFFOON_CONSTANTS.APP_NAME)"
         self.settingsButton.toolTip = "Set preview styles and content"
-        self.feedbackButton.toolTip = "Send feedback to the developer"
+        self.feedbackButton.toolTip = "Set Markdown and notebook text sizes"
         self.infoButton.alphaValue = 1.0
         self.settingsButton.alphaValue = 1.0
         self.feedbackButton.alphaValue = 1.0
 
-        // LOCAL: no feedback server, so hide the Feedback tab and collapse its
-        // slot (width and leading gap) so the other tab buttons stay right-aligned
-        self.feedbackButton.isHidden = true
-        for constraint in self.feedbackButton.constraints where constraint.firstAttribute == .width {
-            constraint.constant = 0
-        }
-        for constraint in self.feedbackButton.superview?.constraints ?? []
-            where constraint.firstItem === self.feedbackButton && constraint.firstAttribute == .leading {
-            constraint.constant = 0
-        }
+        // LOCAL: the third tab, formerly Feedback (there is no feedback server),
+        // holds the Markdown and notebook settings. Settings save as they change,
+        // so there is no Apply button.
+        buildMarkdownPage()
+        self.applyButton.isHidden = true
+        buildGeneralPage()
+        rearrangeCodePage()
+        buildTabBar()
 
         // FROM 2.0.0
         // Configure the tab manager
@@ -181,7 +188,7 @@ final class AppDelegate: NSResponder,
         // Add callback closures, one per tab, to the tab manager
         self.tabManager.callbacks.append(nil)   // Info tab
         self.tabManager.callbacks.append { self.willShowSettingsPage() }
-        self.tabManager.callbacks.append { self.willShowFeedbackPage() }
+        self.tabManager.callbacks.append(nil)   // Markdown tab
 
         // Clear the `Feedback` tab
         // NOTE Don't initialise the Settings tab here too:
@@ -207,6 +214,9 @@ final class AppDelegate: NSResponder,
         self.window.delegate = self
         self.window.center()
         self.window.makeKeyAndOrderFront(self)
+
+        // LOCAL: open on the Code tab
+        showTab(1)
     }
 
 
@@ -392,7 +402,7 @@ final class AppDelegate: NSResponder,
     private func doShowSettings(sender: Any) {
 
         // FROM 2.0.0
-        self.tabManager.programmaticallyClickButton(at: 1)
+        showTab(1)
     }
 
 
@@ -401,6 +411,27 @@ final class AppDelegate: NSResponder,
 
         // FROM 2.0.0
         self.tabManager.programmaticallyClickButton(at: 2)
+    }
+
+
+    /**
+     Show a tab and select it in the tab bar.
+
+     LOCAL: 0 General, 1 Code, 2 Markdown & Notebook
+     */
+    internal func showTab(_ index: Int) {
+
+        self.tabManager.programmaticallyClickButton(at: index)
+        self.tabBar?.selectedSegment = index
+    }
+
+
+    @objc
+    internal func doSelectTab(_ sender: NSSegmentedControl) {
+
+        // Leave a text field so its value is checked and saved first
+        self.window.makeFirstResponder(nil)
+        showTab(sender.selectedSegment)
     }
 
 
@@ -423,7 +454,7 @@ final class AppDelegate: NSResponder,
             .foregroundColor: NSColor.labelColor
         ]
 
-        let infoText = NSMutableAttributedString(string: "Select a file in Finder and press Space to preview it. Use the gear tab to choose the theme, font and window size. You can turn the extensions off and on in ", attributes: bodyAtts)
+        let infoText = NSMutableAttributedString(string: "Select a file in Finder and press Space to preview it. Set how code looks in the Code tab, and Markdown and notebook text sizes in the Markdown & Notebook tab; changes save as you make them. You can turn the extensions off and on in ", attributes: bodyAtts)
         let boldText = NSAttributedString(string: "System Settings > General > Login Items & Extensions > Quick Look", attributes: boldAtts)
         infoText.append(boldText)
         infoText.append(NSAttributedString(string: ".\n\nIf previews stop appearing, run the install command again: it re-registers the extensions.", attributes: bodyAtts))
