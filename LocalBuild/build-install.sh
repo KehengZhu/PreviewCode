@@ -32,7 +32,30 @@ codesign --verify --deep --strict "$app"
 pkill -f "PreviewCode.app/Contents/PlugIns" 2>/dev/null || true
 rm -rf /Applications/PreviewCode.app
 ditto "$app" /Applications/PreviewCode.app
-/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister -f /Applications/PreviewCode.app
+
+# Keep exactly one copy: macOS finds and registers the build output too, and
+# with two registered copies of an extension Quick Look may pick the wrong one
+# (or none) and fall back to plain text. So unregister and delete the build.
+lsregister=/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister
+for appex in "$app"/Contents/PlugIns/*.appex; do pluginkit -r "$appex" 2>/dev/null || true; done
+"$lsregister" -u "$app" 2>/dev/null || true
+rm -rf "$derived/Build/Products"
+
+# The system drops the removed copy's extensions a moment later, by identifier,
+# which can take the installed copy's with them. So register the installed
+# copy after that, and check it took.
+installed="/Applications/PreviewCode.app/Contents/PlugIns"
+for attempt in 1 2 3 4 5; do
+    sleep 2
+    "$lsregister" -f /Applications/PreviewCode.app
+    for appex in "$installed"/*.appex; do pluginkit -a "$appex"; done
+    sleep 1
+    found=$(pluginkit -m -A -D -v -p com.apple.quicklook.preview 2>/dev/null | grep -c "$installed" || true)
+    [[ $found -ge 2 ]] && break
+done
+if [[ $found -lt 2 ]]; then
+    echo "Warning: the Quick Look extensions did not register; run this script again." >&2
+fi
 qlmanage -r >/dev/null 2>&1 || true
 
 echo "Installed /Applications/PreviewCode.app ($(defaults read /Applications/PreviewCode.app/Contents/Info.plist CFBundleShortVersionString))"
