@@ -274,8 +274,8 @@ class PreviewViewController: NSViewController,
     */
     private func setPreviewWindowSize(_ settings: PCSettings) {
 
-        // LOCAL: use the width and height (in points) set in Advanced Settings; the
-        // original code scaled the window to `settings.previewWindowScale` of the screen.
+        // LOCAL: the width and height (in points) set in Advanced Settings; the
+        // original code scaled the window to a fraction of the screen
         self.preferredContentSize = NSSize(width: settings.previewWindowWidth,
                                            height: settings.previewWindowHeight)
     }

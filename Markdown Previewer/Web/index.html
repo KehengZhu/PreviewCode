@@ -1,0 +1,17 @@
+<!doctype html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta name="color-scheme" content="light dark">
+	<!-- No network and no inline scripts: a note's raw HTML cannot run code or phone home -->
+	<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src qlmd:; style-src qlmd: 'unsafe-inline'; img-src qlmd: data:; font-src qlmd: data:; base-uri 'none'; form-action 'none'">
+	<link rel="stylesheet" href="lib/katex.min.css">
+	<link rel="stylesheet" href="lib/hljs-themes.css">
+	<link rel="stylesheet" href="style.css">
+	<script defer src="lib/markdown-it.min.js"></script>
+	<script defer src="lib/katex.min.js"></script>
+	<script defer src="lib/highlight.min.js"></script>
+	<script defer src="app.js"></script>
+</head>
+<body><main id="doc" class="markdown"></main></body>
+</html>

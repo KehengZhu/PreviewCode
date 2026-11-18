@@ -1,0 +1,156 @@
+/* Markdown Previewer (LOCAL): a light take on Obsidian's default theme */
+
+:root {
+	--text: #222;
+	--text-muted: #6b6b6b;
+	--background: #fff;
+	--background-alt: #f6f6f7;
+	--border: #e3e3e3;
+	--accent: #7b6cd9;
+	--link: #705dcf;
+	--mark: rgba(255, 208, 0, 0.4);
+	--tag-bg: rgba(123, 108, 217, 0.1);
+	color-scheme: light dark;
+}
+
+@media (prefers-color-scheme: dark) {
+	:root {
+		--text: #dadada;
+		--text-muted: #999;
+		--background: #1e1e1e;
+		--background-alt: #262626;
+		--border: #363636;
+		--accent: #a68af9;
+		--link: #a68af9;
+		--mark: rgba(255, 208, 0, 0.3);
+		--tag-bg: rgba(166, 138, 249, 0.15);
+	}
+}
+
+html { background: var(--background); }
+
+body {
+	margin: 0;
+	color: var(--text);
+	background: var(--background);
+	font: 16px/1.6 -apple-system, BlinkMacSystemFont, "Helvetica Neue", sans-serif;
+	-webkit-font-smoothing: antialiased;
+	overflow-wrap: break-word;
+}
+
+.markdown {
+	max-width: 820px;
+	margin: 0 auto;
+	padding: 28px 40px 60px;
+}
+
+.markdown > :first-child { margin-top: 0; }
+
+h1, h2, h3, h4, h5, h6 { line-height: 1.25; font-weight: 700; margin: 1.4em 0 0.5em; }
+h1 { font-size: 1.62em; }
+h2 { font-size: 1.46em; }
+h3 { font-size: 1.32em; }
+h4 { font-size: 1.19em; }
+h5 { font-size: 1.08em; }
+h6 { font-size: 1em; color: var(--text-muted); }
+
+p, ul, ol, table, pre, .callout, .katex-display { margin: 0.75em 0; }
+ul, ol { padding-left: 1.6em; }
+li { margin: 0.15em 0; }
+li > p { margin: 0.2em 0; }
+
+a { color: var(--link); text-decoration: underline; text-underline-offset: 2px; }
+a.internal-link { text-decoration: none; }
+a.internal-link:hover { text-decoration: underline; }
+
+mark { background: var(--mark); color: inherit; padding: 0 1px; border-radius: 2px; }
+
+.md-tag {
+	color: var(--accent);
+	background: var(--tag-bg);
+	border-radius: 1em;
+	padding: 0 0.5em;
+	font-size: 0.875em;
+}
+
+hr { border: none; border-top: 1px solid var(--border); margin: 2em 0; }
+
+blockquote {
+	margin: 0.75em 0;
+	padding: 0 0 0 1em;
+	border-left: 3px solid var(--accent);
+	color: var(--text-muted);
+}
+
+code {
+	font-family: "SF Mono", Menlo, monospace;
+	font-size: 0.875em;
+	background: var(--background-alt);
+	border-radius: 4px;
+	padding: 0.1em 0.3em;
+}
+
+pre {
+	background: var(--background-alt);
+	border-radius: 6px;
+	padding: 12px 16px;
+	overflow-x: auto;
+	line-height: 1.45;
+}
+
+pre code, pre code.hljs { background: none; padding: 0; font-size: 13px; }
+
+table { border-collapse: collapse; display: block; overflow-x: auto; }
+th, td { border: 1px solid var(--border); padding: 4px 10px; }
+th { background: var(--background-alt); font-weight: 600; }
+
+img { max-width: 100%; }
+
+.katex { font-size: 1.1em; }
+.katex-display { overflow-x: auto; overflow-y: hidden; padding: 2px 0; }
+.math-error { color: #d33; }
+
+/* Frontmatter properties */
+table.properties { display: table; margin: 0 0 1.5em; font-size: 0.875em; border: none; }
+table.properties th, table.properties td { border: none; background: none; padding: 2px 12px 2px 0; text-align: left; vertical-align: top; }
+table.properties th { color: var(--text-muted); font-weight: 500; }
+.property-value { display: inline-block; margin-right: 6px; }
+
+/* Task lists: the checkbox takes the bullet's place */
+.task-list-item { list-style: none; }
+.task-list-item > input, .task-list-item > p > input { margin: 0 0.45em 0 -1.35em; vertical-align: -1px; }
+.task-list-item.is-checked { color: var(--text-muted); text-decoration: line-through; }
+
+/* Embeds Quick Look cannot show (notes, PDFs, missing attachments) */
+.embed-link {
+	color: var(--text-muted);
+	border: 1px dashed var(--border);
+	border-radius: 4px;
+	padding: 0 6px;
+}
+.embed-link::before { content: "⧉ "; }
+
+/* Callouts */
+.callout {
+	--callout-color: 8, 109, 221;
+	background: rgba(var(--callout-color), 0.08);
+	border-left: 3px solid rgb(var(--callout-color));
+	border-radius: 4px;
+	padding: 10px 14px;
+}
+.callout-title { color: rgb(var(--callout-color)); font-weight: 600; }
+.callout-content { margin-top: 4px; }
+.callout-content > :first-child { margin-top: 0; }
+.callout-content > :last-child { margin-bottom: 0; }
+.callout[data-callout="abstract"], .callout[data-callout="summary"], .callout[data-callout="tldr"],
+.callout[data-callout="tip"], .callout[data-callout="hint"], .callout[data-callout="important"] { --callout-color: 0, 191, 188; }
+.callout[data-callout="success"], .callout[data-callout="check"], .callout[data-callout="done"] { --callout-color: 8, 185, 78; }
+.callout[data-callout="question"], .callout[data-callout="help"], .callout[data-callout="faq"],
+.callout[data-callout="warning"], .callout[data-callout="caution"], .callout[data-callout="attention"] { --callout-color: 236, 117, 0; }
+.callout[data-callout="failure"], .callout[data-callout="fail"], .callout[data-callout="missing"],
+.callout[data-callout="danger"], .callout[data-callout="error"], .callout[data-callout="bug"] { --callout-color: 233, 49, 71; }
+.callout[data-callout="example"] { --callout-color: 120, 82, 238; }
+.callout[data-callout="quote"], .callout[data-callout="cite"] { --callout-color: 158, 158, 158; }
+
+/* Skip layout of blocks below the first screen: halves layout time for long notes */
+.markdown > * { content-visibility: auto; contain-intrinsic-size: auto 2em; }

@@ -92,8 +92,7 @@ struct BUFFOON_CONSTANTS {
         // FROM 2.2.3
         static let PREVIEW_SHOW_MARGIN          = "com-bps-previewcode-do-show-margin"
         static let PREVIEW_MARGIN               = "com-bps-previewcode-preview-margin"
-        static let PREVIEW_WINDOW_SCALE         = "com-bps-previewcode-window-scale"
-        // LOCAL
+        // LOCAL: replace the screen-fraction "window-scale" setting
         static let PREVIEW_WINDOW_WIDTH         = "com-bps-previewcode-window-width"
         static let PREVIEW_WINDOW_HEIGHT        = "com-bps-previewcode-window-height"
         static let THUMB_MATCH_MODE             = "com-bps-previewcode-match-mode"
@@ -108,13 +107,13 @@ struct BUFFOON_CONSTANTS {
     static let LINE_BREAK                       = "\n"
     static let MAX_FEEDBACK_SIZE                = 512
     static let MAX_THUMBNAIL_READ_SIZE          = 1024
-    static let FONT_SIZE_OPTIONS: [CGFloat]     = [10.0, 12.0, 14.0, 16.0, 18.0, 24.0, 28.0]
-    // LOCAL: font size slider step; its range is FONT_SIZE_OPTIONS.first...last
+    // LOCAL: font sizes run from MIN to MAX in STEP increments (the slider in
+    // MainMenu.xib uses the same values), replacing the fixed list of sizes
+    static let FONT_SIZE_MIN: CGFloat           = 10.0
+    static let FONT_SIZE_MAX: CGFloat           = 28.0
     static let FONT_SIZE_STEP: Double           = 0.5
 
-    // FROM 2.2.3
-    // LOCAL: Quick Look window size in points, set in Advanced Settings.
-    // Replaces the screen-fraction SCALERS below, which are no longer used.
+    // LOCAL: Quick Look window size in points, set in Advanced Settings
     struct PREVIEW_WINDOW {
 
         static let WIDTH                        = 1000.0
@@ -130,13 +129,6 @@ struct BUFFOON_CONSTANTS {
 
         static let MIN_LINES                    = 2000
         static let FIRST_LINES                  = 300
-    }
-
-    struct SCALERS {
-
-        static let WINDOW_SIZE_L                = 0.75
-        static let WINDOW_SIZE_M                = 0.50
-        static let WINDOW_SIZE_S                = 0.42
     }
 
     // FROM 2.3.3

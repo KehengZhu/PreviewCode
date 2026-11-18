@@ -28,8 +28,7 @@ final class PCSettings {
     // FROM 2.2.3
     public var doShowMargin: Bool                  = false                                                  // Advanced DEPRECATED
     public var previewMarginWidth: CGFloat         = BUFFOON_CONSTANTS.PREVIEW_SIZE.MARGIN_WIDTH    // Advanced
-    public var previewWindowScale: CGFloat         = BUFFOON_CONSTANTS.SCALERS.WINDOW_SIZE_L                // Advanced (unused locally)
-    // LOCAL: Quick Look window size in points
+    // LOCAL: Quick Look window size in points, replacing `previewWindowScale`
     public var previewWindowWidth: CGFloat         = BUFFOON_CONSTANTS.PREVIEW_WINDOW.WIDTH                 // Advanced
     public var previewWindowHeight: CGFloat        = BUFFOON_CONSTANTS.PREVIEW_WINDOW.HEIGHT                // Advanced
     public var thumbnailMatchFinderMode: Bool      = false                                                  // Advanced
@@ -57,17 +56,16 @@ final class PCSettings {
             // FROM 2.2.3
             self.doShowMargin = defaults.bool(forKey: BUFFOON_CONSTANTS.PREFS_IDS.PREVIEW_SHOW_MARGIN)
             self.previewMarginWidth = CGFloat(defaults.float(forKey: BUFFOON_CONSTANTS.PREFS_IDS.PREVIEW_MARGIN))
-            self.previewWindowScale = CGFloat(defaults.float(forKey: BUFFOON_CONSTANTS.PREFS_IDS.PREVIEW_WINDOW_SCALE))
             self.thumbnailMatchFinderMode = defaults.bool(forKey: BUFFOON_CONSTANTS.PREFS_IDS.THUMB_MATCH_MODE)
 
-            // LOCAL: fall back to the defaults when the keys have not been written yet
+            // LOCAL: keep the defaults when the keys have not been written yet
             // (the extensions read settings without calling `registerSettings()`)
-            if defaults.object(forKey: BUFFOON_CONSTANTS.PREFS_IDS.PREVIEW_WINDOW_WIDTH) != nil {
-                self.previewWindowWidth = CGFloat(defaults.double(forKey: BUFFOON_CONSTANTS.PREFS_IDS.PREVIEW_WINDOW_WIDTH))
+            if let width = defaults.object(forKey: BUFFOON_CONSTANTS.PREFS_IDS.PREVIEW_WINDOW_WIDTH) as? Double {
+                self.previewWindowWidth = CGFloat(width)
             }
 
-            if defaults.object(forKey: BUFFOON_CONSTANTS.PREFS_IDS.PREVIEW_WINDOW_HEIGHT) != nil {
-                self.previewWindowHeight = CGFloat(defaults.double(forKey: BUFFOON_CONSTANTS.PREFS_IDS.PREVIEW_WINDOW_HEIGHT))
+            if let height = defaults.object(forKey: BUFFOON_CONSTANTS.PREFS_IDS.PREVIEW_WINDOW_HEIGHT) as? Double {
+                self.previewWindowHeight = CGFloat(height)
             }
 
             // FROM 2.3.1
@@ -100,7 +98,6 @@ final class PCSettings {
             // FROM 2.2.3
             defaults.setValue(self.doShowMargin, forKey: BUFFOON_CONSTANTS.PREFS_IDS.PREVIEW_SHOW_MARGIN)
             defaults.setValue(self.previewMarginWidth, forKey: BUFFOON_CONSTANTS.PREFS_IDS.PREVIEW_MARGIN)
-            defaults.setValue(self.previewWindowScale, forKey: BUFFOON_CONSTANTS.PREFS_IDS.PREVIEW_WINDOW_SCALE)
             defaults.setValue(self.thumbnailMatchFinderMode, forKey: BUFFOON_CONSTANTS.PREFS_IDS.THUMB_MATCH_MODE)
             // LOCAL
             defaults.setValue(self.previewWindowWidth, forKey: BUFFOON_CONSTANTS.PREFS_IDS.PREVIEW_WINDOW_WIDTH)
@@ -195,11 +192,6 @@ final class PCSettings {
             // Thumbnail should match macOS mode
             if defaults.object(forKey: BUFFOON_CONSTANTS.PREFS_IDS.THUMB_MATCH_MODE) == nil {
                 defaults.setValue(false, forKey: BUFFOON_CONSTANTS.PREFS_IDS.THUMB_MATCH_MODE)
-            }
-            
-            // Preview window scale factor (fraction of main screen size)
-            if defaults.object(forKey: BUFFOON_CONSTANTS.PREFS_IDS.PREVIEW_WINDOW_SCALE) == nil {
-                defaults.setValue(BUFFOON_CONSTANTS.SCALERS.WINDOW_SIZE_L, forKey: BUFFOON_CONSTANTS.PREFS_IDS.PREVIEW_WINDOW_SCALE)
             }
             
             // LOCAL: Preview window size in points

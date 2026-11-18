@@ -126,8 +126,7 @@ final internal class Common {
             }
 
             // Just in case the above block reads in zero value for the preview font size
-            if self.settings.fontSize < BUFFOON_CONSTANTS.FONT_SIZE_OPTIONS[0] ||
-                self.settings.fontSize > BUFFOON_CONSTANTS.FONT_SIZE_OPTIONS[BUFFOON_CONSTANTS.FONT_SIZE_OPTIONS.count - 1] {
+            if !(BUFFOON_CONSTANTS.FONT_SIZE_MIN...BUFFOON_CONSTANTS.FONT_SIZE_MAX).contains(self.settings.fontSize) {
                 self.settings.fontSize = CGFloat(BUFFOON_CONSTANTS.DEFAULTS.FONT_SIZE)
             }
         }
@@ -143,10 +142,7 @@ final internal class Common {
 
         // LOCAL: the preview extension shares one highlighter per process
         if self.usesSharedHighlighter {
-            guard let background = SharedHighlighter.shared.sync({ (hltr: Highlighter) -> NSColor? in
-                self.configure(hltr)
-                return hltr.theme.themeBackgroundColour
-            }) else { return nil }
+            guard let background = withSharedHighlighter({ $0.theme.themeBackgroundColour }) else { return nil }
 
             self.themeBackgroundColour = background
             return
@@ -157,6 +153,20 @@ final internal class Common {
         guard let hltr = self.highlighter else { return nil }
         configure(hltr)
         self.themeBackgroundColour = hltr.theme.themeBackgroundColour
+    }
+
+
+    /**
+     Run `body` with the shared highlighter, set up for this instance, and wait.
+
+     LOCAL
+     */
+    private func withSharedHighlighter<T>(_ body: (Highlighter) -> T?) -> T? {
+
+        return SharedHighlighter.shared.sync { (hltr: Highlighter) -> T? in
+            self.configure(hltr)
+            return body(hltr)
+        }
     }
 
 
@@ -196,10 +206,7 @@ final internal class Common {
 
         // LOCAL: with the shared highlighter, set it up and render on its queue
         if self.usesSharedHighlighter {
-            renderedString = SharedHighlighter.shared.sync { (hltr: Highlighter) -> NSAttributedString? in
-                self.configure(hltr)
-                return self.render(codeFileString, language, hltr)
-            }
+            renderedString = withSharedHighlighter { self.render(codeFileString, language, $0) }
         } else if let hltr = self.highlighter {
             renderedString = render(codeFileString, language, hltr)
         }
@@ -242,10 +249,7 @@ final internal class Common {
      */
     func plainTextAttributes() -> [NSAttributedString.Key: Any] {
 
-        return SharedHighlighter.shared.sync { (hltr: Highlighter) -> [NSAttributedString.Key: Any]? in
-            self.configure(hltr)
-            return hltr.plainTextAttributes()
-        } ?? [.font: self.font!]
+        return withSharedHighlighter { $0.plainTextAttributes() } ?? [.font: self.font!]
     }
 
 
@@ -256,30 +260,25 @@ final internal class Common {
      */
     private func render(_ codeFileString: String, _ language: String, _ hltr: Highlighter) -> NSAttributedString? {
 
-        var renderedString: NSAttributedString? = nil
-        do {
-            if !self.isThumbnail && self.settings.doShowLineNumbers {
-                // FROM 2.2.0
-                // Use line numbering from HighlighterSwift
-                var lnd = LineNumberData()
-                lnd.fontSize = self.settings.fontSize
-                lnd.minWidth = 2
-
-                // Use our theme mode to specify the colour of the line numbers
-                // LOCAL: `isThemeDark` was worked out in `init` (on the main thread) from
-                // the same mode setting and, in auto mode, from NSApp's appearance; this
-                // function may run on the shared highlighter's background queue
-                lnd.usingDarkTheme = self.isThemeDark
-
-                // Render with line numbers
-                renderedString = hltr.highlight(codeFileString, as: language, doFastRender: true, lineNumbering: lnd)
-            } else {
-                // Render without line numbers
-                renderedString = hltr.highlight(codeFileString, as: language)
-            }
+        guard !self.isThumbnail && self.settings.doShowLineNumbers else {
+            // Render without line numbers
+            return hltr.highlight(codeFileString, as: language)
         }
 
-        return renderedString
+        // FROM 2.2.0
+        // Use line numbering from HighlighterSwift
+        var lnd = LineNumberData()
+        lnd.fontSize = self.settings.fontSize
+        lnd.minWidth = 2
+
+        // Use our theme mode to specify the colour of the line numbers
+        // LOCAL: `isThemeDark` was worked out in `init` (on the main thread) from
+        // the same mode setting and, in auto mode, from NSApp's appearance; this
+        // function may run on the shared highlighter's background queue
+        lnd.usingDarkTheme = self.isThemeDark
+
+        // Render with line numbers
+        return hltr.highlight(codeFileString, as: language, doFastRender: true, lineNumbering: lnd)
     }
 
 
