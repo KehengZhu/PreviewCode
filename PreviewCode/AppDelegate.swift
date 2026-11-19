@@ -215,11 +215,17 @@ final class AppDelegate: NSResponder,
         setInfoText(self.infoLabel)
         setversionText(self.versionLabel)
         self.window.delegate = self
+        // LOCAL: a fixed 5:4 window; the tabs lay out to fit it
+        let windowSize = NSSize(width: 680, height: 544)
+        self.window.contentMinSize = windowSize
+        self.window.contentMaxSize = windowSize
+        self.window.setContentSize(windowSize)
         self.window.center()
         self.window.makeKeyAndOrderFront(self)
 
-        // LOCAL: open on the General tab
+        // LOCAL: open on the General tab, with no field selected
         showTab(0)
+        self.window.makeFirstResponder(nil)
     }
 
 
@@ -471,8 +477,8 @@ final class AppDelegate: NSResponder,
     private func setversionText(_ text: NSTextField) {
 
         let version = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "unknown"
-        let build = Bundle.main.object(forInfoDictionaryKey: "CFBundleVersion") as? String ?? "unknown"
-        text.stringValue = "Version \(version) (\(build))"
+        // LOCAL: the version alone, without the build number
+        text.stringValue = "Version \(version)"
     }
 
 }

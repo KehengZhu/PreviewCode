@@ -1378,30 +1378,47 @@ extension AppDelegate {
 
 
     /**
-     Build the Markdown tab: text sizes for Markdown notes and Jupyter notebooks.
-     It replaces the Feedback tab, whose controls are hidden but kept, because
-     their outlets are still referenced.
+     Build the Markdown tab: text sizes for Markdown notes and Jupyter notebooks,
+     in one group like the other tabs. It replaces the Feedback tab, whose
+     controls are hidden but kept, because their outlets are still referenced.
      */
     internal func buildMarkdownPage() {
 
         guard self.mainTabView.numberOfTabViewItems > 2,
               let page = self.mainTabView.tabViewItem(at: 2).view else { return }
+        // Hidden views still take part in layout: drop their constraints, so the
+        // old fixed-width controls cannot widen the window
+        page.removeConstraints(page.constraints)
         for view in page.subviews {
             view.isHidden = true
+            view.translatesAutoresizingMaskIntoConstraints = true
         }
 
-        let body = addSizeRow("Markdown and Notebook Text Size", to: page, below: page.topAnchor, gap: 0)
-        self.mdFontSizeSlider = body.slider
-        self.mdFontSizeLabel = body.value
+        func sizeSlider() -> NSSlider {
+            let slider = NSSlider(value: BUFFOON_CONSTANTS.DEFAULTS.MD_FONT_SIZE,
+                                  minValue: Double(BUFFOON_CONSTANTS.FONT_SIZE_MIN),
+                                  maxValue: Double(BUFFOON_CONSTANTS.FONT_SIZE_MAX),
+                                  target: self, action: #selector(doMoveMarkdownSlider(_:)))
+            slider.isContinuous = true
+            return slider
+        }
 
-        let code = addSizeRow("Code Block Text Size", to: page, below: body.bottom, gap: 24)
-        self.mdCodeSizeSlider = code.slider
-        self.mdCodeSizeLabel = code.value
+        self.mdFontSizeSlider = sizeSlider()
+        self.mdFontSizeLabel = NSTextField(labelWithString: "")
+        self.mdCodeSizeSlider = sizeSlider()
+        self.mdCodeSizeLabel = NSTextField(labelWithString: "")
 
-        let note = NSTextField(wrappingLabelWithString: "These sizes apply to Markdown notes and Jupyter notebooks. "
-                               + "The code block size also sets notebook code cells and outputs. "
-                               + "Source code files use the settings in the Code tab.")
+        let header = makeLabel("Text", in: page, weight: .semibold)
+        let group = makeSettingsGroup(in: page, rows: [
+            settingsRow("Text Size", sliderControls(self.mdFontSizeSlider, self.mdFontSizeLabel, width: 260)),
+            settingsRow("Code Block Text Size", sliderControls(self.mdCodeSizeSlider, self.mdCodeSizeLabel, width: 260)),
+        ])
+        let note = NSTextField(wrappingLabelWithString: "The code block size also sets notebook code cells and outputs. "
+                               + "Markdown notes and notebooks follow macOS light or dark mode; source code files use the Code tab.")
+        note.font = .systemFont(ofSize: NSFont.smallSystemFontSize)
         note.textColor = .secondaryLabelColor
+        note.preferredMaxLayoutWidth = 600
+        note.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
         note.translatesAutoresizingMaskIntoConstraints = false
         page.addSubview(note)
 
@@ -1411,70 +1428,21 @@ extension AppDelegate {
         page.addSubview(defaultsButton)
 
         NSLayoutConstraint.activate([
-            note.topAnchor.constraint(equalTo: code.bottom, constant: 24),
-            note.leadingAnchor.constraint(equalTo: page.leadingAnchor, constant: 20),
-            note.trailingAnchor.constraint(equalTo: page.trailingAnchor, constant: -20),
+            header.topAnchor.constraint(equalTo: page.topAnchor, constant: 12),
+            header.leadingAnchor.constraint(equalTo: page.leadingAnchor, constant: 22),
+            group.topAnchor.constraint(equalTo: header.bottomAnchor, constant: 6),
+            group.leadingAnchor.constraint(equalTo: page.leadingAnchor, constant: 20),
+            group.trailingAnchor.constraint(equalTo: page.trailingAnchor, constant: -20),
+            note.topAnchor.constraint(equalTo: group.bottomAnchor, constant: 8),
+            note.leadingAnchor.constraint(equalTo: header.leadingAnchor),
+            note.trailingAnchor.constraint(equalTo: page.trailingAnchor, constant: -22),
             defaultsButton.leadingAnchor.constraint(equalTo: page.leadingAnchor, constant: 20),
-            defaultsButton.bottomAnchor.constraint(equalTo: page.bottomAnchor, constant: -20),
+            defaultsButton.bottomAnchor.constraint(equalTo: page.bottomAnchor, constant: -16),
         ])
 
         self.mdFontSizeSlider.doubleValue = BUFFOON_CONSTANTS.DEFAULTS.MD_FONT_SIZE
         self.mdCodeSizeSlider.doubleValue = BUFFOON_CONSTANTS.DEFAULTS.MD_CODE_FONT_SIZE
         updateMarkdownLabels()
-    }
-
-
-    /**
-     Add a titled text size slider, laid out like the Settings tab's, below `anchor`.
-
-     - Returns: The slider, its value readout, and the bottom of the row.
-     */
-    private func addSizeRow(_ title: String, to page: NSView, below anchor: NSLayoutYAxisAnchor,
-                            gap: CGFloat) -> (slider: NSSlider, value: NSTextField, bottom: NSLayoutYAxisAnchor) {
-
-        func label(_ text: String, size: CGFloat) -> NSTextField {
-            let field = NSTextField(labelWithString: text)
-            field.font = .systemFont(ofSize: size)
-            field.translatesAutoresizingMaskIntoConstraints = false
-            page.addSubview(field)
-            return field
-        }
-
-        let titleLabel = label(title, size: NSFont.systemFontSize)
-        let valueLabel = label("", size: NSFont.systemFontSize)
-        valueLabel.alignment = .right
-        let smallA = label("A", size: NSFont.smallSystemFontSize)
-        let largeA = label("A", size: 24)
-
-        let slider = NSSlider(value: BUFFOON_CONSTANTS.DEFAULTS.MD_FONT_SIZE,
-                              minValue: Double(BUFFOON_CONSTANTS.FONT_SIZE_MIN),
-                              maxValue: Double(BUFFOON_CONSTANTS.FONT_SIZE_MAX),
-                              target: self, action: #selector(doMoveMarkdownSlider(_:)))
-        slider.numberOfTickMarks = self.fontSizeSlider.numberOfTickMarks
-        slider.tickMarkPosition = self.fontSizeSlider.tickMarkPosition
-        slider.allowsTickMarkValuesOnly = true
-        slider.isContinuous = true
-        if #available(macOS 26.0, *) {
-            slider.tintProminence = .secondary
-        }
-        slider.translatesAutoresizingMaskIntoConstraints = false
-        page.addSubview(slider)
-
-        NSLayoutConstraint.activate([
-            titleLabel.topAnchor.constraint(equalTo: anchor, constant: gap),
-            titleLabel.leadingAnchor.constraint(equalTo: page.leadingAnchor, constant: 20),
-            valueLabel.firstBaselineAnchor.constraint(equalTo: titleLabel.firstBaselineAnchor),
-            valueLabel.trailingAnchor.constraint(equalTo: page.trailingAnchor, constant: -20),
-            slider.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 8),
-            slider.leadingAnchor.constraint(equalTo: page.leadingAnchor, constant: 20),
-            slider.trailingAnchor.constraint(equalTo: page.trailingAnchor, constant: -20),
-            smallA.topAnchor.constraint(equalTo: slider.bottomAnchor, constant: 4),
-            smallA.leadingAnchor.constraint(equalTo: slider.leadingAnchor),
-            largeA.lastBaselineAnchor.constraint(equalTo: smallA.lastBaselineAnchor),
-            largeA.trailingAnchor.constraint(equalTo: slider.trailingAnchor),
-        ])
-
-        return (slider, valueLabel, largeA.bottomAnchor)
     }
 
 
@@ -1586,7 +1554,7 @@ extension AppDelegate {
         let times = makeLabel("×", in: box)
         let points = makeLabel("points", in: box)
         let sizeRow = addGeneralRow(to: box, below: nil, title: "Quick Look Window Size",
-                                    note: "For every preview: code, Markdown and notebooks. It applies the next time Quick Look opens.",
+                                    note: "Every preview uses it, from the next time Quick Look opens.",
                                     control: width)
         NSLayoutConstraint.activate([
             points.trailingAnchor.constraint(equalTo: box.trailingAnchor, constant: -14),
@@ -1623,7 +1591,7 @@ extension AppDelegate {
             largeA.trailingAnchor.constraint(equalTo: percent.leadingAnchor, constant: -10),
             largeA.centerYAnchor.constraint(equalTo: slider.centerYAnchor),
             slider.trailingAnchor.constraint(equalTo: largeA.leadingAnchor, constant: -8),
-            slider.widthAnchor.constraint(equalToConstant: 200),
+            slider.widthAnchor.constraint(equalToConstant: 160),
             smallA.trailingAnchor.constraint(equalTo: slider.leadingAnchor, constant: -8),
             smallA.centerYAnchor.constraint(equalTo: slider.centerYAnchor),
         ])
@@ -1635,7 +1603,7 @@ extension AppDelegate {
         extensionsButton.translatesAutoresizingMaskIntoConstraints = false
         box.addSubview(extensionsButton)
         let extensionsRow = addGeneralRow(to: box, below: smallRow.separatorAnchor, title: "Quick Look Extensions",
-                                          note: "Turn them off or on in System Settings. If previews stop appearing, run the install command again.",
+                                          note: "If previews stop appearing, run the install command again.",
                                           control: extensionsButton, separator: false)
         extensionsButton.trailingAnchor.constraint(equalTo: box.trailingAnchor, constant: -14).isActive = true
 
@@ -1727,8 +1695,7 @@ extension AppDelegate {
             return rounded == rounded.rounded() ? String(format: "%.0f pt", rounded) : String(format: "%.1f pt", rounded)
         }
         label.stringValue = "\(Int(smallScalePercent()))%"
-        self.smallScaleNote?.stringValue = "Finder's column and gallery views, and Get Info. Text shows at "
-            + "\(points(code)) for code and \(points(markdown)) for Markdown."
+        self.smallScaleNote?.stringValue = "Column and gallery views, Get Info: code \(points(code)), Markdown \(points(markdown))"
     }
 
 
@@ -1741,8 +1708,11 @@ extension AppDelegate {
 
 
     /**
-     Put the code-only options from the old Advanced sheet (preview margin,
-     thumbnail appearance) on the Code tab's bottom row, and drop its button.
+     Lay out the Code tab in two groups, one above the other: Text (size, font,
+     style, line spacing, line numbers, margin) and Theme (appearance, the dark
+     and light themes, thumbnails), with Defaults below. The controls are the
+     xib's, moved here, so their outlets and actions are unchanged; the xib's
+     own labels and the Advanced button are hidden.
      */
     internal func rearrangeCodePage() {
 
@@ -1751,34 +1721,207 @@ extension AppDelegate {
               let tintSwitch = self.tintThumbnailsAdvancedSwitch,
               let tintLabel = self.tintThumbnailsAdvancedLabel else { return }
 
-        func allSubviews(_ view: NSView) -> [NSView] {
-            view.subviews + view.subviews.flatMap { allSubviews($0) }
+        let moved: [NSView?] = [self.fontSizeSlider, self.fontSizeLabel, self.fontNamePopup, self.fontFacePopup,
+                                self.lineSpacingPopup, self.showLineNumbersSwitch,
+                                self.lightRadioButton, self.darkRadioButton, self.autoRadioButton, self.themeHelpLabel,
+                                self.darkThemeIcon, self.darkThemeLabel, self.darkThemeListButton,
+                                self.lightThemeIcon, self.lightThemeLabel, self.lightThemeListButton,
+                                self.defaultsButton, self.settingsHelpButton, margin, tintSwitch, tintLabel]
+        for case let view? in moved {
+            view.removeFromSuperview()
+            view.translatesAutoresizingMaskIntoConstraints = false
         }
-        for case let button as NSButton in allSubviews(page) where button.title.hasPrefix("Advanced") {
-            button.isHidden = true
+        // Their fixed widths came from the old layout
+        for case let view? in [self.fontSizeSlider, self.fontSizeLabel, self.fontNamePopup, self.fontFacePopup,
+                               self.lineSpacingPopup, margin, self.darkThemeLabel, self.lightThemeLabel, self.themeHelpLabel] as [NSView?] {
+            view.removeConstraints(view.constraints.filter { $0.firstAttribute == .width && $0.secondItem == nil })
+        }
+        self.themeHelpLabel.removeConstraints(self.themeHelpLabel.constraints.filter { $0.firstAttribute == .height && $0.secondItem == nil })
+        for view in page.subviews {
+            view.isHidden = true
         }
 
-        let marginLabel = makeLabel("Margin", in: page)
-        let points = makeLabel("points", in: page)
-        moveField(margin, to: page, width: 48)
-        moveField(tintSwitch, to: page, width: nil)
-        moveField(tintLabel, to: page, width: nil)
-        tintLabel.stringValue = "Thumbnails follow light or dark mode"
+        // A compact slider: the readout and the snapping do the work of the tick marks
+        self.fontSizeSlider.numberOfTickMarks = 0
+        self.fontSizeSlider.allowsTickMarkValuesOnly = false
+        for popup in [self.fontNamePopup, self.fontFacePopup, self.lineSpacingPopup] {
+            popup?.widthAnchor.constraint(equalToConstant: 180).isActive = true
+        }
+        margin.widthAnchor.constraint(equalToConstant: 52).isActive = true
+        for label in [self.darkThemeLabel, self.lightThemeLabel] {
+            label?.widthAnchor.constraint(equalToConstant: 150).isActive = true
+            label?.lineBreakMode = .byTruncatingTail
+        }
+        tintLabel.stringValue = "Thumbnails Follow Light or Dark Mode"
         tintLabel.font = .systemFont(ofSize: NSFont.systemFontSize)
         tintLabel.toolTip = "Needs macOS 26.1 or later"
+        self.themeHelpLabel.font = .systemFont(ofSize: NSFont.smallSystemFontSize)
+        self.themeHelpLabel.textColor = .secondaryLabelColor
+        self.themeHelpLabel.lineBreakMode = .byTruncatingTail
+        self.themeHelpLabel.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
+        let pointsLabel = NSTextField(labelWithString: "points")
+
+        let textHeader = makeLabel("Text", in: page, weight: .semibold)
+        let textGroup = makeSettingsGroup(in: page, rows: [
+            settingsRow("Size", sliderControls(self.fontSizeSlider, self.fontSizeLabel, width: 200)),
+            settingsRow("Font", [self.fontNamePopup]),
+            settingsRow("Style", [self.fontFacePopup]),
+            settingsRow("Line Spacing", [self.lineSpacingPopup]),
+            settingsRow("Line Numbers", [self.showLineNumbersSwitch]),
+            settingsRow("Margin", [margin, pointsLabel]),
+        ])
+
+        let themeHeader = makeLabel("Theme", in: page, weight: .semibold)
+        let themeGroup = makeSettingsGroup(in: page, rows: [
+            settingsRow("Appearance", [self.lightRadioButton, self.darkRadioButton, self.autoRadioButton],
+                        note: self.themeHelpLabel),
+            settingsRow("Dark", [self.darkThemeIcon, self.darkThemeLabel, self.darkThemeListButton]),
+            settingsRow("Light", [self.lightThemeIcon, self.lightThemeLabel, self.lightThemeListButton]),
+            settingsRow(tintLabel, [tintSwitch]),
+        ])
+
+        page.addSubview(self.defaultsButton)
+        page.addSubview(self.settingsHelpButton)
 
         NSLayoutConstraint.activate([
-            marginLabel.leadingAnchor.constraint(equalTo: self.defaultsButton.trailingAnchor, constant: 24),
-            marginLabel.centerYAnchor.constraint(equalTo: self.defaultsButton.centerYAnchor),
-            margin.leadingAnchor.constraint(equalTo: marginLabel.trailingAnchor, constant: 8),
-            margin.firstBaselineAnchor.constraint(equalTo: marginLabel.firstBaselineAnchor),
-            points.leadingAnchor.constraint(equalTo: margin.trailingAnchor, constant: 6),
-            points.firstBaselineAnchor.constraint(equalTo: marginLabel.firstBaselineAnchor),
-            tintSwitch.trailingAnchor.constraint(equalTo: page.trailingAnchor, constant: -20),
-            tintSwitch.centerYAnchor.constraint(equalTo: self.defaultsButton.centerYAnchor),
-            tintLabel.trailingAnchor.constraint(equalTo: tintSwitch.leadingAnchor, constant: -8),
-            tintLabel.centerYAnchor.constraint(equalTo: tintSwitch.centerYAnchor),
+            textHeader.topAnchor.constraint(equalTo: page.topAnchor, constant: 12),
+            textHeader.leadingAnchor.constraint(equalTo: page.leadingAnchor, constant: 22),
+            textGroup.topAnchor.constraint(equalTo: textHeader.bottomAnchor, constant: 6),
+            textGroup.leadingAnchor.constraint(equalTo: page.leadingAnchor, constant: 20),
+            textGroup.trailingAnchor.constraint(equalTo: page.trailingAnchor, constant: -20),
+            themeHeader.topAnchor.constraint(equalTo: textGroup.bottomAnchor, constant: 14),
+            themeHeader.leadingAnchor.constraint(equalTo: textHeader.leadingAnchor),
+            themeGroup.topAnchor.constraint(equalTo: themeHeader.bottomAnchor, constant: 6),
+            themeGroup.leadingAnchor.constraint(equalTo: textGroup.leadingAnchor),
+            themeGroup.trailingAnchor.constraint(equalTo: textGroup.trailingAnchor),
+            self.defaultsButton.leadingAnchor.constraint(equalTo: page.leadingAnchor, constant: 20),
+            self.defaultsButton.bottomAnchor.constraint(equalTo: page.bottomAnchor, constant: -16),
+            self.settingsHelpButton.leadingAnchor.constraint(equalTo: self.defaultsButton.trailingAnchor, constant: 10),
+            self.settingsHelpButton.centerYAnchor.constraint(equalTo: self.defaultsButton.centerYAnchor),
         ])
+    }
+
+
+    /**
+     A settings row: a title on the left, controls on the right, and an optional
+     note in small type below the title.
+     */
+    private func settingsRow(_ title: String, _ controls: [NSView?], note: NSTextField? = nil) -> NSView {
+
+        let label = NSTextField(labelWithString: title)
+        label.font = .systemFont(ofSize: NSFont.systemFontSize)
+        return settingsRow(label, controls, note: note)
+    }
+
+
+    private func settingsRow(_ title: NSTextField, _ controls: [NSView?], note: NSTextField? = nil) -> NSView {
+
+        let row = NSView()
+        row.translatesAutoresizingMaskIntoConstraints = false
+        title.translatesAutoresizingMaskIntoConstraints = false
+        row.addSubview(title)
+
+        let stack = NSStackView(views: controls.compactMap { $0 })
+        stack.orientation = .horizontal
+        stack.spacing = 8
+        stack.alignment = .centerY
+        stack.translatesAutoresizingMaskIntoConstraints = false
+        row.addSubview(stack)
+
+        NSLayoutConstraint.activate([
+            title.leadingAnchor.constraint(equalTo: row.leadingAnchor, constant: 12),
+            stack.trailingAnchor.constraint(equalTo: row.trailingAnchor, constant: -12),
+            stack.leadingAnchor.constraint(greaterThanOrEqualTo: title.trailingAnchor, constant: 12),
+            row.heightAnchor.constraint(greaterThanOrEqualToConstant: 30),
+            stack.topAnchor.constraint(greaterThanOrEqualTo: row.topAnchor, constant: 4),
+            stack.bottomAnchor.constraint(lessThanOrEqualTo: row.bottomAnchor, constant: -4),
+        ])
+
+        if let note {
+            note.translatesAutoresizingMaskIntoConstraints = false
+            row.addSubview(note)
+            NSLayoutConstraint.activate([
+                title.topAnchor.constraint(equalTo: row.topAnchor, constant: 7),
+                stack.centerYAnchor.constraint(equalTo: title.centerYAnchor),
+                note.topAnchor.constraint(equalTo: title.bottomAnchor, constant: 2),
+                note.leadingAnchor.constraint(equalTo: title.leadingAnchor),
+                note.trailingAnchor.constraint(lessThanOrEqualTo: row.trailingAnchor, constant: -12),
+                note.bottomAnchor.constraint(equalTo: row.bottomAnchor, constant: -7),
+            ])
+        } else {
+            NSLayoutConstraint.activate([
+                title.centerYAnchor.constraint(equalTo: row.centerYAnchor),
+                stack.centerYAnchor.constraint(equalTo: row.centerYAnchor),
+            ])
+        }
+        return row
+    }
+
+
+    /**
+     A size slider's controls for a settings row: small A, slider, large A, readout.
+     */
+    private func sliderControls(_ slider: NSSlider, _ readout: NSTextField, width: CGFloat) -> [NSView] {
+
+        let smallA = NSTextField(labelWithString: "A")
+        smallA.font = .systemFont(ofSize: NSFont.smallSystemFontSize)
+        let largeA = NSTextField(labelWithString: "A")
+        largeA.font = .systemFont(ofSize: 17)
+        slider.translatesAutoresizingMaskIntoConstraints = false
+        slider.widthAnchor.constraint(equalToConstant: width).isActive = true
+        if #available(macOS 26.0, *) {
+            slider.tintProminence = .secondary
+        }
+        readout.alignment = .right
+        readout.font = .monospacedDigitSystemFont(ofSize: NSFont.systemFontSize, weight: .regular)
+        readout.translatesAutoresizingMaskIntoConstraints = false
+        readout.widthAnchor.constraint(equalToConstant: 44).isActive = true
+        return [smallA, slider, largeA, readout]
+    }
+
+
+    /**
+     A rounded group holding settings rows, with separators between them, added
+     to `page`. The caller positions it.
+     */
+    private func makeSettingsGroup(in page: NSView, rows: [NSView]) -> NSBox {
+
+        let group = NSBox()
+        group.boxType = .custom
+        group.titlePosition = .noTitle
+        group.cornerRadius = 8
+        group.borderWidth = 1
+        group.borderColor = .separatorColor
+        group.fillColor = NSColor.labelColor.withAlphaComponent(0.03)
+        group.contentViewMargins = .zero
+        group.translatesAutoresizingMaskIntoConstraints = false
+        page.addSubview(group)
+        guard let box = group.contentView else { return group }
+
+        var previous: NSLayoutYAxisAnchor = box.topAnchor
+        for (index, row) in rows.enumerated() {
+            box.addSubview(row)
+            NSLayoutConstraint.activate([
+                row.topAnchor.constraint(equalTo: previous),
+                row.leadingAnchor.constraint(equalTo: box.leadingAnchor),
+                row.trailingAnchor.constraint(equalTo: box.trailingAnchor),
+            ])
+            previous = row.bottomAnchor
+            if index < rows.count - 1 {
+                let line = NSBox()
+                line.boxType = .separator
+                line.translatesAutoresizingMaskIntoConstraints = false
+                box.addSubview(line)
+                NSLayoutConstraint.activate([
+                    line.topAnchor.constraint(equalTo: previous),
+                    line.leadingAnchor.constraint(equalTo: box.leadingAnchor, constant: 12),
+                    line.trailingAnchor.constraint(equalTo: box.trailingAnchor, constant: -12),
+                ])
+                previous = line.bottomAnchor
+            }
+        }
+        previous.constraint(equalTo: box.bottomAnchor).isActive = true
+        return group
     }
 
 
