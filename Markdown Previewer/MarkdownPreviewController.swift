@@ -86,11 +86,12 @@ final class MarkdownPreviewController: NSViewController, QLPreviewingController 
         defer { AssetSchemeHandler.shared.unpublish(docURL) }
         let result: Any?
         do {
-            result = try await renderer.callAsyncJavaScript("return await qlRender(url, path, kind, fontSize, codeFontSize)",
+            result = try await renderer.callAsyncJavaScript("return await qlRender(url, path, kind, fontSize, codeFontSize, smallScale)",
                                                             arguments: ["url": docURL, "path": url.path,
                                                                         "kind": isNotebook ? "notebook" : "markdown",
                                                                         "fontSize": Double(settings.mdFontSize),
-                                                                        "codeFontSize": Double(settings.mdCodeFontSize)],
+                                                                        "codeFontSize": Double(settings.mdCodeFontSize),
+                                                                        "smallScale": Double(settings.smallPreviewScale)],
                                                             in: nil,
                                                             contentWorld: .page)
         } catch {

@@ -66,6 +66,9 @@ struct BUFFOON_CONSTANTS {
         // LOCAL: Markdown and notebook previews: body text and code blocks
         static let MD_FONT_SIZE                 = 16.0
         static let MD_CODE_FONT_SIZE            = 13.0
+        // LOCAL: small previews (Finder's column and gallery view panes, Get Info)
+        // show text at this share of its normal size
+        static let SMALL_PREVIEW_SCALE          = 0.7
         static let LANGUAGE_UTI                 = "swift-source"
         static let LANGUAGE                     = "swift"
         // FROM 2.0.0
@@ -103,8 +106,15 @@ struct BUFFOON_CONSTANTS {
         // LOCAL: Markdown and notebook previews
         static let MD_FONT_SIZE                 = "com-bps-previewcode-md-font-size"
         static let MD_CODE_FONT_SIZE            = "com-bps-previewcode-md-code-font-size"
+        static let SMALL_PREVIEW_SCALE          = "com-bps-previewcode-small-preview-scale"
     }
     
+    // LOCAL: a preview narrower than this (points) counts as small; style.css
+    // uses the same width in its media query
+    static let SMALL_PREVIEW_MAX_WIDTH: CGFloat = 500
+    // LOCAL: the margin of small previews, code and Markdown alike (style.css too)
+    static let SMALL_PREVIEW_MARGIN: CGFloat = 15
+
     static let APP_CODE_PREVIEWER               = "io.github.kehengzhu.QuicklookAnything.Code-Previewer"
     static let FILE_CODE_SAMPLE                 = "code-sample"
     static let FILE_THEME_LIST                  = "themes-list"

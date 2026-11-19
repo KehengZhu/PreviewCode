@@ -135,6 +135,9 @@ final class AppDelegate: NSResponder,
     internal var settingsLoaded: Bool           = false
     // LOCAL: the tab bar: General, Code, Markdown & Notebook
     internal var tabBar: NSSegmentedControl!    = nil
+    internal var smallScaleSlider: NSSlider!    = nil
+    internal var smallScaleLabel: NSTextField!  = nil
+    internal var smallScaleNote: NSTextField?   = nil
 
     /*
      Replace the following string with your own team ID. This is used to
@@ -215,8 +218,8 @@ final class AppDelegate: NSResponder,
         self.window.center()
         self.window.makeKeyAndOrderFront(self)
 
-        // LOCAL: open on the Code tab
-        showTab(1)
+        // LOCAL: open on the General tab
+        showTab(0)
     }
 
 
@@ -402,7 +405,7 @@ final class AppDelegate: NSResponder,
     private func doShowSettings(sender: Any) {
 
         // FROM 2.0.0
-        showTab(1)
+        showTab(0)
     }
 
 
@@ -454,10 +457,10 @@ final class AppDelegate: NSResponder,
             .foregroundColor: NSColor.labelColor
         ]
 
-        let infoText = NSMutableAttributedString(string: "Select a file in Finder and press Space to preview it. Set how code looks in the Code tab, and Markdown and notebook text sizes in the Markdown & Notebook tab; changes save as you make them. You can turn the extensions off and on in ", attributes: bodyAtts)
+        let infoText = NSMutableAttributedString(string: "Select a file in Finder and press Space to preview it. Changes save as you make them. Turn the extensions off and on in ", attributes: bodyAtts)
         let boldText = NSAttributedString(string: "System Settings > General > Login Items & Extensions > Quick Look", attributes: boldAtts)
         infoText.append(boldText)
-        infoText.append(NSAttributedString(string: ".\n\nIf previews stop appearing, run the install command again: it re-registers the extensions.", attributes: bodyAtts))
+        infoText.append(NSAttributedString(string: "; if previews stop appearing, run the install command again.", attributes: bodyAtts))
         text.attributedStringValue = infoText
     }
 

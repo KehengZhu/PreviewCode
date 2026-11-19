@@ -23,6 +23,12 @@ class PreviewViewController: NSViewController,
     @IBOutlet var renderTextView: NSTextView!
     @IBOutlet var renderTextScrollView: NSScrollView!
 
+    // LOCAL: text scale in small previews (Settings > General), and the scale the
+    // text is shown at now
+    private var smallPreviewScale: CGFloat = 1.0
+    private var appliedScale: CGFloat = 1.0
+    private var marginWidth: CGFloat = 0.0
+
 
     // MARK: - Public Properties
 
@@ -152,6 +158,12 @@ class PreviewViewController: NSViewController,
         renderTextStorage.setAttributedString(attributedCode)
         renderTextStorage.endEditing()
 
+        // LOCAL: shrink the text in a small preview (see `viewDidLayout()`)
+        self.smallPreviewScale = common.settings.smallPreviewScale
+        self.appliedScale = 1.0
+        self.marginWidth = common.settings.previewMarginWidth
+        updateTextScale()
+
         // LOCAL: restyle a partially highlighted large file once the full highlight is ready
         if highlightRestLater {
             common.getAttributedStringInBackground(code, language) { [weak self] fullCode in
@@ -231,11 +243,62 @@ class PreviewViewController: NSViewController,
         fullCode.enumerateAttributes(in: NSRange(location: 0, length: fullCode.length)) { attributes, range, _ in
             renderTextStorage.setAttributes(attributes, range: range)
         }
+        // The full highlight comes at the normal size
+        if self.appliedScale != 1.0 {
+            scaleFonts(in: renderTextStorage, by: self.appliedScale)
+        }
         renderTextStorage.endEditing()
         previewLog.debug("""
             Full highlight applied to \(fullCode.length) characters, \
             \(Double(clock_gettime_nsec_np(CLOCK_UPTIME_RAW)) / 1e6 - start, format: .fixed(precision: 1)) ms after the preview started
             """)
+    }
+
+
+    // MARK: - Small Preview Functions
+
+    override func viewDidLayout() {
+
+        super.viewDidLayout()
+        updateTextScale()
+    }
+
+
+    /**
+     Show the text smaller in a small preview: Finder's column and gallery view
+     panes and Get Info, or any preview narrower than `SMALL_PREVIEW_MAX_WIDTH`.
+     LOCAL. Called whenever the view is laid out, so it follows the pane's width.
+     */
+    private func updateTextScale() {
+
+        guard let renderTextStorage = self.renderTextView?.textStorage, renderTextStorage.length > 0 else { return }
+        let small = self.view.bounds.width > 0 && self.view.bounds.width < BUFFOON_CONSTANTS.SMALL_PREVIEW_MAX_WIDTH
+        let scale = small ? self.smallPreviewScale : 1.0
+        // A small preview has a fixed margin, the same as Markdown's; the text
+        // container's line padding is part of it
+        let padding = self.renderTextView.textContainer?.lineFragmentPadding ?? 0
+        let margin = small ? max(BUFFOON_CONSTANTS.SMALL_PREVIEW_MARGIN - padding, 0) : self.marginWidth
+        if self.renderTextView.textContainerInset.width != margin {
+            self.renderTextView.textContainerInset = NSSize(width: margin, height: small ? BUFFOON_CONSTANTS.SMALL_PREVIEW_MARGIN : margin)
+        }
+        guard scale > 0, abs(scale - self.appliedScale) > 0.001 else { return }
+        renderTextStorage.beginEditing()
+        scaleFonts(in: renderTextStorage, by: scale / self.appliedScale)
+        renderTextStorage.endEditing()
+        self.appliedScale = scale
+    }
+
+
+    /**
+     Multiply the size of every font in the text by `factor`.
+     */
+    private func scaleFonts(in storage: NSTextStorage, by factor: CGFloat) {
+
+        storage.enumerateAttribute(.font, in: NSRange(location: 0, length: storage.length)) { value, range, _ in
+            if let font = value as? NSFont {
+                storage.addAttribute(.font, value: font.withSize(font.pointSize * factor), range: range)
+            }
+        }
     }
 
 

@@ -35,6 +35,8 @@ final class PCSettings {
     // LOCAL: Markdown and notebook previews
     public var mdFontSize: CGFloat                 = CGFloat(BUFFOON_CONSTANTS.DEFAULTS.MD_FONT_SIZE)
     public var mdCodeFontSize: CGFloat             = CGFloat(BUFFOON_CONSTANTS.DEFAULTS.MD_CODE_FONT_SIZE)
+    // LOCAL: text scale in small previews (Finder's column view pane), for code and Markdown
+    public var smallPreviewScale: CGFloat          = CGFloat(BUFFOON_CONSTANTS.DEFAULTS.SMALL_PREVIEW_SCALE)
 
 
     // MARK: Retrieve and Persist Functions
@@ -70,6 +72,7 @@ final class PCSettings {
             self.thumbnailMatchFinderMode = defaults.bool(forKey: ids.THUMB_MATCH_MODE)
             self.mdFontSize = number(ids.MD_FONT_SIZE) ?? self.mdFontSize
             self.mdCodeFontSize = number(ids.MD_CODE_FONT_SIZE) ?? self.mdCodeFontSize
+            self.smallPreviewScale = number(ids.SMALL_PREVIEW_SCALE) ?? self.smallPreviewScale
 
             // LOCAL: keep the defaults when the keys have not been written yet
             // (the extensions read settings without calling `registerSettings()`)
@@ -117,6 +120,7 @@ final class PCSettings {
             defaults.setValue(self.previewWindowHeight, forKey: BUFFOON_CONSTANTS.PREFS_IDS.PREVIEW_WINDOW_HEIGHT)
             defaults.setValue(self.mdFontSize, forKey: BUFFOON_CONSTANTS.PREFS_IDS.MD_FONT_SIZE)
             defaults.setValue(self.mdCodeFontSize, forKey: BUFFOON_CONSTANTS.PREFS_IDS.MD_CODE_FONT_SIZE)
+            defaults.setValue(self.smallPreviewScale, forKey: BUFFOON_CONSTANTS.PREFS_IDS.SMALL_PREVIEW_SCALE)
         }
     }
 

@@ -84,6 +84,7 @@ extension AppDelegate {
 
         // LOCAL: the slider value is the font size itself, in 0.5pt steps
         self.fontSizeLabel.stringValue = fontSizeText(sliderFontSize())
+        updateSmallScaleLabel()
 
         // LOCAL: save the change
         autosaveSettings()
@@ -288,6 +289,7 @@ extension AppDelegate {
         let defaults = PCSettings()
         defaults.mdFontSize = self.currentSettings.mdFontSize
         defaults.mdCodeFontSize = self.currentSettings.mdCodeFontSize
+        defaults.smallPreviewScale = self.currentSettings.smallPreviewScale
         defaults.previewWindowWidth = self.currentSettings.previewWindowWidth
         defaults.previewWindowHeight = self.currentSettings.previewWindowHeight
         displaySettings(defaults)
@@ -378,6 +380,12 @@ extension AppDelegate {
             self.mdCodeSizeSlider.doubleValue = Double(settings.mdCodeFontSize)
             updateMarkdownLabels()
         }
+
+        // LOCAL: General tab
+        if self.smallScaleSlider != nil {
+            self.smallScaleSlider.doubleValue = Double(settings.smallPreviewScale) * 100
+            updateSmallScaleLabel()
+        }
     }
 
 
@@ -428,6 +436,10 @@ extension AppDelegate {
         if self.mdFontSizeSlider != nil {
             displayedSettings.mdFontSize = CGFloat(snappedSize(self.mdFontSizeSlider))
             displayedSettings.mdCodeFontSize = CGFloat(snappedSize(self.mdCodeSizeSlider))
+        }
+
+        if self.smallScaleSlider != nil {
+            displayedSettings.smallPreviewScale = CGFloat(smallScalePercent()) / 100
         }
 
         return displayedSettings
@@ -533,7 +545,8 @@ extension AppDelegate {
         // LOCAL
         if !settingsHaveChanged {
             settingsHaveChanged = self.currentSettings.mdFontSize != displayedSettings.mdFontSize ||
-                                  self.currentSettings.mdCodeFontSize != displayedSettings.mdCodeFontSize
+                                  self.currentSettings.mdCodeFontSize != displayedSettings.mdCodeFontSize ||
+                                  !self.currentSettings.smallPreviewScale.isClose(to: displayedSettings.smallPreviewScale)
         }
 
         return settingsHaveChanged
@@ -1486,6 +1499,7 @@ extension AppDelegate {
     private func doMoveMarkdownSlider(_ sender: NSSlider) {
 
         updateMarkdownLabels()
+        updateSmallScaleLabel()
         autosaveSettings()
     }
 
@@ -1496,6 +1510,7 @@ extension AppDelegate {
         self.mdFontSizeSlider.doubleValue = BUFFOON_CONSTANTS.DEFAULTS.MD_FONT_SIZE
         self.mdCodeSizeSlider.doubleValue = BUFFOON_CONSTANTS.DEFAULTS.MD_CODE_FONT_SIZE
         updateMarkdownLabels()
+        updateSmallScaleLabel()
         autosaveSettings()
     }
 }
@@ -1531,15 +1546,16 @@ extension AppDelegate {
             bar.centerYAnchor.constraint(equalTo: self.settingsButton.centerYAnchor),
         ])
 
-        bar.selectedSegment = 1
+        bar.selectedSegment = 0
         self.tabBar = bar
     }
 
 
     /**
-     The General tab (formerly About): settings for every kind of preview, the
-     Quick Look window size from the old Advanced sheet, and a way to the
-     system's extension settings, above the version and credits.
+     The General tab (formerly About), laid out like System Settings: the app's
+     description and version, then one group of settings rows (the Quick Look
+     window size, the text size in small previews, the Quick Look extensions),
+     each with its control on the right and a short note below, above the credits.
      */
     internal func buildGeneralPage() {
 
@@ -1547,39 +1563,180 @@ extension AppDelegate {
               let width = self.previewWidthAdvancedText,
               let height = self.previewHeightAdvancedText else { return }
 
-        let title = makeLabel("Quick Look Window Size", in: page, weight: .semibold)
-        let times = makeLabel("×", in: page)
-        let points = makeLabel("points", in: page)
-        let note = makeLabel("For every preview: code, Markdown and notebooks. A new size shows the next time Quick Look opens.",
-                             in: page, size: NSFont.smallSystemFontSize)
-        note.textColor = .secondaryLabelColor
-        moveField(width, to: page, width: 64)
-        moveField(height, to: page, width: 64)
+        // The settings rows and the version say what the old help text did
+        self.infoLabel?.isHidden = true
+
+        let group = NSBox()
+        group.boxType = .custom
+        group.titlePosition = .noTitle
+        group.cornerRadius = 8
+        group.borderWidth = 1
+        group.borderColor = .separatorColor
+        group.fillColor = NSColor.labelColor.withAlphaComponent(0.03)
+        group.contentViewMargins = .zero
+        group.translatesAutoresizingMaskIntoConstraints = false
+        page.addSubview(group)
+        guard let box = group.contentView else { return }
+
+        // Window size: two fields
+        moveField(width, to: box, width: 60)
+        moveField(height, to: box, width: 60)
         width.delegate = self
         height.delegate = self
+        let times = makeLabel("×", in: box)
+        let points = makeLabel("points", in: box)
+        let sizeRow = addGeneralRow(to: box, below: nil, title: "Quick Look Window Size",
+                                    note: "For every preview: code, Markdown and notebooks. It applies the next time Quick Look opens.",
+                                    control: width)
+        NSLayoutConstraint.activate([
+            points.trailingAnchor.constraint(equalTo: box.trailingAnchor, constant: -14),
+            points.firstBaselineAnchor.constraint(equalTo: width.firstBaselineAnchor),
+            height.trailingAnchor.constraint(equalTo: points.leadingAnchor, constant: -6),
+            height.firstBaselineAnchor.constraint(equalTo: width.firstBaselineAnchor),
+            times.trailingAnchor.constraint(equalTo: height.leadingAnchor, constant: -6),
+            times.firstBaselineAnchor.constraint(equalTo: width.firstBaselineAnchor),
+            width.trailingAnchor.constraint(equalTo: times.leadingAnchor, constant: -6),
+        ])
 
-        let extensionsButton = NSButton(title: "Quick Look Extensions…", target: self,
+        // Text size in small previews: a share of the normal sizes, for code and Markdown
+        let slider = NSSlider(value: BUFFOON_CONSTANTS.DEFAULTS.SMALL_PREVIEW_SCALE * 100, minValue: 40, maxValue: 100,
+                              target: self, action: #selector(doMoveSmallScaleSlider(_:)))
+        slider.numberOfTickMarks = 13
+        slider.allowsTickMarkValuesOnly = true
+        slider.isContinuous = true
+        if #available(macOS 26.0, *) {
+            slider.tintProminence = .secondary
+        }
+        slider.translatesAutoresizingMaskIntoConstraints = false
+        box.addSubview(slider)
+        let smallA = makeLabel("A", in: box, size: NSFont.smallSystemFontSize)
+        let largeA = makeLabel("A", in: box, size: 17)
+        let percent = makeLabel("70%", in: box)
+        percent.alignment = .right
+        percent.font = .monospacedDigitSystemFont(ofSize: NSFont.systemFontSize, weight: .regular)
+        let smallRow = addGeneralRow(to: box, below: sizeRow.separatorAnchor, title: "Text Size in Small Previews",
+                                     note: "", control: slider)
+        NSLayoutConstraint.activate([
+            percent.trailingAnchor.constraint(equalTo: box.trailingAnchor, constant: -14),
+            percent.widthAnchor.constraint(equalToConstant: 40),
+            percent.centerYAnchor.constraint(equalTo: slider.centerYAnchor),
+            largeA.trailingAnchor.constraint(equalTo: percent.leadingAnchor, constant: -10),
+            largeA.centerYAnchor.constraint(equalTo: slider.centerYAnchor),
+            slider.trailingAnchor.constraint(equalTo: largeA.leadingAnchor, constant: -8),
+            slider.widthAnchor.constraint(equalToConstant: 200),
+            smallA.trailingAnchor.constraint(equalTo: slider.leadingAnchor, constant: -8),
+            smallA.centerYAnchor.constraint(equalTo: slider.centerYAnchor),
+        ])
+
+        // The Quick Look extensions
+        let extensionsButton = NSButton(title: "Open System Settings…", target: self,
                                         action: NSSelectorFromString("doOpenSysPrefsWithSender:"))
-        extensionsButton.toolTip = "Turn the Quick Look extensions on or off in System Settings"
+        extensionsButton.toolTip = "System Settings > General > Login Items & Extensions > Quick Look"
         extensionsButton.translatesAutoresizingMaskIntoConstraints = false
-        page.addSubview(extensionsButton)
+        box.addSubview(extensionsButton)
+        let extensionsRow = addGeneralRow(to: box, below: smallRow.separatorAnchor, title: "Quick Look Extensions",
+                                          note: "Turn them off or on in System Settings. If previews stop appearing, run the install command again.",
+                                          control: extensionsButton, separator: false)
+        extensionsButton.trailingAnchor.constraint(equalTo: box.trailingAnchor, constant: -14).isActive = true
 
         NSLayoutConstraint.activate([
-            title.topAnchor.constraint(equalTo: self.versionLabel.bottomAnchor, constant: 28),
-            title.leadingAnchor.constraint(equalTo: page.leadingAnchor, constant: 20),
-            width.leadingAnchor.constraint(equalTo: title.trailingAnchor, constant: 12),
-            width.firstBaselineAnchor.constraint(equalTo: title.firstBaselineAnchor),
-            times.leadingAnchor.constraint(equalTo: width.trailingAnchor, constant: 6),
-            times.firstBaselineAnchor.constraint(equalTo: title.firstBaselineAnchor),
-            height.leadingAnchor.constraint(equalTo: times.trailingAnchor, constant: 6),
-            height.firstBaselineAnchor.constraint(equalTo: title.firstBaselineAnchor),
-            points.leadingAnchor.constraint(equalTo: height.trailingAnchor, constant: 6),
-            points.firstBaselineAnchor.constraint(equalTo: title.firstBaselineAnchor),
-            extensionsButton.trailingAnchor.constraint(equalTo: page.trailingAnchor, constant: -20),
-            extensionsButton.centerYAnchor.constraint(equalTo: width.centerYAnchor),
-            note.topAnchor.constraint(equalTo: width.bottomAnchor, constant: 6),
-            note.leadingAnchor.constraint(equalTo: title.leadingAnchor),
+            group.topAnchor.constraint(equalTo: self.versionLabel.bottomAnchor, constant: 16),
+            group.leadingAnchor.constraint(equalTo: page.leadingAnchor, constant: 20),
+            group.trailingAnchor.constraint(equalTo: page.trailingAnchor, constant: -20),
+            box.bottomAnchor.constraint(equalTo: extensionsRow.bottom),
         ])
+
+        self.smallScaleSlider = slider
+        self.smallScaleLabel = percent
+        self.smallScaleNote = smallRow.note
+        updateSmallScaleLabel()
+    }
+
+
+    /**
+     Add a settings row to the General tab's group: a title and a short note on
+     the left, `control` on the right (the caller sets its trailing edge), and a
+     separator below unless it is the last row.
+
+     - Returns: The note, and where the next row starts.
+     */
+    private func addGeneralRow(to box: NSView, below anchor: NSLayoutYAxisAnchor?, title: String, note: String,
+                               control: NSView, separator: Bool = true)
+                               -> (note: NSTextField, separatorAnchor: NSLayoutYAxisAnchor, bottom: NSLayoutYAxisAnchor) {
+
+        let titleLabel = makeLabel(title, in: box)
+        let noteLabel = makeLabel(note, in: box, size: NSFont.smallSystemFontSize)
+        noteLabel.textColor = .secondaryLabelColor
+        noteLabel.lineBreakMode = .byTruncatingTail
+        noteLabel.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
+
+        let guide = NSLayoutGuide()
+        box.addLayoutGuide(guide)
+        NSLayoutConstraint.activate([
+            titleLabel.topAnchor.constraint(equalTo: anchor ?? box.topAnchor, constant: 10),
+            titleLabel.leadingAnchor.constraint(equalTo: box.leadingAnchor, constant: 14),
+            noteLabel.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 2),
+            noteLabel.leadingAnchor.constraint(equalTo: titleLabel.leadingAnchor),
+            noteLabel.trailingAnchor.constraint(lessThanOrEqualTo: box.trailingAnchor, constant: -14),
+            guide.topAnchor.constraint(equalTo: titleLabel.topAnchor),
+            guide.bottomAnchor.constraint(equalTo: noteLabel.bottomAnchor),
+            control.centerYAnchor.constraint(equalTo: titleLabel.centerYAnchor, constant: 0),
+        ])
+
+        let bottom = noteLabel.bottomAnchor
+        guard separator else {
+            let end = NSLayoutGuide()
+            box.addLayoutGuide(end)
+            end.topAnchor.constraint(equalTo: noteLabel.bottomAnchor, constant: 10).isActive = true
+            return (noteLabel, end.topAnchor, end.topAnchor)
+        }
+
+        let line = NSBox()
+        line.boxType = .separator
+        line.translatesAutoresizingMaskIntoConstraints = false
+        box.addSubview(line)
+        NSLayoutConstraint.activate([
+            line.topAnchor.constraint(equalTo: bottom, constant: 10),
+            line.leadingAnchor.constraint(equalTo: box.leadingAnchor, constant: 14),
+            line.trailingAnchor.constraint(equalTo: box.trailingAnchor, constant: -14),
+        ])
+        return (noteLabel, line.bottomAnchor, line.bottomAnchor)
+    }
+
+
+    /**
+     The small-preview slider's value in percent, snapped to 5% steps.
+     */
+    internal func smallScalePercent() -> Double {
+
+        return (self.smallScaleSlider.doubleValue / 5).rounded() * 5
+    }
+
+
+    /**
+     Show the share, and in the row's note what it makes of the current sizes.
+     */
+    internal func updateSmallScaleLabel() {
+
+        guard let label = self.smallScaleLabel, self.smallScaleSlider != nil else { return }
+        let share = smallScalePercent() / 100
+        let code = sliderFontSize() * share
+        let markdown = (self.mdFontSizeSlider != nil ? snappedSize(self.mdFontSizeSlider) : BUFFOON_CONSTANTS.DEFAULTS.MD_FONT_SIZE) * share
+        func points(_ size: Double) -> String {
+            let rounded = (size * 2).rounded() / 2
+            return rounded == rounded.rounded() ? String(format: "%.0f pt", rounded) : String(format: "%.1f pt", rounded)
+        }
+        label.stringValue = "\(Int(smallScalePercent()))%"
+        self.smallScaleNote?.stringValue = "Finder's column and gallery views, and Get Info. Text shows at "
+            + "\(points(code)) for code and \(points(markdown)) for Markdown."
+    }
+
+
+    @objc
+    private func doMoveSmallScaleSlider(_ sender: NSSlider) {
+
+        updateSmallScaleLabel()
+        autosaveSettings()
     }
 
 

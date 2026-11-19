@@ -73,7 +73,7 @@ You can turn the extensions off and on in **System Settings > General > Login It
 
 Open **Quicklook Anything** from Applications. It has three tabs, and every change saves as you make it:
 
-- **General**: the Quick Look window size, used by every preview, and a shortcut to turn the extensions on or off.
+- **General**: the Quick Look window size, used by every preview; the text size in small previews (Finder's column and gallery views, and Get Info), 70% of the normal size by default; and a shortcut to turn the extensions on or off.
 - **Code**: text size (13 pt by default), font and style, line spacing, line numbers, the theme (one for light mode and one for dark, or a single theme for both), the preview margin, and whether thumbnails follow light or dark mode.
 - **Markdown & Notebook**: the body text size (16 pt) and the code block size (13 pt), which also sets notebook code cells and outputs.
 
