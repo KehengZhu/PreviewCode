@@ -1,5 +1,9 @@
 ## Quicklook Anything
 
+- 1.2.1 *19 November 2026*
+    - The theme icons on the Code tab and the previews in the theme list show each theme's colors; they were empty.
+    - The app menu's Preferences… item is now Settings…; the Help menu drops What's New and Other Preview Apps.
+    - Tidier source: unused code removed, folders laid out by role (App, Extensions, Shared, Vendor, Scripts), the settings code split by tab. Settings carry over.
 - 1.2.0 *18 November 2026*
     - New app icon.
     - Small previews (Finder's column and gallery views, Get Info) show smaller text, set in General with the new Text Size in Small Previews slider (70% by default), and a 15 pt margin for code and Markdown alike.
