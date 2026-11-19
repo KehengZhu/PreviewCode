@@ -15,7 +15,7 @@
         </customObject>
         <customObject id="-1" userLabel="First Responder" customClass="FirstResponder"/>
         <customObject id="-3" userLabel="Application" customClass="NSObject"/>
-        <customObject id="Voe-Tx-rLC" customClass="AppDelegate" customModule="PreviewCode" customModuleProvider="target">
+        <customObject id="Voe-Tx-rLC" customClass="AppDelegate" customModule="QuicklookAnything" customModuleProvider="target">
             <connections>
                 <outlet property="autoRadioButton" destination="dcs-Dc-uUU" id="h6P-zA-QSp"/>
                 <outlet property="darkRadioButton" destination="2Yo-iH-15q" id="gxu-e5-5il"/>
@@ -432,7 +432,7 @@ Contains Highlight.js © 2006-25, Josh Goebel and Other Contributors; and Highli
                                                 <action selector="doChangeValueWithSender:" target="Voe-Tx-rLC" id="SPV-jg-kY5"/>
                                             </connections>
                                         </popUpButton>
-                                        <imageView horizontalHuggingPriority="251" verticalHuggingPriority="251" allowsExpansionToolTips="YES" translatesAutoresizingMaskIntoConstraints="NO" id="PjM-pz-TTz" customClass="PCImageView" customModule="PreviewCode" customModuleProvider="target">
+                                        <imageView horizontalHuggingPriority="251" verticalHuggingPriority="251" allowsExpansionToolTips="YES" translatesAutoresizingMaskIntoConstraints="NO" id="PjM-pz-TTz" customClass="PCImageView" customModule="QuicklookAnything" customModuleProvider="target">
                                             <rect key="frame" x="107" y="96" width="32" height="16"/>
                                             <constraints>
                                                 <constraint firstAttribute="height" constant="16" id="6YK-bU-PYy"/>
@@ -440,7 +440,7 @@ Contains Highlight.js © 2006-25, Josh Goebel and Other Contributors; and Highli
                                             </constraints>
                                             <imageCell key="cell" refusesFirstResponder="YES" alignment="left" animates="YES" imageScaling="proportionallyDown" id="8f6-Vl-yHX"/>
                                         </imageView>
-                                        <imageView horizontalHuggingPriority="251" verticalHuggingPriority="251" allowsExpansionToolTips="YES" translatesAutoresizingMaskIntoConstraints="NO" id="3cp-Eq-Ykf" customClass="PCImageView" customModule="PreviewCode" customModuleProvider="target">
+                                        <imageView horizontalHuggingPriority="251" verticalHuggingPriority="251" allowsExpansionToolTips="YES" translatesAutoresizingMaskIntoConstraints="NO" id="3cp-Eq-Ykf" customClass="PCImageView" customModule="QuicklookAnything" customModuleProvider="target">
                                             <rect key="frame" x="107" y="122" width="32" height="16"/>
                                             <constraints>
                                                 <constraint firstAttribute="height" constant="16" id="4Sb-PY-WZd"/>
@@ -667,7 +667,7 @@ Contains Highlight.js © 2006-25, Josh Goebel and Other Contributors; and Highli
                     </textFieldCell>
                     <tableColumnResizingMask key="resizingMask" resizeWithTable="YES" userResizable="YES"/>
                     <prototypeCellViews>
-                        <tableCellView identifier="previewcode-theme-cell" id="vOD-1n-Z2q" customClass="PCThemeTableCellView" customModule="PreviewCode" customModuleProvider="target">
+                        <tableCellView identifier="previewcode-theme-cell" id="vOD-1n-Z2q" customClass="PCThemeTableCellView" customModule="QuicklookAnything" customModuleProvider="target">
                             <rect key="frame" x="0.0" y="0.0" width="500" height="0.0"/>
                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                             <userGuides>

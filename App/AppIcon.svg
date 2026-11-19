@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
   <!-- Quicklook Anything app icon. Render at 1024 x 1024 (for example with headless Chrome) and
-       resize into LocalBuild/Assets.xcassets/AppIcon.appiconset (16 to 512 pt, @1x and @2x). -->
+       resize into App/Assets.xcassets/AppIcon.appiconset (16 to 512 pt, @1x and @2x). -->
   <defs>
     <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
       <stop offset="0" stop-color="#FFFFFF"/>

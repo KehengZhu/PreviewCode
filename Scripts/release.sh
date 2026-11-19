@@ -3,7 +3,7 @@
 # one-line installer (install.sh) downloads. Needs the GitHub CLI, logged in
 # (`brew install gh && gh auth login`), and a clean, pushed checkout.
 #
-# Usage: LocalBuild/release.sh        (version comes from MARKETING_VERSION)
+# Usage: Scripts/release.sh           (version comes from MARKETING_VERSION)
 set -euo pipefail
 
 cd "${0:A:h}/.."
@@ -14,8 +14,8 @@ command -v gh >/dev/null || { echo "Install the GitHub CLI first: brew install g
 git fetch -q origin
 [[ $(git rev-parse HEAD) == $(git rev-parse origin/main) ]] || { echo "Push main to origin first." >&2; exit 1; }
 
-LocalBuild/build.sh
-zip=LocalBuild/dist/QuicklookAnything.zip
+Scripts/build.sh
+zip=build/dist/QuicklookAnything.zip
 version=$(unzip -p "$zip" "Quicklook Anything.app/Contents/Info.plist" | plutil -extract CFBundleShortVersionString raw -)
 
 if gh release view "v$version" --repo "$repo" >/dev/null 2>&1; then

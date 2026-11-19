@@ -173,10 +173,22 @@ Markdown (`.md`, `.markdown`) and Jupyter notebooks (`.ipynb`), plus:
 
 ## Building from Source
 
-You need Xcode and an Apple Development certificate.
+You need Xcode and an Apple Development certificate. Open `QuicklookAnything.xcodeproj`, or use the scripts:
 
-- `LocalBuild/build-install.sh` builds the app and installs it on this Mac with `install.sh`.
-- `LocalBuild/release.sh` builds it and publishes a GitHub release, which the install command then fetches. Set the version in the Xcode project (`MARKETING_VERSION`) first.
+- `Scripts/build-install.sh` builds the app and installs it on this Mac with `install.sh`.
+- `Scripts/release.sh` builds it and publishes a GitHub release, which the install command then fetches. Set the version in the Xcode project (`MARKETING_VERSION`) first.
+
+The source is laid out as:
+
+| Folder | Contents |
+|---|---|
+| `App/` | The settings app, which hosts the extensions |
+| `Extensions/CodePreviewer/` | Quick Look previews of source code |
+| `Extensions/CodeThumbnailer/` | Finder thumbnails of source code |
+| `Extensions/MarkdownPreviewer/` | Quick Look previews of Markdown notes and Jupyter notebooks (a web page in `Web/`) |
+| `Shared/` | Settings and the code highlighting, used by the app and the extensions |
+| `Vendor/HighlighterSwift/` | The highlighting library, with local changes |
+| `Scripts/` | Build, install and release scripts; their output goes in `build/` |
 
 ## Credits
 
@@ -189,7 +201,7 @@ It also builds on:
 - [markdown-it](https://github.com/markdown-it/markdown-it) (MIT)
 - [KaTeX](https://github.com/KaTeX/KaTeX) (MIT)
 
-Their license texts ship with the app and are in [`Code Previewer/Licences.md`](Code%20Previewer/Licences.md) and [`Markdown Previewer/Web/lib/LICENSES.txt`](Markdown%20Previewer/Web/lib/LICENSES.txt).
+Their license texts ship with the app and are in [`Extensions/CodePreviewer/Licences.md`](Extensions/CodePreviewer/Licences.md) and [`Extensions/MarkdownPreviewer/Web/lib/LICENSES.txt`](Extensions/MarkdownPreviewer/Web/lib/LICENSES.txt).
 
 ## License
 

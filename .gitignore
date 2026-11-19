@@ -89,6 +89,4 @@ fastlane/test_output
 
 iOSInjectionProject/
 
-# Local build output (LocalBuild/build-install.sh)
-LocalBuild/DerivedData/
-LocalBuild/dist/
+# Local build output (Scripts/build.sh) goes in build/, ignored above

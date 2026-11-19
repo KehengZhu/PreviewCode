@@ -23,10 +23,10 @@
 		3B3F580D29D5892900E227C7 /* PCImageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B3F580C29D5892900E227C7 /* PCImageView.swift */; };
 		3B6ABAC52669649500A436AA /* Common.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BFD785E2663E4C9002AD588 /* Common.swift */; };
 		3B7D83D12A8A2FEE008A4B2E /* code-sample.txt in Resources */ = {isa = PBXBuildFile; fileRef = 3B7D83D02A8A2FEE008A4B2E /* code-sample.txt */; };
-		3B7D83D52A8A3034008A4B2E /* REPLACE_WITH_YOUR_CODES.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B7D83D32A8A3034008A4B2E /* REPLACE_WITH_YOUR_CODES.swift */; };
+		3B7D83D52A8A3034008A4B2E /* REPLACE_WITH_YOUR_CODES.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B7D83D32A8A3034008A4B2E /* TeamID.swift */; };
 		3B7D83D82A8A3069008A4B2E /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 3B7D83D72A8A3069008A4B2E /* Assets.xcassets */; };
-		3B7D83D92A8A306C008A4B2E /* REPLACE_WITH_YOUR_CODES.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B7D83D32A8A3034008A4B2E /* REPLACE_WITH_YOUR_CODES.swift */; };
-		3B7D83DA2A8A306D008A4B2E /* REPLACE_WITH_YOUR_CODES.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B7D83D32A8A3034008A4B2E /* REPLACE_WITH_YOUR_CODES.swift */; };
+		3B7D83D92A8A306C008A4B2E /* REPLACE_WITH_YOUR_CODES.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B7D83D32A8A3034008A4B2E /* TeamID.swift */; };
+		3B7D83DA2A8A306D008A4B2E /* REPLACE_WITH_YOUR_CODES.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B7D83D32A8A3034008A4B2E /* TeamID.swift */; };
 		3B95C9312666222D00C7CC14 /* Licences.md in Resources */ = {isa = PBXBuildFile; fileRef = 3B95C92F2666222D00C7CC14 /* Licences.md */; };
 		3BA5D03B269081BF00AF4EF2 /* PAFont.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BA5D03A269081BF00AF4EF2 /* PAFont.swift */; };
 		3BAE671B28D4D3AD001532BD /* PCAppDelegateFontHandling.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BAE671A28D4D3AD001532BD /* PCAppDelegateFontHandling.swift */; };
@@ -50,10 +50,11 @@
 		4D0C0DE000082F00A0B0C0D0 /* MarkdownPreviewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D0C0DE000022F00A0B0C0D0 /* MarkdownPreviewController.swift */; };
 		4D0C0DE000092F00A0B0C0D0 /* WebViewPool.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D0C0DE000032F00A0B0C0D0 /* WebViewPool.swift */; };
 		4D0C0DE0000A2F00A0B0C0D0 /* Constants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BFD78582663E2C9002AD588 /* Constants.swift */; };
-		4D0C0DE0000B2F00A0B0C0D0 /* REPLACE_WITH_YOUR_CODES.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B7D83D32A8A3034008A4B2E /* REPLACE_WITH_YOUR_CODES.swift */; };
+		4D0C0DE0000B2F00A0B0C0D0 /* REPLACE_WITH_YOUR_CODES.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B7D83D32A8A3034008A4B2E /* TeamID.swift */; };
 		4D0C0DE0000C2F00A0B0C0D0 /* Web in Resources */ = {isa = PBXBuildFile; fileRef = 4D0C0DE000062F00A0B0C0D0 /* Web */; };
 		4D0C0DE0000D2F00A0B0C0D0 /* Quartz.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3BFD78472663E27D002AD588 /* Quartz.framework */; };
 		4D0C0DE0000E2F00A0B0C0D0 /* Markdown Previewer.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 4D0C0DE000012F00A0B0C0D0 /* Markdown Previewer.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		4D0C0DE0001A2F00A0B0C0D0 /* highlight.min.js in Copy highlight.js into Web/lib */ = {isa = PBXBuildFile; fileRef = 4D0C0DE000192F00A0B0C0D0 /* highlight.min.js */; };
 		4D0C0DE000182F00A0B0C0D0 /* PCSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B1A5B7A2E60A447002AECE4 /* PCSettings.swift */; };
 /* End PBXBuildFile section */
 
@@ -95,6 +96,17 @@
 			name = "Embed Foundation Extensions";
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		4D0C0DE0001B2F00A0B0C0D0 /* Copy highlight.js into Web/lib */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = Web/lib;
+			dstSubfolderSpec = 7;
+			files = (
+				4D0C0DE0001A2F00A0B0C0D0 /* highlight.min.js in Copy highlight.js into Web/lib */,
+			);
+			name = "Copy highlight.js into Web/lib";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
@@ -108,8 +120,8 @@
 		3B3F580C29D5892900E227C7 /* PCImageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PCImageView.swift; sourceTree = "<group>"; };
 		3B60F44F2E3B9EED009A7975 /* CHANGELOG.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = CHANGELOG.md; sourceTree = "<group>"; };
 		3B7D83D02A8A2FEE008A4B2E /* code-sample.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = "code-sample.txt"; sourceTree = "<group>"; };
-		3B7D83D32A8A3034008A4B2E /* REPLACE_WITH_YOUR_CODES.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = REPLACE_WITH_YOUR_CODES.swift; path = LocalBuild/REPLACE_WITH_YOUR_CODES.swift; sourceTree = SOURCE_ROOT; };
-		3B7D83D72A8A3069008A4B2E /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Assets.xcassets; path = LocalBuild/Assets.xcassets; sourceTree = SOURCE_ROOT; };
+		3B7D83D32A8A3034008A4B2E /* TeamID.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TeamID.swift; sourceTree = "<group>"; };
+		3B7D83D72A8A3069008A4B2E /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		3B95C92F2666222D00C7CC14 /* Licences.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = Licences.md; sourceTree = "<group>"; };
 		3BA5D03A269081BF00AF4EF2 /* PAFont.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PAFont.swift; sourceTree = "<group>"; };
 		3BAE671A28D4D3AD001532BD /* PCAppDelegateFontHandling.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PCAppDelegateFontHandling.swift; sourceTree = "<group>"; };
@@ -125,7 +137,7 @@
 		3BFD78172663E16D002AD588 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		3BFD781C2663E16E002AD588 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = Base; path = Base.lproj/MainMenu.xib; sourceTree = "<group>"; };
 		3BFD781E2663E16E002AD588 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		3BFD781F2663E16E002AD588 /* PreviewCode.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = PreviewCode.entitlements; sourceTree = "<group>"; };
+		3BFD781F2663E16E002AD588 /* QuicklookAnything.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = QuicklookAnything.entitlements; sourceTree = "<group>"; };
 		3BFD78452663E27D002AD588 /* Code Previewer.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = "Code Previewer.appex"; sourceTree = BUILT_PRODUCTS_DIR; };
 		3BFD78472663E27D002AD588 /* Quartz.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Quartz.framework; path = System/Library/Frameworks/Quartz.framework; sourceTree = SDKROOT; };
 		3BFD784A2663E27D002AD588 /* PreviewViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreviewViewController.swift; sourceTree = "<group>"; };
@@ -140,6 +152,7 @@
 		4D0C0DE000042F00A0B0C0D0 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		4D0C0DE000052F00A0B0C0D0 /* Markdown_Previewer.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Markdown_Previewer.entitlements; sourceTree = "<group>"; };
 		4D0C0DE000062F00A0B0C0D0 /* Web */ = {isa = PBXFileReference; lastKnownFileType = folder; path = Web; sourceTree = "<group>"; };
+		4D0C0DE000192F00A0B0C0D0 /* highlight.min.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; name = highlight.min.js; path = Vendor/HighlighterSwift/Sources/Assets/highlight.min.js; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -181,23 +194,26 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		3B03ED542EE1CA2C00DD7230 /* Common */ = {
+		3B03ED542EE1CA2C00DD7230 /* Shared */ = {
 			isa = PBXGroup;
 			children = (
+				3BFD78582663E2C9002AD588 /* Constants.swift */,
+				3B7D83D32A8A3034008A4B2E /* TeamID.swift */,
+				3B1A5B7A2E60A447002AECE4 /* PCSettings.swift */,
 				3BFD785E2663E4C9002AD588 /* Common.swift */,
 				3B1A5B7E2E60BD8A002AECE4 /* PAExtensions.swift */,
-				3B1A5B7A2E60A447002AECE4 /* PCSettings.swift */,
 			);
-			path = Common;
+			path = Shared;
 			sourceTree = "<group>";
 		};
-		3B7D83D22A8A301F008A4B2E /* YOU MIUST SUPPLY */ = {
+		4D0C0DE0001C2F00A0B0C0D0 /* Extensions */ = {
 			isa = PBXGroup;
 			children = (
-				3B7D83D32A8A3034008A4B2E /* REPLACE_WITH_YOUR_CODES.swift */,
-				3B7D83D72A8A3069008A4B2E /* Assets.xcassets */,
+				3BFD78492663E27D002AD588 /* CodePreviewer */,
+				3BE0EB9F266A845B00C9924E /* CodeThumbnailer */,
+				4D0C0DE000072F00A0B0C0D0 /* MarkdownPreviewer */,
 			);
-			name = "YOU MIUST SUPPLY";
+			path = Extensions;
 			sourceTree = "<group>";
 		};
 		3BB8E90F2935FF6C00C6D452 /* Misc */ = {
@@ -210,27 +226,25 @@
 			name = Misc;
 			sourceTree = "<group>";
 		};
-		3BE0EB9F266A845B00C9924E /* Code Thumbnailer */ = {
+		3BE0EB9F266A845B00C9924E /* CodeThumbnailer */ = {
 			isa = PBXGroup;
 			children = (
 				3BE0EBA0266A845B00C9924E /* ThumbnailProvider.swift */,
 				3BE0EBA2266A845B00C9924E /* Info.plist */,
 				3BE0EBA3266A845B00C9924E /* Code_Thumbnailer.entitlements */,
 			);
-			path = "Code Thumbnailer";
+			path = CodeThumbnailer;
 			sourceTree = "<group>";
 		};
 		3BFD780B2663E16D002AD588 = {
 			isa = PBXGroup;
 			children = (
-				3BFD78162663E16D002AD588 /* PreviewCode */,
-				3BFD78492663E27D002AD588 /* Code Previewer */,
-				3BE0EB9F266A845B00C9924E /* Code Thumbnailer */,
-				3B03ED542EE1CA2C00DD7230 /* Common */,
-				3BFD78462663E27D002AD588 /* Frameworks */,
+				3BFD78162663E16D002AD588 /* App */,
+				4D0C0DE0001C2F00A0B0C0D0 /* Extensions */,
+				3B03ED542EE1CA2C00DD7230 /* Shared */,
 				3BB8E90F2935FF6C00C6D452 /* Misc */,
+				3BFD78462663E27D002AD588 /* Frameworks */,
 				3BFD78152663E16D002AD588 /* Products */,
-				4D0C0DE000072F00A0B0C0D0 /* Markdown Previewer */,
 			);
 			sourceTree = "<group>";
 		};
@@ -245,10 +259,9 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
-		3BFD78162663E16D002AD588 /* PreviewCode */ = {
+		3BFD78162663E16D002AD588 /* App */ = {
 			isa = PBXGroup;
 			children = (
-				3BFD78582663E2C9002AD588 /* Constants.swift */,
 				3BFD78172663E16D002AD588 /* AppDelegate.swift */,
 				3B2D12E72E2A85C100046D72 /* PCAppDelegateSettings.swift */,
 				3BAE671A28D4D3AD001532BD /* PCAppDelegateFontHandling.swift */,
@@ -262,10 +275,10 @@
 				3BFD781E2663E16E002AD588 /* Info.plist */,
 				3B271DC9268B0A9B00EFC72C /* themes-list.json */,
 				3B7D83D02A8A2FEE008A4B2E /* code-sample.txt */,
-				3BFD781F2663E16E002AD588 /* PreviewCode.entitlements */,
-				3B7D83D22A8A301F008A4B2E /* YOU MIUST SUPPLY */,
+				3BFD781F2663E16E002AD588 /* QuicklookAnything.entitlements */,
+				3B7D83D72A8A3069008A4B2E /* Assets.xcassets */,
 			);
-			path = PreviewCode;
+			path = App;
 			sourceTree = "<group>";
 		};
 		3BFD78462663E27D002AD588 /* Frameworks */ = {
@@ -277,7 +290,7 @@
 			name = Frameworks;
 			sourceTree = "<group>";
 		};
-		3BFD78492663E27D002AD588 /* Code Previewer */ = {
+		3BFD78492663E27D002AD588 /* CodePreviewer */ = {
 			isa = PBXGroup;
 			children = (
 				3BFD784A2663E27D002AD588 /* PreviewViewController.swift */,
@@ -286,10 +299,10 @@
 				3BFD78502663E27D002AD588 /* Code_Previewer.entitlements */,
 				3B95C92F2666222D00C7CC14 /* Licences.md */,
 			);
-			path = "Code Previewer";
+			path = CodePreviewer;
 			sourceTree = "<group>";
 		};
-		4D0C0DE000072F00A0B0C0D0 /* Markdown Previewer */ = {
+		4D0C0DE000072F00A0B0C0D0 /* MarkdownPreviewer */ = {
 			isa = PBXGroup;
 			children = (
 				4D0C0DE000022F00A0B0C0D0 /* MarkdownPreviewController.swift */,
@@ -298,7 +311,7 @@
 				4D0C0DE000042F00A0B0C0D0 /* Info.plist */,
 				4D0C0DE000052F00A0B0C0D0 /* Markdown_Previewer.entitlements */,
 			);
-			path = "Markdown Previewer";
+			path = MarkdownPreviewer;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -324,9 +337,9 @@
 			productReference = 3BE0EB9B266A845B00C9924E /* Code Thumbnailer.appex */;
 			productType = "com.apple.product-type.app-extension";
 		};
-		3BFD78132663E16D002AD588 /* PreviewCode */ = {
+		3BFD78132663E16D002AD588 /* Quicklook Anything */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 3BFD78382663E16E002AD588 /* Build configuration list for PBXNativeTarget "PreviewCode" */;
+			buildConfigurationList = 3BFD78382663E16E002AD588 /* Build configuration list for PBXNativeTarget "Quicklook Anything" */;
 			buildPhases = (
 				3BFD78102663E16D002AD588 /* Sources */,
 				3BFD78112663E16D002AD588 /* Frameworks */,
@@ -340,11 +353,11 @@
 				3BE0EBA5266A845B00C9924E /* PBXTargetDependency */,
 				4D0C0DE000172F00A0B0C0D0 /* PBXTargetDependency */,
 			);
-			name = PreviewCode;
+			name = "Quicklook Anything";
 			packageProductDependencies = (
 				3B1108B726714ADA00A36A48 /* Highlighter */,
 			);
-			productName = PreviewCode;
+			productName = "Quicklook Anything";
 			productReference = 3BFD78142663E16D002AD588 /* Quicklook Anything.app */;
 			productType = "com.apple.product-type.application";
 		};
@@ -375,6 +388,7 @@
 				4D0C0DE0000F2F00A0B0C0D0 /* Sources */,
 				4D0C0DE000102F00A0B0C0D0 /* Frameworks */,
 				4D0C0DE000112F00A0B0C0D0 /* Resources */,
+				4D0C0DE0001B2F00A0B0C0D0 /* Copy highlight.js into Web/lib */,
 			);
 			buildRules = (
 			);
@@ -406,7 +420,7 @@
 					};
 				};
 			};
-			buildConfigurationList = 3BFD780F2663E16D002AD588 /* Build configuration list for PBXProject "PreviewCode" */;
+			buildConfigurationList = 3BFD780F2663E16D002AD588 /* Build configuration list for PBXProject "QuicklookAnything" */;
 			compatibilityVersion = "Xcode 9.3";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
@@ -416,13 +430,13 @@
 			);
 			mainGroup = 3BFD780B2663E16D002AD588;
 			packageReferences = (
-				3B1108B626714ADA00A36A48 /* XCLocalSwiftPackageReference "LocalPackages/HighlighterSwift" */,
+				3B1108B626714ADA00A36A48 /* XCLocalSwiftPackageReference "Vendor/HighlighterSwift" */,
 			);
 			productRefGroup = 3BFD78152663E16D002AD588 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				3BFD78132663E16D002AD588 /* PreviewCode */,
+				3BFD78132663E16D002AD588 /* Quicklook Anything */,
 				3BFD78442663E27D002AD588 /* Code Previewer */,
 				3BE0EB9A266A845B00C9924E /* Code Thumbnailer */,
 				4D0C0DE000122F00A0B0C0D0 /* Markdown Previewer */,
@@ -571,7 +585,7 @@
 		3BE0EBA7266A845B00C9924E /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				CODE_SIGN_ENTITLEMENTS = "Code Thumbnailer/Code_Thumbnailer.entitlements";
+				CODE_SIGN_ENTITLEMENTS = "Extensions/CodeThumbnailer/Code_Thumbnailer.entitlements";
 				CODE_SIGN_IDENTITY = "Apple Development";
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Developer ID Application";
 				CODE_SIGN_STYLE = Manual;
@@ -585,7 +599,7 @@
 					"DEBUG=1",
 					"$(inherited)",
 				);
-				INFOPLIST_FILE = "Code Thumbnailer/Info.plist";
+				INFOPLIST_FILE = "Extensions/CodeThumbnailer/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
@@ -607,7 +621,7 @@
 		3BE0EBA8266A845B00C9924E /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				CODE_SIGN_ENTITLEMENTS = "Code Thumbnailer/Code_Thumbnailer.entitlements";
+				CODE_SIGN_ENTITLEMENTS = "Extensions/CodeThumbnailer/Code_Thumbnailer.entitlements";
 				CODE_SIGN_IDENTITY = "Apple Development";
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Developer ID Application";
 				CODE_SIGN_STYLE = Manual;
@@ -618,7 +632,7 @@
 				ENABLE_APP_SANDBOX = YES;
 				ENABLE_HARDENED_RUNTIME = YES;
 				GCC_PREPROCESSOR_DEFINITIONS = "";
-				INFOPLIST_FILE = "Code Thumbnailer/Info.plist";
+				INFOPLIST_FILE = "Extensions/CodeThumbnailer/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
@@ -776,7 +790,7 @@
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
 				ASSETCATALOG_OTHER_FLAGS = "--enable-icon-stack-fallback-generation=disabled";
 				BUILD_ONLY_KNOWN_LOCALIZATIONS = NO;
-				CODE_SIGN_ENTITLEMENTS = PreviewCode/PreviewCode.entitlements;
+				CODE_SIGN_ENTITLEMENTS = App/QuicklookAnything.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Developer ID Application";
 				CODE_SIGN_STYLE = Manual;
@@ -788,7 +802,7 @@
 				ENABLE_APP_SANDBOX = YES;
 				ENABLE_HARDENED_RUNTIME = YES;
 				GCC_PREPROCESSOR_DEFINITIONS = "TARGET_IS_PC=1";
-				INFOPLIST_FILE = PreviewCode/Info.plist;
+				INFOPLIST_FILE = App/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "Quicklook Anything";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.developer-tools";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "© 2026 Keheng Zhu. Based on PreviewCode © Tony Smith. MIT License.";
@@ -804,7 +818,7 @@
 				OTHER_LDFLAGS = "";
 				OTHER_SWIFT_FLAGS = "-D TARGET_IS_PC";
 				PRODUCT_BUNDLE_IDENTIFIER = io.github.kehengzhu.QuicklookAnything;
-				PRODUCT_MODULE_NAME = PreviewCode;
+				PRODUCT_MODULE_NAME = QuicklookAnything;
 				PRODUCT_NAME = "Quicklook Anything";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				REGISTER_APP_GROUPS = NO;
@@ -822,7 +836,7 @@
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
 				ASSETCATALOG_OTHER_FLAGS = "--enable-icon-stack-fallback-generation=disabled";
 				BUILD_ONLY_KNOWN_LOCALIZATIONS = NO;
-				CODE_SIGN_ENTITLEMENTS = PreviewCode/PreviewCode.entitlements;
+				CODE_SIGN_ENTITLEMENTS = App/QuicklookAnything.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Developer ID Application";
 				CODE_SIGN_STYLE = Manual;
@@ -834,7 +848,7 @@
 				ENABLE_APP_SANDBOX = YES;
 				ENABLE_HARDENED_RUNTIME = YES;
 				GCC_PREPROCESSOR_DEFINITIONS = "TARGET_IS_PC=1";
-				INFOPLIST_FILE = PreviewCode/Info.plist;
+				INFOPLIST_FILE = App/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "Quicklook Anything";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.developer-tools";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "© 2026 Keheng Zhu. Based on PreviewCode © Tony Smith. MIT License.";
@@ -851,7 +865,7 @@
 				OTHER_LDFLAGS = "";
 				OTHER_SWIFT_FLAGS = "-D TARGET_IS_PC";
 				PRODUCT_BUNDLE_IDENTIFIER = io.github.kehengzhu.QuicklookAnything;
-				PRODUCT_MODULE_NAME = PreviewCode;
+				PRODUCT_MODULE_NAME = QuicklookAnything;
 				PRODUCT_NAME = "Quicklook Anything";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				REGISTER_APP_GROUPS = NO;
@@ -863,7 +877,7 @@
 		3BFD78552663E27D002AD588 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				CODE_SIGN_ENTITLEMENTS = "Code Previewer/Code_Previewer.entitlements";
+				CODE_SIGN_ENTITLEMENTS = "Extensions/CodePreviewer/Code_Previewer.entitlements";
 				CODE_SIGN_IDENTITY = "Apple Development";
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Developer ID Application";
 				CODE_SIGN_STYLE = Manual;
@@ -873,7 +887,7 @@
 				"DEVELOPMENT_TEAM[sdk=macosx*]" = BTT85F79L9;
 				ENABLE_APP_SANDBOX = YES;
 				ENABLE_HARDENED_RUNTIME = YES;
-				INFOPLIST_FILE = "Code Previewer/Info.plist";
+				INFOPLIST_FILE = "Extensions/CodePreviewer/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
@@ -900,7 +914,7 @@
 		3BFD78562663E27D002AD588 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				CODE_SIGN_ENTITLEMENTS = "Code Previewer/Code_Previewer.entitlements";
+				CODE_SIGN_ENTITLEMENTS = "Extensions/CodePreviewer/Code_Previewer.entitlements";
 				CODE_SIGN_IDENTITY = "Apple Development";
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Developer ID Application";
 				CODE_SIGN_STYLE = Manual;
@@ -910,7 +924,7 @@
 				"DEVELOPMENT_TEAM[sdk=macosx*]" = BTT85F79L9;
 				ENABLE_APP_SANDBOX = YES;
 				ENABLE_HARDENED_RUNTIME = YES;
-				INFOPLIST_FILE = "Code Previewer/Info.plist";
+				INFOPLIST_FILE = "Extensions/CodePreviewer/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
@@ -936,7 +950,7 @@
 		4D0C0DE000142F00A0B0C0D0 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				CODE_SIGN_ENTITLEMENTS = "Markdown Previewer/Markdown_Previewer.entitlements";
+				CODE_SIGN_ENTITLEMENTS = "Extensions/MarkdownPreviewer/Markdown_Previewer.entitlements";
 				CODE_SIGN_IDENTITY = "Apple Development";
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Developer ID Application";
 				CODE_SIGN_STYLE = Manual;
@@ -946,7 +960,7 @@
 				"DEVELOPMENT_TEAM[sdk=macosx*]" = BTT85F79L9;
 				ENABLE_APP_SANDBOX = YES;
 				ENABLE_HARDENED_RUNTIME = YES;
-				INFOPLIST_FILE = "Markdown Previewer/Info.plist";
+				INFOPLIST_FILE = "Extensions/MarkdownPreviewer/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
@@ -973,7 +987,7 @@
 		4D0C0DE000152F00A0B0C0D0 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				CODE_SIGN_ENTITLEMENTS = "Markdown Previewer/Markdown_Previewer.entitlements";
+				CODE_SIGN_ENTITLEMENTS = "Extensions/MarkdownPreviewer/Markdown_Previewer.entitlements";
 				CODE_SIGN_IDENTITY = "Apple Development";
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Developer ID Application";
 				CODE_SIGN_STYLE = Manual;
@@ -983,7 +997,7 @@
 				"DEVELOPMENT_TEAM[sdk=macosx*]" = BTT85F79L9;
 				ENABLE_APP_SANDBOX = YES;
 				ENABLE_HARDENED_RUNTIME = YES;
-				INFOPLIST_FILE = "Markdown Previewer/Info.plist";
+				INFOPLIST_FILE = "Extensions/MarkdownPreviewer/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
@@ -1018,7 +1032,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		3BFD780F2663E16D002AD588 /* Build configuration list for PBXProject "PreviewCode" */ = {
+		3BFD780F2663E16D002AD588 /* Build configuration list for PBXProject "QuicklookAnything" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				3BFD78362663E16E002AD588 /* Debug */,
@@ -1027,7 +1041,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		3BFD78382663E16E002AD588 /* Build configuration list for PBXNativeTarget "PreviewCode" */ = {
+		3BFD78382663E16E002AD588 /* Build configuration list for PBXNativeTarget "Quicklook Anything" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				3BFD78392663E16E002AD588 /* Debug */,
@@ -1057,26 +1071,26 @@
 /* End XCConfigurationList section */
 
 /* Begin XCLocalSwiftPackageReference section */
-		3B1108B626714ADA00A36A48 /* XCLocalSwiftPackageReference "LocalPackages/HighlighterSwift" */ = {
+		3B1108B626714ADA00A36A48 /* XCLocalSwiftPackageReference "Vendor/HighlighterSwift" */ = {
 			isa = XCLocalSwiftPackageReference;
-			relativePath = LocalPackages/HighlighterSwift;
+			relativePath = Vendor/HighlighterSwift;
 		};
 /* End XCLocalSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
 		3B1108B726714ADA00A36A48 /* Highlighter */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 3B1108B626714ADA00A36A48 /* XCLocalSwiftPackageReference "LocalPackages/HighlighterSwift" */;
+			package = 3B1108B626714ADA00A36A48 /* XCLocalSwiftPackageReference "Vendor/HighlighterSwift" */;
 			productName = Highlighter;
 		};
 		3B1108B926714AE700A36A48 /* Highlighter */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 3B1108B626714ADA00A36A48 /* XCLocalSwiftPackageReference "LocalPackages/HighlighterSwift" */;
+			package = 3B1108B626714ADA00A36A48 /* XCLocalSwiftPackageReference "Vendor/HighlighterSwift" */;
 			productName = Highlighter;
 		};
 		3B1108BB26714AED00A36A48 /* Highlighter */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 3B1108B626714ADA00A36A48 /* XCLocalSwiftPackageReference "LocalPackages/HighlighterSwift" */;
+			package = 3B1108B626714ADA00A36A48 /* XCLocalSwiftPackageReference "Vendor/HighlighterSwift" */;
 			productName = Highlighter;
 		};
 /* End XCSwiftPackageProductDependency section */

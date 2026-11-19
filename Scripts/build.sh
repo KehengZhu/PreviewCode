@@ -1,24 +1,24 @@
 #!/bin/zsh
 # Build a universal (Apple silicon + Intel) Release of Quicklook Anything and zip
-# it to LocalBuild/dist/QuicklookAnything.zip, the file install.sh downloads.
+# it to build/dist/QuicklookAnything.zip, the file install.sh downloads.
 #
 # Signs with the local "Apple Development" certificate (team BTT85F79L9) and no
 # provisioning profile, so the build never expires weekly; only the certificate
 # (valid until 2027-11-15) needs renewing, by reopening Xcode > Settings > Accounts.
 #
-# Usage: LocalBuild/build.sh
+# Usage: Scripts/build.sh
 set -euo pipefail
 
 cd "${0:A:h}/.."
-derived=LocalBuild/DerivedData
-dist=LocalBuild/dist
+derived=build/DerivedData
+dist=build/dist
 log=$(mktemp -t quicklook-anything-build)
 
 # A failed codesign can leave *.cstemp files that break every later signing run.
 rm -rf "$derived/Build/Products"
 
 echo "Building (log: $log)..."
-if ! xcodebuild -scheme PreviewCode -configuration Release -derivedDataPath "$derived" \
+if ! xcodebuild -scheme "Quicklook Anything" -configuration Release -derivedDataPath "$derived" \
     ONLY_ACTIVE_ARCH=NO \
     DEVELOPMENT_TEAM=BTT85F79L9 CODE_SIGN_STYLE=Manual CODE_SIGN_IDENTITY="Apple Development" \
     PROVISIONING_PROFILE_SPECIFIER="" PROVISIONING_PROFILE="" \
