@@ -1409,6 +1409,8 @@ extension AppDelegate {
         self.mdCodeSizeLabel = NSTextField(labelWithString: "")
 
         let header = makeLabel("Text", in: page, weight: .semibold)
+        let fileTypes = makeLabel(".md notes and .ipynb notebooks", in: page, size: NSFont.smallSystemFontSize)
+        fileTypes.textColor = .secondaryLabelColor
         let group = makeSettingsGroup(in: page, rows: [
             settingsRow("Text Size", sliderControls(self.mdFontSizeSlider, self.mdFontSizeLabel, width: 260)),
             settingsRow("Code Block Text Size", sliderControls(self.mdCodeSizeSlider, self.mdCodeSizeLabel, width: 260)),
@@ -1428,8 +1430,10 @@ extension AppDelegate {
         page.addSubview(defaultsButton)
 
         NSLayoutConstraint.activate([
-            header.topAnchor.constraint(equalTo: page.topAnchor, constant: 12),
+            header.topAnchor.constraint(equalTo: page.topAnchor, constant: 6),
             header.leadingAnchor.constraint(equalTo: page.leadingAnchor, constant: 22),
+            fileTypes.firstBaselineAnchor.constraint(equalTo: header.firstBaselineAnchor),
+            fileTypes.trailingAnchor.constraint(equalTo: page.trailingAnchor, constant: -22),
             group.topAnchor.constraint(equalTo: header.bottomAnchor, constant: 6),
             group.leadingAnchor.constraint(equalTo: page.leadingAnchor, constant: 20),
             group.trailingAnchor.constraint(equalTo: page.trailingAnchor, constant: -20),
@@ -1437,7 +1441,7 @@ extension AppDelegate {
             note.leadingAnchor.constraint(equalTo: header.leadingAnchor),
             note.trailingAnchor.constraint(equalTo: page.trailingAnchor, constant: -22),
             defaultsButton.leadingAnchor.constraint(equalTo: page.leadingAnchor, constant: 20),
-            defaultsButton.bottomAnchor.constraint(equalTo: page.bottomAnchor, constant: -16),
+            defaultsButton.bottomAnchor.constraint(equalTo: page.bottomAnchor, constant: -12),
         ])
 
         self.mdFontSizeSlider.doubleValue = BUFFOON_CONSTANTS.DEFAULTS.MD_FONT_SIZE
@@ -1489,33 +1493,34 @@ extension AppDelegate {
 extension AppDelegate {
 
     /**
-     Replace the round tab icons with a tab bar of three peers:
-     General, Code and Markdown & Notebook.
+     Replace the round tab icons with a settings toolbar, as in Apple's own apps:
+     General, Code and Markdown & Notebook, each an icon with a label. The window
+     title names the selected tab.
      */
     internal func buildTabBar() {
 
-        guard let header = self.settingsButton.superview else { return }
+        guard let content = self.window.contentView else { return }
         for button in [self.infoButton, self.settingsButton, self.feedbackButton] {
             button?.isHidden = true
         }
 
-        let bar = NSSegmentedControl(labels: ["General",
-                                              "Code (.py .js .c .sh .swift …)",
-                                              "Markdown & Notebook (.md .ipynb)"],
-                                     trackingMode: .selectOne, target: self, action: #selector(doSelectTab(_:)))
-        bar.segmentDistribution = .fit
-        bar.setToolTip("Quick Look window size, extensions and version", forSegment: 0)
-        bar.setToolTip("Source code and data files: more than 50 languages", forSegment: 1)
-        bar.setToolTip("Markdown notes and Jupyter notebooks", forSegment: 2)
-        bar.translatesAutoresizingMaskIntoConstraints = false
-        header.addSubview(bar)
-        NSLayoutConstraint.activate([
-            bar.centerXAnchor.constraint(equalTo: header.centerXAnchor),
-            bar.centerYAnchor.constraint(equalTo: self.settingsButton.centerYAnchor),
-        ])
+        // The tabs start right below the toolbar, where the header was
+        NSLayoutConstraint.deactivate(content.constraints.filter {
+            ($0.firstItem === self.mainTabView && $0.firstAttribute == .top) ||
+            ($0.secondItem === self.mainTabView && $0.secondAttribute == .top)
+        })
+        self.mainTabView.topAnchor.constraint(equalTo: content.topAnchor, constant: 8).isActive = true
 
-        bar.selectedSegment = 0
-        self.tabBar = bar
+        let toolbar = NSToolbar(identifier: "io.github.kehengzhu.QuicklookAnything.settings")
+        toolbar.delegate = self
+        toolbar.displayMode = .iconAndLabel
+        toolbar.allowsUserCustomization = false
+        self.window.titleVisibility = .visible
+        self.window.titlebarAppearsTransparent = false
+        self.window.toolbar = toolbar
+        self.window.toolbarStyle = .preference
+        toolbar.selectedItemIdentifier = SettingsTab.all[0].id
+        self.window.title = SettingsTab.all[0].label
     }
 
 
@@ -1604,14 +1609,33 @@ extension AppDelegate {
         box.addSubview(extensionsButton)
         let extensionsRow = addGeneralRow(to: box, below: smallRow.separatorAnchor, title: "Quick Look Extensions",
                                           note: "If previews stop appearing, run the install command again.",
-                                          control: extensionsButton, separator: false)
+                                          control: extensionsButton)
         extensionsButton.trailingAnchor.constraint(equalTo: box.trailingAnchor, constant: -14).isActive = true
+
+        // Updates: the project page and a check for a newer release
+        let updateButton = NSButton(title: "Check for Updates…", target: self, action: #selector(doCheckForUpdates(_:)))
+        updateButton.translatesAutoresizingMaskIntoConstraints = false
+        box.addSubview(updateButton)
+        let githubButton = NSButton(title: "GitHub", target: self, action: #selector(doOpenGitHub(_:)))
+        githubButton.toolTip = BUFFOON_CONSTANTS.MAIN_URL
+        githubButton.translatesAutoresizingMaskIntoConstraints = false
+        box.addSubview(githubButton)
+        let updatesRow = addGeneralRow(to: box, below: extensionsRow.separatorAnchor, title: "Updates",
+                                       note: "Check GitHub for a newer release; upgrading keeps your settings.",
+                                       control: updateButton, separator: false)
+        NSLayoutConstraint.activate([
+            updateButton.trailingAnchor.constraint(equalTo: box.trailingAnchor, constant: -14),
+            githubButton.trailingAnchor.constraint(equalTo: updateButton.leadingAnchor, constant: -8),
+            githubButton.centerYAnchor.constraint(equalTo: updateButton.centerYAnchor),
+        ])
+        self.updateNote = updatesRow.note
+        self.updateButton = updateButton
 
         NSLayoutConstraint.activate([
             group.topAnchor.constraint(equalTo: self.versionLabel.bottomAnchor, constant: 16),
             group.leadingAnchor.constraint(equalTo: page.leadingAnchor, constant: 20),
             group.trailingAnchor.constraint(equalTo: page.trailingAnchor, constant: -20),
-            box.bottomAnchor.constraint(equalTo: extensionsRow.bottom),
+            box.bottomAnchor.constraint(equalTo: updatesRow.bottom),
         ])
 
         self.smallScaleSlider = slider
@@ -1762,6 +1786,8 @@ extension AppDelegate {
         let pointsLabel = NSTextField(labelWithString: "points")
 
         let textHeader = makeLabel("Text", in: page, weight: .semibold)
+        let fileTypes = makeLabel(".py .js .c .sh .swift and more than 50 languages", in: page, size: NSFont.smallSystemFontSize)
+        fileTypes.textColor = .secondaryLabelColor
         let textGroup = makeSettingsGroup(in: page, rows: [
             settingsRow("Size", sliderControls(self.fontSizeSlider, self.fontSizeLabel, width: 200)),
             settingsRow("Font", [self.fontNamePopup]),
@@ -1784,18 +1810,20 @@ extension AppDelegate {
         page.addSubview(self.settingsHelpButton)
 
         NSLayoutConstraint.activate([
-            textHeader.topAnchor.constraint(equalTo: page.topAnchor, constant: 12),
+            textHeader.topAnchor.constraint(equalTo: page.topAnchor, constant: 6),
             textHeader.leadingAnchor.constraint(equalTo: page.leadingAnchor, constant: 22),
+            fileTypes.firstBaselineAnchor.constraint(equalTo: textHeader.firstBaselineAnchor),
+            fileTypes.trailingAnchor.constraint(equalTo: page.trailingAnchor, constant: -22),
             textGroup.topAnchor.constraint(equalTo: textHeader.bottomAnchor, constant: 6),
             textGroup.leadingAnchor.constraint(equalTo: page.leadingAnchor, constant: 20),
             textGroup.trailingAnchor.constraint(equalTo: page.trailingAnchor, constant: -20),
-            themeHeader.topAnchor.constraint(equalTo: textGroup.bottomAnchor, constant: 14),
+            themeHeader.topAnchor.constraint(equalTo: textGroup.bottomAnchor, constant: 10),
             themeHeader.leadingAnchor.constraint(equalTo: textHeader.leadingAnchor),
             themeGroup.topAnchor.constraint(equalTo: themeHeader.bottomAnchor, constant: 6),
             themeGroup.leadingAnchor.constraint(equalTo: textGroup.leadingAnchor),
             themeGroup.trailingAnchor.constraint(equalTo: textGroup.trailingAnchor),
             self.defaultsButton.leadingAnchor.constraint(equalTo: page.leadingAnchor, constant: 20),
-            self.defaultsButton.bottomAnchor.constraint(equalTo: page.bottomAnchor, constant: -16),
+            self.defaultsButton.bottomAnchor.constraint(equalTo: page.bottomAnchor, constant: -12),
             self.settingsHelpButton.leadingAnchor.constraint(equalTo: self.defaultsButton.trailingAnchor, constant: 10),
             self.settingsHelpButton.centerYAnchor.constraint(equalTo: self.defaultsButton.centerYAnchor),
         ])
@@ -1832,7 +1860,7 @@ extension AppDelegate {
             title.leadingAnchor.constraint(equalTo: row.leadingAnchor, constant: 12),
             stack.trailingAnchor.constraint(equalTo: row.trailingAnchor, constant: -12),
             stack.leadingAnchor.constraint(greaterThanOrEqualTo: title.trailingAnchor, constant: 12),
-            row.heightAnchor.constraint(greaterThanOrEqualToConstant: 30),
+            row.heightAnchor.constraint(greaterThanOrEqualToConstant: 28),
             stack.topAnchor.constraint(greaterThanOrEqualTo: row.topAnchor, constant: 4),
             stack.bottomAnchor.constraint(lessThanOrEqualTo: row.bottomAnchor, constant: -4),
         ])
@@ -1841,12 +1869,12 @@ extension AppDelegate {
             note.translatesAutoresizingMaskIntoConstraints = false
             row.addSubview(note)
             NSLayoutConstraint.activate([
-                title.topAnchor.constraint(equalTo: row.topAnchor, constant: 7),
+                title.topAnchor.constraint(equalTo: row.topAnchor, constant: 5),
                 stack.centerYAnchor.constraint(equalTo: title.centerYAnchor),
                 note.topAnchor.constraint(equalTo: title.bottomAnchor, constant: 2),
                 note.leadingAnchor.constraint(equalTo: title.leadingAnchor),
                 note.trailingAnchor.constraint(lessThanOrEqualTo: row.trailingAnchor, constant: -12),
-                note.bottomAnchor.constraint(equalTo: row.bottomAnchor, constant: -7),
+                note.bottomAnchor.constraint(equalTo: row.bottomAnchor, constant: -5),
             ])
         } else {
             NSLayoutConstraint.activate([
@@ -1949,5 +1977,215 @@ extension AppDelegate {
         if let width {
             view.widthAnchor.constraint(equalToConstant: width).isActive = true
         }
+    }
+}
+
+
+// MARK: - Settings Toolbar (LOCAL)
+
+/**
+ The settings window's tabs, in toolbar order.
+ */
+struct SettingsTab {
+
+    let id: NSToolbarItem.Identifier
+    let label: String
+    let symbol: String
+    let toolTip: String
+
+    static let all: [SettingsTab] = [
+        SettingsTab(id: .init("general"), label: "General", symbol: "gearshape",
+                    toolTip: "Quick Look window size, small previews and extensions"),
+        SettingsTab(id: .init("code"), label: "Code", symbol: "chevron.left.forwardslash.chevron.right",
+                    toolTip: "Source code and data files: .py .js .c .sh .swift and more than 50 languages"),
+        SettingsTab(id: .init("markdown"), label: "Markdown & Notebook", symbol: "doc.richtext",
+                    toolTip: "Markdown notes (.md) and Jupyter notebooks (.ipynb)"),
+    ]
+}
+
+
+extension AppDelegate: NSToolbarDelegate {
+
+    func toolbarAllowedItemIdentifiers(_ toolbar: NSToolbar) -> [NSToolbarItem.Identifier] {
+        SettingsTab.all.map(\.id)
+    }
+
+
+    func toolbarDefaultItemIdentifiers(_ toolbar: NSToolbar) -> [NSToolbarItem.Identifier] {
+        SettingsTab.all.map(\.id)
+    }
+
+
+    func toolbarSelectableItemIdentifiers(_ toolbar: NSToolbar) -> [NSToolbarItem.Identifier] {
+        SettingsTab.all.map(\.id)
+    }
+
+
+    func toolbar(_ toolbar: NSToolbar, itemForItemIdentifier itemIdentifier: NSToolbarItem.Identifier,
+                 willBeInsertedIntoToolbar flag: Bool) -> NSToolbarItem? {
+
+        guard let tab = SettingsTab.all.first(where: { $0.id == itemIdentifier }) else { return nil }
+        let item = NSToolbarItem(itemIdentifier: itemIdentifier)
+        item.label = tab.label
+        item.toolTip = tab.toolTip
+        item.image = NSImage(systemSymbolName: tab.symbol, accessibilityDescription: tab.label)
+        item.target = self
+        item.action = #selector(doSelectToolbarTab(_:))
+        return item
+    }
+
+
+    @objc
+    private func doSelectToolbarTab(_ sender: NSToolbarItem) {
+
+        guard let index = SettingsTab.all.firstIndex(where: { $0.id == sender.itemIdentifier }) else { return }
+        // Leave a text field so its value is checked and saved first
+        self.window.makeFirstResponder(nil)
+        showTab(index)
+    }
+}
+
+
+// MARK: - Updates (LOCAL)
+
+extension AppDelegate {
+
+    @objc
+    internal func doOpenGitHub(_ sender: Any) {
+
+        if let url = URL(string: BUFFOON_CONSTANTS.MAIN_URL) {
+            NSWorkspace.shared.open(url)
+        }
+    }
+
+
+    /**
+     Ask GitHub for the latest release and compare it with this version. A newer
+     release is installed with the one-line installer, which the alert copies.
+     */
+    @objc
+    internal func doCheckForUpdates(_ sender: Any) {
+
+        guard let url = URL(string: BUFFOON_CONSTANTS.LATEST_RELEASE_API) else { return }
+        let current = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "0"
+        self.updateButton?.isEnabled = false
+        self.updateNote?.stringValue = "Checking…"
+
+        var request = URLRequest(url: url, cachePolicy: .reloadIgnoringLocalCacheData, timeoutInterval: 15)
+        request.setValue("application/vnd.github+json", forHTTPHeaderField: "Accept")
+        URLSession.shared.dataTask(with: request) { data, response, error in
+            let status = (response as? HTTPURLResponse)?.statusCode ?? 0
+            var latest: String? = nil
+            var page = BUFFOON_CONSTANTS.MAIN_URL + "/releases/latest"
+            if status == 200, let data,
+               let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+               let tag = json["tag_name"] as? String {
+                latest = tag.hasPrefix("v") ? String(tag.dropFirst()) : tag
+                page = json["html_url"] as? String ?? page
+            }
+            DispatchQueue.main.async {
+                self.updateButton?.isEnabled = true
+                self.showUpdateResult(current: current, latest: latest, page: page,
+                                      problem: error?.localizedDescription ?? (status == 200 ? nil : "GitHub answered with status \(status)."))
+            }
+        }.resume()
+    }
+
+
+    private func showUpdateResult(current: String, latest: String?, page: String, problem: String?) {
+
+        let alert = NSAlert()
+        guard let latest else {
+            self.updateNote?.stringValue = "The check for updates did not complete."
+            alert.alertStyle = .warning
+            alert.messageText = "Could Not Check for Updates"
+            alert.informativeText = (problem ?? "The latest release could not be read.") + " Try again later, or see the releases on GitHub."
+            alert.addButton(withTitle: "OK")
+            alert.addButton(withTitle: "Open GitHub")
+            if alert.runModal() == .alertSecondButtonReturn, let url = URL(string: page) {
+                NSWorkspace.shared.open(url)
+            }
+            return
+        }
+
+        guard isVersion(latest, newerThan: current) else {
+            self.updateNote?.stringValue = "Version \(current) is the latest."
+            alert.messageText = "You’re Up to Date"
+            alert.informativeText = "Quicklook Anything \(current) is the latest version."
+            alert.addButton(withTitle: "OK")
+            alert.runModal()
+            return
+        }
+
+        self.updateNote?.stringValue = "Version \(latest) is available; you have \(current)."
+        alert.messageText = "Quicklook Anything \(latest) Is Available"
+        alert.informativeText = "You have \(current). Install Update runs the install command in Terminal, "
+            + "then reopens the app. Your settings are kept."
+        alert.addButton(withTitle: "Install Update")
+        alert.addButton(withTitle: "What’s New")
+        alert.addButton(withTitle: "Later")
+        switch alert.runModal() {
+            case .alertFirstButtonReturn:
+                installUpdateInTerminal()
+            case .alertSecondButtonReturn:
+                if let url = URL(string: page) {
+                    NSWorkspace.shared.open(url)
+                }
+            default:
+                break
+        }
+    }
+
+
+    /**
+     Run the one-line installer in Terminal, which quits this app, upgrades it and
+     opens it again. The app is sandboxed, so it cannot run the installer itself.
+     If Terminal cannot be asked (eg. the user declined Automation), copy the
+     command instead.
+     */
+    private func installUpdateInTerminal() {
+
+        let bundleID = Bundle.main.bundleIdentifier ?? "io.github.kehengzhu.QuicklookAnything"
+        let command = BUFFOON_CONSTANTS.INSTALL_COMMAND + " && open -b " + bundleID
+        let quoted = command.replacingOccurrences(of: "\\", with: "\\\\").replacingOccurrences(of: "\"", with: "\\\"")
+        let source = """
+            tell application "Terminal"
+                activate
+                do script "\(quoted)"
+            end tell
+            """
+        var error: NSDictionary? = nil
+        NSAppleScript(source: source)?.executeAndReturnError(&error)
+        guard let error else {
+            self.updateNote?.stringValue = "Installing in Terminal…"
+            return
+        }
+
+        NSPasteboard.general.clearContents()
+        NSPasteboard.general.setString(BUFFOON_CONSTANTS.INSTALL_COMMAND, forType: .string)
+        self.updateNote?.stringValue = "Install command copied: paste it in Terminal."
+        let alert = NSAlert()
+        alert.alertStyle = .warning
+        alert.messageText = "Could Not Open Terminal"
+        alert.informativeText = "The install command is copied. Open Terminal, paste it and press Return. "
+            + "To let the app open Terminal itself, allow it in System Settings > Privacy & Security > Automation."
+            + "\n\n(\(error[NSAppleScript.errorMessage] as? String ?? "Unknown error"))"
+        alert.addButton(withTitle: "OK")
+        alert.runModal()
+    }
+
+
+    /**
+     Compare dotted version numbers, eg. 1.10.0 is newer than 1.9.2.
+     */
+    private func isVersion(_ a: String, newerThan b: String) -> Bool {
+
+        let x = a.split(separator: ".").map { Int($0) ?? 0 }
+        let y = b.split(separator: ".").map { Int($0) ?? 0 }
+        for i in 0..<max(x.count, y.count) {
+            let p = i < x.count ? x[i] : 0, q = i < y.count ? y[i] : 0
+            if p != q { return p > q }
+        }
+        return false
     }
 }

@@ -4,8 +4,9 @@
     - New app icon.
     - Small previews (Finder's column and gallery views, Get Info) show smaller text, set in General with the new Text Size in Small Previews slider (70% by default), and a 15 pt margin for code and Markdown alike.
     - In small notebook previews, `In [n]:` and `Out[n]:` sit on their own line above the cell, in faded italics.
-    - Settings are grouped like System Settings, in a smaller 5:4 window, and the app opens on General.
-    - The version shown in General leaves out the build number.
+    - Settings in a standard toolbar (General, Code, Markdown & Notebook), with grouped rows like System Settings, in a smaller 5:4 window; the app opens on General.
+    - General has a GitHub link and Check for Updates: a newer release installs through Terminal with the install command, and the app reopens.
+    - No What's New window after an update; the version shown leaves out the build number.
 - 1.1.0 *18 November 2026*
     - Settings in three tabs: General, Code and Markdown & Notebook. Changes save as you make them, so there is no Apply button, and the app opens on the Code tab.
     - Set the Markdown and notebook text size and code block size.

@@ -121,6 +121,9 @@ struct BUFFOON_CONSTANTS {
     static let SUITE_NAME                       = ".suite.preview-code"
     static let APP_STORE                        = "https://apps.apple.com/gb/app/previewcode/id1571797683"
     static let MAIN_URL                         = "https://github.com/KehengZhu/QuicklookAnything"
+    // LOCAL: update checks and the one-line installer, which also upgrades
+    static let LATEST_RELEASE_API               = "https://api.github.com/repos/KehengZhu/QuicklookAnything/releases/latest"
+    static let INSTALL_COMMAND                  = "curl -fsSL https://raw.githubusercontent.com/KehengZhu/QuicklookAnything/main/install.sh | zsh"
     static let LINE_BREAK                       = "\n"
     static let MAX_FEEDBACK_SIZE                = 512
     static let MAX_THUMBNAIL_READ_SIZE          = 1024

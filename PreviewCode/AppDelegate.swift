@@ -138,6 +138,8 @@ final class AppDelegate: NSResponder,
     internal var smallScaleSlider: NSSlider!    = nil
     internal var smallScaleLabel: NSTextField!  = nil
     internal var smallScaleNote: NSTextField?   = nil
+    internal var updateNote: NSTextField?       = nil
+    internal var updateButton: NSButton?        = nil
 
     /*
      Replace the following string with your own team ID. This is used to
@@ -207,19 +209,23 @@ final class AppDelegate: NSResponder,
 
         localApplicationDidFinishLaunching()
 
-        // Show the `What's New` panel if we need to
-        // NOTE Has to take place at the end of the function
-        doShowWhatsNew(nil)
+        // LOCAL: no `What's New` panel after an update; the changes are in the
+        // release notes on GitHub
 
         // Centre the main window and display
         setInfoText(self.infoLabel)
         setversionText(self.versionLabel)
         self.window.delegate = self
-        // LOCAL: a fixed 5:4 window; the tabs lay out to fit it
+        // LOCAL: a fixed 5:4 window, toolbar included; the tabs lay out to fit it
         let windowSize = NSSize(width: 680, height: 544)
-        self.window.contentMinSize = windowSize
-        self.window.contentMaxSize = windowSize
+        self.window.contentMinSize = NSSize(width: 100, height: 100)
+        self.window.contentMaxSize = NSSize(width: 4000, height: 4000)
         self.window.setContentSize(windowSize)
+        let chrome = self.window.frame.height - (self.window.contentView?.frame.height ?? windowSize.height)
+        let contentSize = NSSize(width: windowSize.width, height: windowSize.height - chrome)
+        self.window.contentMinSize = contentSize
+        self.window.contentMaxSize = contentSize
+        self.window.setContentSize(contentSize)
         self.window.center()
         self.window.makeKeyAndOrderFront(self)
 
@@ -432,6 +438,10 @@ final class AppDelegate: NSResponder,
 
         self.tabManager.programmaticallyClickButton(at: index)
         self.tabBar?.selectedSegment = index
+        if index < SettingsTab.all.count {
+            self.window.toolbar?.selectedItemIdentifier = SettingsTab.all[index].id
+            self.window.title = SettingsTab.all[index].label
+        }
     }
 
 

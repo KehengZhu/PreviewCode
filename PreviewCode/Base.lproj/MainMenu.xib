@@ -1120,7 +1120,7 @@ running this app once more.</string>
                             <action selector="doSwitchTabWithSender:" target="Voe-Tx-rLC" id="baA-Za-2i5"/>
                         </connections>
                     </button>
-                    <box boxType="custom" borderType="line" borderWidth="2" title="Box" titlePosition="noTitle" translatesAutoresizingMaskIntoConstraints="NO" id="toV-NQ-YRO">
+                    <box hidden="YES" boxType="custom" borderType="line" borderWidth="2" title="Box" titlePosition="noTitle" translatesAutoresizingMaskIntoConstraints="NO" id="toV-NQ-YRO">
                         <rect key="frame" x="0.0" y="342" width="800" height="2"/>
                         <view key="contentView" id="YPq-sF-1y9">
                             <rect key="frame" x="2" y="0.0" width="796" height="2"/>
@@ -1141,7 +1141,7 @@ running this app once more.</string>
                     <constraint firstItem="toV-NQ-YRO" firstAttribute="top" secondItem="Kdv-wh-S0Y" secondAttribute="bottom" constant="16" symbolic="YES" id="Pja-Yf-cBE"/>
                     <constraint firstItem="CHZ-dY-741" firstAttribute="leading" secondItem="Abu-Ly-NyT" secondAttribute="trailing" constant="10" symbolic="YES" id="Xgb-Ax-ns3"/>
                     <constraint firstItem="CHZ-dY-741" firstAttribute="top" secondItem="nG3-Id-QUi" secondAttribute="top" constant="11" id="e85-bs-VOk"/>
-                    <constraint firstItem="Efa-Tr-CoS" firstAttribute="top" secondItem="toV-NQ-YRO" secondAttribute="bottom" constant="20" symbolic="YES" id="emE-Ro-EBF"/>
+                    <constraint firstItem="Efa-Tr-CoS" firstAttribute="top" secondItem="toV-NQ-YRO" secondAttribute="bottom" constant="4" id="emE-Ro-EBF"/>
                     <constraint firstItem="toV-NQ-YRO" firstAttribute="leading" secondItem="nG3-Id-QUi" secondAttribute="leading" id="gwz-Ko-vX9"/>
                     <constraint firstAttribute="trailing" secondItem="toV-NQ-YRO" secondAttribute="trailing" id="iJT-3k-4p4"/>
                     <constraint firstAttribute="bottom" secondItem="Efa-Tr-CoS" secondAttribute="bottom" id="j8N-qi-ojS"/>
