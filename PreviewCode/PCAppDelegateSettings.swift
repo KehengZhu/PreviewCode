@@ -216,6 +216,7 @@ extension AppDelegate {
      */
     private func setThemeControls() {
 
+        updateThemeIcons()
         switch self.themeDisplayMode {
             case BUFFOON_CONSTANTS.DISPLAY_MODE.LIGHT:
                 self.lightRadioButton.state = .on
@@ -834,6 +835,67 @@ extension AppDelegate {
 
 
     /**
+     A theme's preview: the sample code (code-sample.txt) highlighted in the
+     theme, 256 x 134 points. Each theme is drawn once, when first shown.
+
+     LOCAL: replaces the original app's prerendered images, which are not in
+     this repository
+
+     - Parameters:
+        - index: The theme's index in `themes`.
+
+     - Returns: The preview, or `nil` if it can't be drawn.
+     */
+    internal func themePreview(_ index: Int) -> NSImage? {
+
+        if let image = self.themePreviews[index] {
+            return image
+        }
+
+        guard index >= 0 && index < self.themes.count else { return nil }
+        if self.themeRenderer == nil {
+            self.themeRenderer = Common(forThumbnail: false)
+        }
+
+        if self.themeSample == nil {
+            self.themeSample = loadBundleFile(BUFFOON_CONSTANTS.FILE_CODE_SAMPLE, ofType: "txt")
+        }
+
+        guard let renderer = self.themeRenderer, let sample = self.themeSample else { return nil }
+
+        // Draw at twice the size, with the code's own font size, then show it at half
+        renderer.updateTheme(codedName(index))
+        let frame = NSMakeRect(0, 0, 512, 268)
+        let textView = NSTextView(frame: frame)
+        textView.textContainerInset = NSMakeSize(10, 10)
+        textView.textStorage?.setAttributedString(renderer.getAttributedString(sample, "swift"))
+        textView.backgroundColor = renderer.themeBackgroundColour
+        guard let rep = textView.bitmapImageRepForCachingDisplay(in: frame) else { return nil }
+        textView.cacheDisplay(in: frame, to: rep)
+
+        let image = NSImage(size: NSMakeSize(256, 134))
+        image.addRepresentation(rep)
+        self.themePreviews[index] = image
+        return image
+    }
+
+
+    /**
+     Show the selected dark and light themes' previews next to their names.
+
+     LOCAL
+     */
+    internal func updateThemeIcons() {
+
+        guard !self.themes.isEmpty else { return }
+        self.darkThemeIcon.imageScaling = .scaleAxesIndependently
+        self.lightThemeIcon.imageScaling = .scaleAxesIndependently
+        self.darkThemeIcon.image = themePreview(self.darkThemeIndex)
+        self.lightThemeIcon.image = themePreview(self.lightThemeIndex)
+    }
+
+
+    /**
      Render all the themes as 512 x 268 PNG files.
 
      Run this from the **Help** menu in debug sessions.
@@ -983,19 +1045,25 @@ extension AppDelegate {
         // and thus the theme from that list
         let index = getBaseIndex(row)
         let theme = self.themes[index]
-        let themeCSS = theme["css"] as! String
 
         // Populate cell
         cell.themePreviewTitle.stringValue = theme["name"] as! String
         cell.themeIndex = index
 
-        // FROM 1.1.0
-        // Use images rather then JIT-rendered NSTextViews (too slow)
-        if let themePreview = NSImage(named: themeCSS) {
-            let imv = NSImageView(image: themePreview)
-            imv.frame = tableView == self.nuThemeTable ? NSMakeRect(8, 8, 256, 134) : NSMakeRect(0, 0, 128, 67)
-            cell.addSubview(imv)
-        }
+        // LOCAL: the preview, drawn the first time the theme is shown. Cells are
+        // reused, so the image view is added once per cell.
+        let previewID = NSUserInterfaceItemIdentifier("theme-preview")
+        let preview = cell.subviews.first { $0.identifier == previewID } as? NSImageView ?? {
+            let view = NSImageView(frame: NSMakeRect(8, 8, 256, 134))
+            view.identifier = previewID
+            view.imageScaling = .scaleAxesIndependently
+            view.wantsLayer = true
+            view.layer?.cornerRadius = 6
+            view.layer?.masksToBounds = true
+            cell.addSubview(view)
+            return view
+        }()
+        preview.image = themePreview(index)
 
         return cell
     }
@@ -1031,6 +1099,8 @@ extension AppDelegate {
                     }
                 }
         }
+
+        updateThemeIcons()
 
         // FROM 2.2.1
         // LOCAL: save the change

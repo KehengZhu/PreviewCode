@@ -438,7 +438,7 @@ Contains Highlight.js © 2006-25, Josh Goebel and Other Contributors; and Highli
                                                 <constraint firstAttribute="height" constant="16" id="6YK-bU-PYy"/>
                                                 <constraint firstAttribute="width" constant="32" id="kBg-yc-XWa"/>
                                             </constraints>
-                                            <imageCell key="cell" refusesFirstResponder="YES" alignment="left" animates="YES" imageScaling="proportionallyDown" image="folder-icon-light" id="8f6-Vl-yHX"/>
+                                            <imageCell key="cell" refusesFirstResponder="YES" alignment="left" animates="YES" imageScaling="proportionallyDown" id="8f6-Vl-yHX"/>
                                         </imageView>
                                         <imageView horizontalHuggingPriority="251" verticalHuggingPriority="251" allowsExpansionToolTips="YES" translatesAutoresizingMaskIntoConstraints="NO" id="3cp-Eq-Ykf" customClass="PCImageView" customModule="PreviewCode" customModuleProvider="target">
                                             <rect key="frame" x="107" y="122" width="32" height="16"/>
@@ -446,7 +446,7 @@ Contains Highlight.js © 2006-25, Josh Goebel and Other Contributors; and Highli
                                                 <constraint firstAttribute="height" constant="16" id="4Sb-PY-WZd"/>
                                                 <constraint firstAttribute="width" constant="32" id="v8Y-qg-syy"/>
                                             </constraints>
-                                            <imageCell key="cell" refusesFirstResponder="YES" alignment="left" animates="YES" imageScaling="proportionallyDown" image="folder-icon-dark" id="OhM-j0-sR8"/>
+                                            <imageCell key="cell" refusesFirstResponder="YES" alignment="left" animates="YES" imageScaling="proportionallyDown" id="OhM-j0-sR8"/>
                                             <connections>
                                                 <action selector="doShowThemeList:" target="Voe-Tx-rLC" id="YjU-xY-jOS"/>
                                             </connections>
@@ -713,8 +713,6 @@ Contains Highlight.js © 2006-25, Josh Goebel and Other Contributors; and Highli
         <image name="ant" catalog="system" width="14" height="18"/>
         <image name="document" catalog="system" width="14" height="16"/>
         <image name="ellipsis.circle" catalog="system" width="20" height="20"/>
-        <image name="folder-icon-dark" width="32" height="16"/>
-        <image name="folder-icon-light" width="32" height="16"/>
         <image name="questionmark.circle" catalog="system" width="15" height="15"/>
     </resources>
 </document>

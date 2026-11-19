@@ -96,6 +96,10 @@ final class AppDelegate: NSResponder,
     internal var mdFontSizeLabel: NSTextField!  = nil
     internal var mdCodeSizeSlider: NSSlider!    = nil
     internal var mdCodeSizeLabel: NSTextField!  = nil
+    // LOCAL: theme previews, drawn when first shown (see `themePreview(_:)`)
+    internal var themePreviews: [Int: NSImage]  = [:]
+    internal var themeRenderer: Common?         = nil
+    internal var themeSample: String?           = nil
     // LOCAL: settings save as they change, but only once they have been loaded
     internal var settingsLoaded: Bool           = false
     // LOCAL: the General tab's controls, built in code by `buildGeneralPage()`

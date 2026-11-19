@@ -36,14 +36,18 @@ class PCImageView: NSImageView {
     // MARK: - Public Functions
 
     override func draw(_ dirtyRect: NSRect) {
-        
+
+        // LOCAL: round the image's corners to match the outline
+        NSGraphicsContext.saveGraphicsState()
+        NSBezierPath(roundedRect: self.bounds.insetBy(dx: 1, dy: 1), xRadius: 3.0, yRadius: 3.0).addClip()
         super.draw(dirtyRect)
+        NSGraphicsContext.restoreGraphicsState()
 
         if let gc = NSGraphicsContext.current {
             // Lock the context
             gc.saveGraphicsState()
 
-            // Set the colours we'll be using
+            // Set the colors we'll be using
             if self.outline {
                 NSColor.controlAccentColor.setStroke()
                 self.alphaValue = 1.0
