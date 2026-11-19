@@ -12,24 +12,6 @@ import Highlighter
 
 extension AppDelegate {
 
-    /**
-     Disable all panel-opening menu items.
-     */
-    internal func localHides() {
-
-        self.helpMenuReportBug.isEnabled = false
-    }
-
-
-    /**
-     Enable all panel-opening menu items.
-     */
-    internal func localShows() {
-
-        self.helpMenuReportBug.isEnabled = true
-    }
-
-
     internal func localApplicationDidFinishLaunching() {
 
 #if DEBUG

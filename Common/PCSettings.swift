@@ -130,11 +130,10 @@ final class PCSettings {
 
      MOVED HERE 2.2.3
 
-     - Paramters:
-        - suite:   The app suite name.
-        - version: The app version number.
+     - Parameters:
+        - suite: The app suite name.
      */
-    public func registerSettings(_ suite: String, _ version: String) {
+    public func registerSettings(_ suite: String) {
 
         if let defaults = UserDefaults(suiteName: suite) {
             // Check if each preference value exists -- set if it doesn't
@@ -184,18 +183,6 @@ final class PCSettings {
             if defaultDisplayMode == nil {
                 defaults.setValue(BUFFOON_CONSTANTS.DISPLAY_MODE.AUTO,
                                   forKey: BUFFOON_CONSTANTS.PREFS_IDS.PREVIEW_THEME_MODE)
-            }
-            
-            // Show the What's New sheet
-            // Default: true
-            // This is a version-specific preference suffixed with, eg, '-2-3'. Once created
-            // this will persist, but with each new major and/or minor version, we make a
-            // new preference that will be read by 'doShowWhatsNew()' to see if the sheet
-            // should be shown this run
-            let key = BUFFOON_CONSTANTS.PREFS_IDS.MAIN_WHATS_NEW + version
-            let showNewDefault: Any? = defaults.object(forKey: key)
-            if showNewDefault == nil {
-                defaults.setValue(true, forKey: key)
             }
             
             // FROM 2.0.0

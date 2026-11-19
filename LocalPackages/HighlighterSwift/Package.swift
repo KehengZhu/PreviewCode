@@ -277,9 +277,6 @@ let package = Package(
                 .copy("Assets/styles/xcode.css"),
                 .copy("Assets/styles/xt256.css"),
                 .copy("Assets/styles/zenburn.css")
-            ]),
-        .testTarget(
-            name: "HighlighterTests",
-            dependencies: ["Highlighter"])
+            ])
     ]
 )

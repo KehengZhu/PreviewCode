@@ -7,8 +7,6 @@
  */
 
 import Cocoa
-import CoreServices
-import WebKit
 import Highlighter
 
 
@@ -19,7 +17,6 @@ typealias ThemeRecord = [String: Any]
 @MainActor
 final class AppDelegate: NSResponder,
                          NSApplicationDelegate,
-                         WKNavigationDelegate,
                          NSTableViewDelegate,
                          NSTableViewDataSource,
                          NSTextViewDelegate,
@@ -33,28 +30,18 @@ final class AppDelegate: NSResponder,
     // Menu Items
     @IBOutlet var helpMenuOnlineHelp: NSMenuItem!
     @IBOutlet var helpMenuAcknowledgments: NSMenuItem!
-    @IBOutlet var helpMenuAppStoreRating: NSMenuItem!
     @IBOutlet var helpMenuHighlightr: NSMenuItem!
     @IBOutlet var helpMenuHighlightjs: NSMenuItem!
     @IBOutlet var helpMenuHighlighterSwift: NSMenuItem!
-    @IBOutlet var helpMenuOthersPreviewMarkdown: NSMenuItem!
-    @IBOutlet var helpMenuOthersPreviewJson: NSMenuItem!
     @IBOutlet var helpMenuRenderThemes: NSMenuItem!
-    // FROM 1.2.5
-    @IBOutlet var helpMenuWhatsNew: NSMenuItem!
     @IBOutlet var helpMenuReportBug: NSMenuItem!
-    @IBOutlet var mainMenuSettings: NSMenuItem!
-    
-    // Main Window
+
+    // Main Window: one tab per toolbar item (General, Code, Markdown & Notebook)
     @IBOutlet var window: NSWindow!
-    @IBOutlet weak var infoButton: NSButton!
-    @IBOutlet weak var settingsButton: NSButton!
-    @IBOutlet weak var feedbackButton: NSButton!
     @IBOutlet weak var mainTabView: NSTabView!
 
-    // Window > Info Tab Items
+    // Window > General Tab Items
     @IBOutlet var versionLabel: NSTextField!
-    @IBOutlet var infoLabel: NSTextField!
 
     // Window > Settings Tab Items
     @IBOutlet weak var fontSizeSlider: NSSlider!
@@ -70,9 +57,6 @@ final class AppDelegate: NSResponder,
     @IBOutlet weak var lightThemeIcon: PCImageView!
     @IBOutlet weak var themeHelpLabel: NSTextField!
     @IBOutlet weak var lineSpacingPopup: NSPopUpButton!
-    @IBOutlet weak var applyButton: NSButton!
-    // FROM 2.0.0
-    //@IBOutlet weak var showLineNumbersCheckbox: NSButton!
     @IBOutlet weak var settingsHelpButton: NSButton!
     @IBOutlet weak var defaultsButton: NSButton!
     // FROM 2.3.0
@@ -81,35 +65,19 @@ final class AppDelegate: NSResponder,
     @IBOutlet weak var nuThemeTable: NSTableView!
     @IBOutlet weak var showLineNumbersSwitch: NSSwitch!
 
-    // Window > Feedback Tab Items
-    @IBOutlet weak var feedbackText: NSTextField!
-    @IBOutlet weak var connectionProgress: NSProgressIndicator!
-    @IBOutlet weak var messageSizeLabel: NSTextField!
-    @IBOutlet weak var messageSendButton: NSButton!
-
-    // What's New Sheet
-    @IBOutlet var whatsNewWindow: NSWindow!
-    @IBOutlet var whatsNewWebView: WKWebView!
-
-    // FROM 2.3.0
-    // Advanced Settings Sheet
-    @IBOutlet weak var advancedSettingsSheet: NSWindow!
-    @IBOutlet weak var applyAdvancedButton: NSButton!
-    // LOCAL: window width and height fields replace the Small/Medium/Large popup
+    // LOCAL: formerly in the Advanced Settings sheet. The Quick Look window
+    // size fields are on the General tab, the others on the Code tab.
     @IBOutlet weak var previewWidthAdvancedText: NSTextField!
     @IBOutlet weak var previewHeightAdvancedText: NSTextField!
     @IBOutlet weak var tintThumbnailsAdvancedSwitch: NSSwitch!
     @IBOutlet weak var tintThumbnailsAdvancedLabel: NSTextField!
     @IBOutlet weak var previewMarginSizeText: NSTextField!
-    @IBOutlet weak var previewMarginRangeText: NSTextField!
-    @IBOutlet weak var advancedHelpButton: NSButton!
 
 
     // MARK: - Private Properies
 
     internal var currentSettings: PCSettings    = PCSettings()
     internal let defaultSettings: PCSettings    = PCSettings()
-    internal var whatsNewNav: WKNavigation?     = nil
     internal var fonts: [PAFont]                = []
     internal var themes: [ThemeRecord]          = []
     internal var darkThemes: [Int]              = []
@@ -117,9 +85,6 @@ final class AppDelegate: NSResponder,
     internal var themeDisplayMode: Int          = BUFFOON_CONSTANTS.DISPLAY_MODE.AUTO
     internal var darkThemeIndex: Int            = 30    // atom-one-dark
     internal var lightThemeIndex: Int           = 29    // atom-one-light
-    // FROM 2.0.0
-    private  var tabManager: PATabManager       = PATabManager()
-    internal var hasSentFeedback: Bool          = false
     // FROM 2.2.4
     internal var oldMag: CGFloat                = 0.0
     internal var timer: Timer?                  = nil
@@ -133,8 +98,7 @@ final class AppDelegate: NSResponder,
     internal var mdCodeSizeLabel: NSTextField!  = nil
     // LOCAL: settings save as they change, but only once they have been loaded
     internal var settingsLoaded: Bool           = false
-    // LOCAL: the tab bar: General, Code, Markdown & Notebook
-    internal var tabBar: NSSegmentedControl!    = nil
+    // LOCAL: the General tab's controls, built in code by `buildGeneralPage()`
     internal var smallScaleSlider: NSSlider!    = nil
     internal var smallScaleLabel: NSTextField!  = nil
     internal var smallScaleNote: NSTextField?   = nil
@@ -163,57 +127,30 @@ final class AppDelegate: NSResponder,
         }
 
         // Set application group-level defaults
-        self.defaultSettings.registerSettings(self.appSuiteName, getVersion())
+        self.defaultSettings.registerSettings(self.appSuiteName)
 
         // Disable the Help menu Spotlight features
         NSApplication.shared.helpMenu = NSMenu(title: "Dummy")
 
-        self.infoButton.toolTip = "About \(BUFFOON_CONSTANTS.APP_NAME)"
-        self.settingsButton.toolTip = "Set preview styles and content"
-        self.feedbackButton.toolTip = "Set Markdown and notebook text sizes"
-        self.infoButton.alphaValue = 1.0
-        self.settingsButton.alphaValue = 1.0
-        self.feedbackButton.alphaValue = 1.0
-
-        // LOCAL: the third tab, formerly Feedback (there is no feedback server),
-        // holds the Markdown and notebook settings. Settings save as they change,
+        // LOCAL: the tabs are laid out in code. Settings save as they change,
         // so there is no Apply button.
         buildMarkdownPage()
-        self.applyButton.isHidden = true
         buildGeneralPage()
         rearrangeCodePage()
-        buildTabBar()
-
-        // FROM 2.0.0
-        // Configure the tab manager
-        self.tabManager.parent = self
-        self.tabManager.buttons.append(self.infoButton)
-        self.tabManager.buttons.append(self.settingsButton)
-        self.tabManager.buttons.append(self.feedbackButton)
-        // Add callback closures, one per tab, to the tab manager
-        self.tabManager.callbacks.append(nil)   // Info tab
-        self.tabManager.callbacks.append { self.willShowSettingsPage() }
-        self.tabManager.callbacks.append(nil)   // Markdown tab
-
-        // Clear the `Feedback` tab
-        // NOTE Don't initialise the Settings tab here too:
-        //      It must happen after we've got a list of fonts
-        initialiseFeedback()
+        buildToolbar()
 
         // Set the `Settings` tab's tooltips
         initialiseSettings()
 
         // FROM 2.3.0
         self.previewMarginSizeText.delegate = self
-        self.previewMarginRangeText.stringValue = "Valid range \(BUFFOON_CONSTANTS.PREVIEW_SIZE.MARGIN_WIDTH_MIN)-\(BUFFOON_CONSTANTS.PREVIEW_SIZE.MARGIN_WIDTH_MAX)"
 
         localApplicationDidFinishLaunching()
 
         // LOCAL: no `What's New` panel after an update; the changes are in the
         // release notes on GitHub
 
-        // Centre the main window and display
-        setInfoText(self.infoLabel)
+        // Center the main window and display
         setversionText(self.versionLabel)
         self.window.delegate = self
         // LOCAL: a fixed 5:4 window, toolbar included; the tabs lay out to fit it
@@ -254,29 +191,14 @@ final class AppDelegate: NSResponder,
     internal func doClose(_ sender: Any) {
 
         Task { @MainActor in
-            await closeBasics()
             await closeSettings()
         }
     }
 
 
     /**
-     Close sheets and perform other general close-related tasks.
-
-     FROM 2.0.0
-     */
-    internal func closeBasics() async {
-
-        // Close the What's New sheet if it's open
-        if self.whatsNewWindow.isVisible {
-            self.whatsNewWindow.close()
-        }
-    }
-
-
-    /**
      Handle a settings-change call to action, if there is one, and either bail (to allow the user
-     to save the settings) or move on to the feedback check.
+     to save the settings) or close the main window, which quits the app.
 
      FROM 2.0.0
      */
@@ -297,35 +219,6 @@ final class AppDelegate: NSResponder,
             }
         }
 
-        // Move on to the next phase: the feedback check
-        await closeFeedback()
-    }
-
-
-    /**
-     Handle a feedback-unsent call to action, if one is needed, and either bail (to all the user
-     to send the feedback) or close the main window.
-
-     FROM 2.0.0
-     */
-    internal func closeFeedback() async {
-
-        // Does the feeback page contain text? If so let the user know
-        if self.feedbackText.stringValue.count > 0 && !self.hasSentFeedback {
-            let alert = makeAlert("You have unsent feedback",
-                                  "Do you wish to cancel and send it, or quit the app anyway?",
-                                  false)
-            alert.addButton(withTitle: "Quit")
-            alert.addButton(withTitle: "Cancel")
-
-            let response = await alert.beginSheetModal(for: self.window)
-            if response != .alertFirstButtonReturn {
-                // The user clicked 'Cancel'
-                return
-            }
-        }
-
-        // No feedback text to send/ignore so close the window which will trigger an app closure
         self.window.close()
     }
 
@@ -351,18 +244,12 @@ final class AppDelegate: NSResponder,
             path += "#credits"
         } else if item == self.helpMenuReportBug {
             path += "/issues"
-        } else if item == self.helpMenuAppStoreRating {
-            path = BUFFOON_CONSTANTS.APP_STORE + "?action=write-review"
         } else if item == self.helpMenuHighlightr {
             path = "https://github.com/raspu/Highlightr"
         } else if item == self.helpMenuHighlightjs {
             path = "https://github.com/highlightjs/highlight.js"
         } else if item == self.helpMenuHighlighterSwift {
             path = "https://github.com/smittytone/HighlighterSwift"
-        } else if item == self.helpMenuOthersPreviewMarkdown {
-            path = BUFFOON_CONSTANTS.APP_URLS.PM
-        } else if item == self.helpMenuOthersPreviewJson {
-            path = BUFFOON_CONSTANTS.APP_URLS.PJ
         }
         
         // Open the selected website
@@ -379,16 +266,7 @@ final class AppDelegate: NSResponder,
     @IBAction
     private func doShowPrefsHelp(sender: Any) {
         
-        let path: String
-        if sender as? NSButton == self.advancedHelpButton {
-            path = BUFFOON_CONSTANTS.MAIN_URL + "#settings"
-        } else {
-            path = BUFFOON_CONSTANTS.MAIN_URL + "#settings"
-        }
-
-        // Open the selected website
-        // FROM 2.2.3 -- more safely
-        if let url = URL(string: path) {
+        if let url = URL(string: BUFFOON_CONSTANTS.MAIN_URL + "#settings") {
             NSWorkspace.shared.open(url)
         }
     }
@@ -406,80 +284,32 @@ final class AppDelegate: NSResponder,
 
 
     @IBAction
-    private func doSwitchTab(sender: NSButton) {
-
-        // FROM 2.0.0
-        self.tabManager.buttonClicked(sender)
-    }
-
-
-    @IBAction
     private func doShowSettings(sender: Any) {
 
-        // FROM 2.0.0
         showTab(0)
-    }
-
-
-    @IBAction
-    private func doShowFeedback(sender: Any) {
-
-        // FROM 2.0.0
-        self.tabManager.programmaticallyClickButton(at: 2)
+        self.window.makeKeyAndOrderFront(self)
     }
 
 
     /**
-     Show a tab and select it in the tab bar.
+     Show a tab and select its toolbar item.
 
      LOCAL: 0 General, 1 Code, 2 Markdown & Notebook
      */
     internal func showTab(_ index: Int) {
 
-        self.tabManager.programmaticallyClickButton(at: index)
-        self.tabBar?.selectedSegment = index
-        if index < SettingsTab.all.count {
-            self.window.toolbar?.selectedItemIdentifier = SettingsTab.all[index].id
-            self.window.title = SettingsTab.all[index].label
+        guard index >= 0, index < SettingsTab.all.count else { return }
+        if index == 1 {
+            willShowSettingsPage()
         }
-    }
 
-
-    @objc
-    internal func doSelectTab(_ sender: NSSegmentedControl) {
-
-        // Leave a text field so its value is checked and saved first
-        self.window.makeFirstResponder(nil)
-        showTab(sender.selectedSegment)
+        self.mainTabView.selectTabViewItem(at: index)
+        self.window.toolbar?.selectedItemIdentifier = SettingsTab.all[index].id
+        self.window.title = SettingsTab.all[index].label
     }
 
 
     // MARK: - Window Set Up Functions
-
-    /**
-     Create and display the information text label. This is done programmatically
-     because we're using an NSAttributedString rather than a plain string.
-     */
-    private func setInfoText(_ text: NSTextField) {
-
-        // Set the attributes
-        let bodyAtts: [NSAttributedString.Key: Any] = [
-            .font: NSFont.systemFont(ofSize: 13.0),
-            .foregroundColor: NSColor.labelColor
-        ]
-
-        let boldAtts : [NSAttributedString.Key: Any] = [
-            .font: NSFont.systemFont(ofSize: 13.0, weight: .bold),
-            .foregroundColor: NSColor.labelColor
-        ]
-
-        let infoText = NSMutableAttributedString(string: "Select a file in Finder and press Space to preview it. Changes save as you make them. Turn the extensions off and on in ", attributes: bodyAtts)
-        let boldText = NSAttributedString(string: "System Settings > General > Login Items & Extensions > Quick Look", attributes: boldAtts)
-        infoText.append(boldText)
-        infoText.append(NSAttributedString(string: "; if previews stop appearing, run the install command again.", attributes: bodyAtts))
-        text.attributedStringValue = infoText
-    }
-
 
     /**
      Add the app's version number to the UI.

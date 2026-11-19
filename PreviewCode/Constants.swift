@@ -76,18 +76,8 @@ struct BUFFOON_CONSTANTS {
         static let LIGHT_THEME                  = "light.atom-one-light"
     }
 
-    struct APP_URLS {
-        
-        static let PM                           = "https://apps.apple.com/us/app/previewmarkdown/id1492280469?ls=1"
-        static let PC                           = "https://apps.apple.com/us/app/previewcode/id1571797683?ls=1"
-        static let PY                           = "https://apps.apple.com/us/app/previewyaml/id1564574724?ls=1"
-        static let PJ                           = "https://apps.apple.com/us/app/previewjson/id6443584377?ls=1"
-        static let PT                           = "https://apps.apple.com/us/app/previewtext/id1660037028?ls=1"
-    }
-
     struct PREFS_IDS {
         
-        static let MAIN_WHATS_NEW               = "com-bps-previewcode-do-show-whats-new-"
         static let PREVIEW_FONT_SIZE            = "com-bps-previewcode-base-font-size"
         static let PREVIEW_FONT_NAME            = "com-bps-previewcode-base-font-name"
         static let PREVIEW_LINE_SPACING         = "com-bps-previewcode-line-spacing"
@@ -119,13 +109,10 @@ struct BUFFOON_CONSTANTS {
     static let FILE_CODE_SAMPLE                 = "code-sample"
     static let FILE_THEME_LIST                  = "themes-list"
     static let SUITE_NAME                       = ".suite.preview-code"
-    static let APP_STORE                        = "https://apps.apple.com/gb/app/previewcode/id1571797683"
     static let MAIN_URL                         = "https://github.com/KehengZhu/QuicklookAnything"
     // LOCAL: update checks and the one-line installer, which also upgrades
     static let LATEST_RELEASE_API               = "https://api.github.com/repos/KehengZhu/QuicklookAnything/releases/latest"
     static let INSTALL_COMMAND                  = "curl -fsSL https://raw.githubusercontent.com/KehengZhu/QuicklookAnything/main/install.sh | zsh"
-    static let LINE_BREAK                       = "\n"
-    static let MAX_FEEDBACK_SIZE                = 512
     static let MAX_THUMBNAIL_READ_SIZE          = 1024
     // LOCAL: font sizes run from MIN to MAX in STEP increments (the slider in
     // MainMenu.xib uses the same values), replacing the fixed list of sizes
@@ -161,16 +148,4 @@ struct BUFFOON_CONSTANTS {
         static let MARGIN_WIDTH         = 16.0
         static let MARGIN_SIZE          = NSSize(width: MARGIN_WIDTH, height: MARGIN_WIDTH)
     }
-
-
-    /*
-     These entries are now no longer used. They are retained here for reference
-     *
-    struct PREFS_IDS {
-
-        static let PREVIEW_USE_LIGHT            = "com-bps-previewcode-do-use-light"
-        static let THUMB_FONT_SIZE              = "com-bps-previewcode-thumb-font-size"
-        static let PREVIEW_THEME_NAME           = "com-bps-previewcode-theme-name"
-    }
-     */
 }

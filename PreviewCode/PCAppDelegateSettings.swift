@@ -252,27 +252,6 @@ extension AppDelegate {
 
 
     /**
-     The user has clicked on the `Apply` button.
-
-     FROM 2.0.0
-
-     - Parameters:
-        - sender: The source of the action.
-     */
-    @IBAction
-    internal func doApplyCurrentSettings(sender: Any) {
-
-        // First, make sure changes have been made
-        if checkSettingsOnQuit() {
-            // Changes are present, so save them.
-            // NOTE This call updates the current settings values from the Settings tab UI.
-            saveSettings()
-            willShowSettingsPage()
-        }
-    }
-
-
-    /**
      The user has clicked on the `Defaults` button.
 
      NOTE This does not save the settings, it only updates Settings tab UI state.
@@ -424,7 +403,7 @@ extension AppDelegate {
         // FROM 2.3.0
         // Advanced Settings
         displayedSettings.thumbnailMatchFinderMode = self.tintThumbnailsAdvancedSwitch.state == .on
-        // LOCAL: preview window size in points (validated by `advancedValuesGood()`)
+        // LOCAL: preview window size in points (checked by `windowSizeWarning()`)
         displayedSettings.previewWindowWidth = CGFloat(Double(self.previewWidthAdvancedText.stringValue.trimmingCharacters(in: .whitespacesAndNewlines))
                                                        ?? BUFFOON_CONSTANTS.PREVIEW_WINDOW.WIDTH)
         displayedSettings.previewWindowHeight = CGFloat(Double(self.previewHeightAdvancedText.stringValue.trimmingCharacters(in: .whitespacesAndNewlines))
@@ -553,66 +532,7 @@ extension AppDelegate {
     }
 
 
-    // MARK: - Advanced Settings
-
-    @IBAction
-    internal func doShowAdvancedSettings(sender: Any) {
-
-        self.window.beginSheet(self.advancedSettingsSheet)
-    }
-
-
-    @IBAction
-    internal func doCloseAdvancedSettings(sender: Any) {
-
-        if advancedValuesGood() {
-            self.window.endSheet(self.advancedSettingsSheet)
-            willShowSettingsPage()
-            // LOCAL: save the change
-            autosaveSettings()
-        }
-    }
-
-
-    /**
-     Check that advanced settings textfield values are of the right type
-     and within range, presenting a warning if they are not.
-
-     FROM 2.0.3
-
-     - Returns: `true` if the values are good, otherwise `false`.
-     */
-    internal func advancedValuesGood() -> Bool {
-
-        // LOCAL: check the preview window size first
-        if let sizeWarning = windowSizeWarning() {
-            Task { @MainActor in
-                let alert = makeAlert("Something’s not right!", sizeWarning)
-                _ = await alert.beginSheetModal(for: self.advancedSettingsSheet)
-            }
-
-            return false
-        }
-
-        let warningMessage: String
-        if let previewMargin = Float(self.previewMarginSizeText.stringValue.trimmingCharacters(in: .whitespacesAndNewlines)) {
-            if previewMargin >= 0.0 && previewMargin <= 256.0 {
-                return true
-            }
-
-            warningMessage = "The preview margin value is outside the range \(BUFFOON_CONSTANTS.PREVIEW_SIZE.MARGIN_WIDTH_MIN)-\(BUFFOON_CONSTANTS.PREVIEW_SIZE.MARGIN_WIDTH_MAX)"
-        } else {
-            warningMessage = "The preview margin value must be a number in the range \(BUFFOON_CONSTANTS.PREVIEW_SIZE.MARGIN_WIDTH_MIN)-\(BUFFOON_CONSTANTS.PREVIEW_SIZE.MARGIN_WIDTH_MAX)"
-        }
-
-        Task { @MainActor in
-            let alert = makeAlert("Something’s not right!", warningMessage)
-            _ = await alert.beginSheetModal(for: self.advancedSettingsSheet)
-        }
-
-        return false
-    }
-
+    // MARK: - Field Checks
 
     /**
      Check the preview window width and height fields.
@@ -1378,21 +1298,13 @@ extension AppDelegate {
 
 
     /**
-     Build the Markdown tab: text sizes for Markdown notes and Jupyter notebooks,
-     in one group like the other tabs. It replaces the Feedback tab, whose
-     controls are hidden but kept, because their outlets are still referenced.
+     Build the Markdown tab, whose page is empty in MainMenu.xib: text sizes for
+     Markdown notes and Jupyter notebooks, in one group like the other tabs.
      */
     internal func buildMarkdownPage() {
 
         guard self.mainTabView.numberOfTabViewItems > 2,
               let page = self.mainTabView.tabViewItem(at: 2).view else { return }
-        // Hidden views still take part in layout: drop their constraints, so the
-        // old fixed-width controls cannot widen the window
-        page.removeConstraints(page.constraints)
-        for view in page.subviews {
-            view.isHidden = true
-            view.translatesAutoresizingMaskIntoConstraints = true
-        }
 
         func sizeSlider() -> NSSlider {
             let slider = NSSlider(value: BUFFOON_CONSTANTS.DEFAULTS.MD_FONT_SIZE,
@@ -1493,23 +1405,11 @@ extension AppDelegate {
 extension AppDelegate {
 
     /**
-     Replace the round tab icons with a settings toolbar, as in Apple's own apps:
-     General, Code and Markdown & Notebook, each an icon with a label. The window
-     title names the selected tab.
+     The settings toolbar, as in Apple's own apps: General, Code and
+     Markdown & Notebook, each an icon with a label. The window title names
+     the selected tab.
      */
-    internal func buildTabBar() {
-
-        guard let content = self.window.contentView else { return }
-        for button in [self.infoButton, self.settingsButton, self.feedbackButton] {
-            button?.isHidden = true
-        }
-
-        // The tabs start right below the toolbar, where the header was
-        NSLayoutConstraint.deactivate(content.constraints.filter {
-            ($0.firstItem === self.mainTabView && $0.firstAttribute == .top) ||
-            ($0.secondItem === self.mainTabView && $0.secondAttribute == .top)
-        })
-        self.mainTabView.topAnchor.constraint(equalTo: content.topAnchor, constant: 8).isActive = true
+    internal func buildToolbar() {
 
         let toolbar = NSToolbar(identifier: "io.github.kehengzhu.QuicklookAnything.settings")
         toolbar.delegate = self
@@ -1535,9 +1435,6 @@ extension AppDelegate {
         guard let page = self.mainTabView.tabViewItem(at: 0).view,
               let width = self.previewWidthAdvancedText,
               let height = self.previewHeightAdvancedText else { return }
-
-        // The settings rows and the version say what the old help text did
-        self.infoLabel?.isHidden = true
 
         let group = NSBox()
         group.boxType = .custom
