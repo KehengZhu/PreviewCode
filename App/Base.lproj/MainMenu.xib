@@ -432,7 +432,7 @@ Contains Highlight.js © 2006-25, Josh Goebel and Other Contributors; and Highli
                                                 <action selector="doChangeValueWithSender:" target="Voe-Tx-rLC" id="SPV-jg-kY5"/>
                                             </connections>
                                         </popUpButton>
-                                        <imageView horizontalHuggingPriority="251" verticalHuggingPriority="251" allowsExpansionToolTips="YES" translatesAutoresizingMaskIntoConstraints="NO" id="PjM-pz-TTz" customClass="PCImageView" customModule="QuicklookAnything" customModuleProvider="target">
+                                        <imageView horizontalHuggingPriority="251" verticalHuggingPriority="251" allowsExpansionToolTips="YES" translatesAutoresizingMaskIntoConstraints="NO" id="PjM-pz-TTz" customClass="ThemeImageView" customModule="QuicklookAnything" customModuleProvider="target">
                                             <rect key="frame" x="107" y="96" width="32" height="16"/>
                                             <constraints>
                                                 <constraint firstAttribute="height" constant="16" id="6YK-bU-PYy"/>
@@ -440,7 +440,7 @@ Contains Highlight.js © 2006-25, Josh Goebel and Other Contributors; and Highli
                                             </constraints>
                                             <imageCell key="cell" refusesFirstResponder="YES" alignment="left" animates="YES" imageScaling="proportionallyDown" id="8f6-Vl-yHX"/>
                                         </imageView>
-                                        <imageView horizontalHuggingPriority="251" verticalHuggingPriority="251" allowsExpansionToolTips="YES" translatesAutoresizingMaskIntoConstraints="NO" id="3cp-Eq-Ykf" customClass="PCImageView" customModule="QuicklookAnything" customModuleProvider="target">
+                                        <imageView horizontalHuggingPriority="251" verticalHuggingPriority="251" allowsExpansionToolTips="YES" translatesAutoresizingMaskIntoConstraints="NO" id="3cp-Eq-Ykf" customClass="ThemeImageView" customModule="QuicklookAnything" customModuleProvider="target">
                                             <rect key="frame" x="107" y="122" width="32" height="16"/>
                                             <constraints>
                                                 <constraint firstAttribute="height" constant="16" id="4Sb-PY-WZd"/>
@@ -667,7 +667,7 @@ Contains Highlight.js © 2006-25, Josh Goebel and Other Contributors; and Highli
                     </textFieldCell>
                     <tableColumnResizingMask key="resizingMask" resizeWithTable="YES" userResizable="YES"/>
                     <prototypeCellViews>
-                        <tableCellView identifier="previewcode-theme-cell" id="vOD-1n-Z2q" customClass="PCThemeTableCellView" customModule="QuicklookAnything" customModuleProvider="target">
+                        <tableCellView identifier="previewcode-theme-cell" id="vOD-1n-Z2q" customClass="ThemeTableCellView" customModule="QuicklookAnything" customModuleProvider="target">
                             <rect key="frame" x="0.0" y="0.0" width="500" height="0.0"/>
                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                             <userGuides>

@@ -1,6 +1,6 @@
 /*
- *  Common.swift
- *  PreviewCode
+ *  CodeRenderer.swift
+ *  Quicklook Anything
  *
  *  Created by Tony Smith on 30/05/2021.
  *  Copyright © 2026 Tony Smith. All rights reserved.
@@ -94,13 +94,13 @@ final class SharedHighlighter: @unchecked Sendable {
 
 // FROM 1.1.0
 // Implement as a class
-final internal class Common {
+final internal class CodeRenderer {
 
     // MARK: - Public Properties
 
     var themeBackgroundColour: NSColor          = .white
     var isThemeDark: Bool                       = false
-    var settings: PCSettings                    = PCSettings()
+    var settings: AppSettings                    = AppSettings()
 
 
     // MARK: - Private Properties
@@ -118,7 +118,7 @@ final internal class Common {
      identify the app suite and so share preferences set by the main app with
      the previewer and thumbnailer extensions.
      */
-    private var appSuiteName: String = MNU_SECRETS.PID + BUFFOON_CONSTANTS.SUITE_NAME
+    private var appSuiteName: String = Constants.TEAM_ID + Constants.SUITE_NAME
 
     
     // MARK: - Lifecycle Functions
@@ -134,16 +134,16 @@ final internal class Common {
 
         if forThumbnail {
             // Thumbnails use fixed, light-on-dark values
-            highlightJsThemeName = setTheme(BUFFOON_CONSTANTS.THUMBNAIL.THEME)
-            self.settings.fontSize = CGFloat(BUFFOON_CONSTANTS.THUMBNAIL.FONT_SIZE)
+            highlightJsThemeName = setTheme(Constants.THUMBNAIL.THEME)
+            self.settings.fontSize = CGFloat(Constants.THUMBNAIL.FONT_SIZE)
             self.isThumbnail = true
         } else {
             // Set preview theme details
             // FROM 1.3.0 -- adjust by current state or user setting
             switch self.settings.themeDisplayMode {
-                case BUFFOON_CONSTANTS.DISPLAY_MODE.LIGHT:
+                case Constants.DISPLAY_MODE.LIGHT:
                     highlightJsThemeName = setTheme(self.settings.lightThemeName)
-                case BUFFOON_CONSTANTS.DISPLAY_MODE.DARK:
+                case Constants.DISPLAY_MODE.DARK:
                     highlightJsThemeName = setTheme(self.settings.darkThemeName)
                     self.isThemeDark = true
                 default:
@@ -153,8 +153,8 @@ final internal class Common {
             }
 
             // Just in case the above block reads in zero value for the preview font size
-            if !(BUFFOON_CONSTANTS.FONT_SIZE_MIN...BUFFOON_CONSTANTS.FONT_SIZE_MAX).contains(self.settings.fontSize) {
-                self.settings.fontSize = CGFloat(BUFFOON_CONSTANTS.DEFAULTS.FONT_SIZE)
+            if !(Constants.FONT_SIZE_MIN...Constants.FONT_SIZE_MAX).contains(self.settings.fontSize) {
+                self.settings.fontSize = CGFloat(Constants.DEFAULTS.FONT_SIZE)
             }
         }
 
@@ -478,7 +478,7 @@ final internal class Common {
         // Remaining UTIs follow a standard structure:
         // eg. `public.objective-c-source`
         // So split by `.`, ignore the first item, and remove the `-xxx-yyy`
-        var sourceLanguage = BUFFOON_CONSTANTS.DEFAULTS.LANGUAGE_UTI
+        var sourceLanguage = Constants.DEFAULTS.LANGUAGE_UTI
         let parts = sourceFileUTI.components(separatedBy: ".")
         if parts.count > 0 {
             let index = parts.count - 1

@@ -1,6 +1,6 @@
 /*
  *  Constants.swift
- *  PreviewCode
+ *  Quicklook Anything
  *
  *  Created by Tony Smith on 30/05/2021.
  *  Copyright © 2026 Tony Smith. All rights reserved.
@@ -12,7 +12,11 @@ import Foundation
 /*
  * Combine the app's various constants into a struct
  */
-struct BUFFOON_CONSTANTS {
+struct Constants {
+
+    // LOCAL: the Developer Team ID. It prefixes the app group that shares the
+    // settings between the app and its extensions.
+    static let TEAM_ID                          = "BTT85F79L9"
 
     struct ERRORS {
 

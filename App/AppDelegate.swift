@@ -1,9 +1,10 @@
 /*
  *  AppDelegate.swift
- *  PreviewCode
+ *  Quicklook Anything
  *
- *  Created by Tony Smith on 30/05/2021.
- *  Copyright © 2026 Tony Smith. All rights reserved.
+ *  The settings app: its window, menus and lifecycle. The tabs are in the
+ *  AppDelegate+*.swift files.
+ *  Based on PreviewCode, Copyright © 2026 Tony Smith (MIT License).
  */
 
 import Cocoa
@@ -53,8 +54,8 @@ final class AppDelegate: NSResponder,
     @IBOutlet weak var autoRadioButton: NSButton!
     @IBOutlet weak var darkThemeLabel: NSTextField!
     @IBOutlet weak var lightThemeLabel: NSTextField!
-    @IBOutlet weak var darkThemeIcon: PCImageView!
-    @IBOutlet weak var lightThemeIcon: PCImageView!
+    @IBOutlet weak var darkThemeIcon: ThemeImageView!
+    @IBOutlet weak var lightThemeIcon: ThemeImageView!
     @IBOutlet weak var themeHelpLabel: NSTextField!
     @IBOutlet weak var lineSpacingPopup: NSPopUpButton!
     @IBOutlet weak var settingsHelpButton: NSButton!
@@ -76,13 +77,13 @@ final class AppDelegate: NSResponder,
 
     // MARK: - Private Properies
 
-    internal var currentSettings: PCSettings    = PCSettings()
-    internal let defaultSettings: PCSettings    = PCSettings()
-    internal var fonts: [PAFont]                = []
+    internal var currentSettings: AppSettings    = AppSettings()
+    internal let defaultSettings: AppSettings    = AppSettings()
+    internal var fonts: [FontRecord]                = []
     internal var themes: [ThemeRecord]          = []
     internal var darkThemes: [Int]              = []
     internal var lightThemes: [Int]             = []
-    internal var themeDisplayMode: Int          = BUFFOON_CONSTANTS.DISPLAY_MODE.AUTO
+    internal var themeDisplayMode: Int          = Constants.DISPLAY_MODE.AUTO
     internal var darkThemeIndex: Int            = 30    // atom-one-dark
     internal var lightThemeIndex: Int           = 29    // atom-one-light
     // FROM 2.2.4
@@ -98,7 +99,7 @@ final class AppDelegate: NSResponder,
     internal var mdCodeSizeLabel: NSTextField!  = nil
     // LOCAL: theme previews, drawn when first shown (see `themePreview(_:)`)
     internal var themePreviews: [Int: NSImage]  = [:]
-    internal var themeRenderer: Common?         = nil
+    internal var themeRenderer: CodeRenderer?         = nil
     internal var themeSample: String?           = nil
     // LOCAL: settings save as they change, but only once they have been loaded
     internal var settingsLoaded: Bool           = false
@@ -114,7 +115,7 @@ final class AppDelegate: NSResponder,
      identify the app suite and so share preferences set by the main app with
      the previewer and thumbnailer extensions.
      */
-    internal var appSuiteName: String = MNU_SECRETS.PID + BUFFOON_CONSTANTS.SUITE_NAME
+    internal var appSuiteName: String = Constants.TEAM_ID + Constants.SUITE_NAME
 
 
     // MARK: - Class Lifecycle Functions
@@ -122,7 +123,7 @@ final class AppDelegate: NSResponder,
     func applicationDidFinishLaunching(_ notification: Notification) {
 
         // Pre-load fonts in a separate thread
-        // NOTE This ultimately calls `AppDelegateSettings.loadSettings()`
+        // NOTE This ultimately calls `loadSettings()` (AppDelegate+Settings.swift)
         //      which we delay until after the fonts have loaded asynchronously
         //      because they reference loaded fonts.
         // FROM 2.4.1 - Upgrade to Swift Concurrency
@@ -149,7 +150,10 @@ final class AppDelegate: NSResponder,
         // FROM 2.3.0
         self.previewMarginSizeText.delegate = self
 
-        localApplicationDidFinishLaunching()
+#if DEBUG
+        // Help > Render Themes draws the theme previews as PNG files
+        self.helpMenuRenderThemes.isHidden = false
+#endif
 
         // LOCAL: no `What's New` panel after an update; the changes are in the
         // release notes on GitHub
@@ -239,7 +243,7 @@ final class AppDelegate: NSResponder,
         
         // Open the websites for contributors, help and suc
         guard let item = sender as? NSMenuItem else { return }
-        var path = BUFFOON_CONSTANTS.MAIN_URL
+        var path = Constants.MAIN_URL
 
         // Depending on the menu selected, set the load path
         if item == self.helpMenuOnlineHelp {
@@ -270,7 +274,7 @@ final class AppDelegate: NSResponder,
     @IBAction
     private func doShowPrefsHelp(sender: Any) {
         
-        if let url = URL(string: BUFFOON_CONSTANTS.MAIN_URL + "#settings") {
+        if let url = URL(string: Constants.MAIN_URL + "#settings") {
             NSWorkspace.shared.open(url)
         }
     }
@@ -323,6 +327,60 @@ final class AppDelegate: NSResponder,
         let version = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "unknown"
         // LOCAL: the version alone, without the build number
         text.stringValue = "Version \(version)"
+    }
+
+}
+
+
+extension AppDelegate {
+
+    // MARK: - Alert Handler Functions
+
+    /**
+     Generic alert generator.
+
+     - Parameters:
+        - head:        The alert's title.
+        - message:     The alert's message.
+        - addOkButton: Should we add an OK button?
+        - isCritical:  Should we make this a crirical alert
+
+     - Returns: The NSAlert.
+     */
+    internal func makeAlert(_ head: String, _ message: String, _ addOkButton: Bool = true, _ isCritical: Bool = false) -> NSAlert {
+
+        let alert = NSAlert()
+        alert.messageText = head
+        alert.informativeText = message
+        if addOkButton { alert.addButton(withTitle: "OK") }
+        if isCritical { alert.alertStyle = .critical }
+        return alert
+    }
+
+
+    // MARK: - Support Functions
+
+    func applicationSupportsSecureRestorableState() -> Bool {
+
+        return true
+    }
+
+
+    // MARK: - NSWindowDelegate Functions
+
+    /**
+      Catch when the user clicks on the window's red close button.
+     */
+    public func windowShouldClose(_ sender: NSWindow) -> Bool {
+
+        if !checkSettingsOnQuit() {
+            // No unsaved settings, so we're good to close
+            return true
+        }
+
+        // Close manually: there are settings changes, so this asks first
+        doClose(self)
+        return false
     }
 
 }

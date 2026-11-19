@@ -1,6 +1,6 @@
 /*
  *  ThumbnailProvider.swift
- *  PreviewCode
+ *  Quicklook Anything
  *
  *  Created by Tony Smith on 04/06/2021.
  *  Copyright © 2026 Tony Smith. All rights reserved.
@@ -43,7 +43,7 @@ class ThumbnailProvider: QLThumbnailProvider {
 
         defer { try? codeFileHandle.close() }
 
-        guard let data = try? codeFileHandle.read(upToCount: BUFFOON_CONSTANTS.MAX_THUMBNAIL_READ_SIZE) else {
+        guard let data = try? codeFileHandle.read(upToCount: Constants.MAX_THUMBNAIL_READ_SIZE) else {
             // Can read file, buy can't read data (maybe none to be had?) so bail
             handler(nil, ThumbnailerError.badFileUnreadable(request.fileURL.path))
             return
@@ -57,8 +57,8 @@ class ThumbnailProvider: QLThumbnailProvider {
         }
 
         // Instantiate the common code within the closure
-        guard let common = Common(forThumbnail: true) else {
-            // A key component of Common, eg. 'hightlight.js' is missing, so bail
+        guard let common = CodeRenderer(forThumbnail: true) else {
+            // A key component of CodeRenderer, eg. 'hightlight.js' is missing, so bail
             handler(nil, ThumbnailerError.badHighlighter)
             return
         }
@@ -82,10 +82,10 @@ class ThumbnailProvider: QLThumbnailProvider {
         }
 
         // Set the primary NSTextView drawing frame and a base font size
-        let codeFrame = NSMakeRect(CGFloat(BUFFOON_CONSTANTS.THUMBNAIL.ORIGIN_X),
-                                   CGFloat(BUFFOON_CONSTANTS.THUMBNAIL.ORIGIN_Y),
-                                   CGFloat(BUFFOON_CONSTANTS.THUMBNAIL.WIDTH),
-                                   CGFloat(BUFFOON_CONSTANTS.THUMBNAIL.HEIGHT))
+        let codeFrame = NSMakeRect(CGFloat(Constants.THUMBNAIL.ORIGIN_X),
+                                   CGFloat(Constants.THUMBNAIL.ORIGIN_Y),
+                                   CGFloat(Constants.THUMBNAIL.WIDTH),
+                                   CGFloat(Constants.THUMBNAIL.HEIGHT))
 
         let codeTextField = NSTextField(frame: codeFrame)
         codeTextField.attributedStringValue = codeAttString
@@ -119,7 +119,7 @@ class ThumbnailProvider: QLThumbnailProvider {
         // Calculate image scaling, frame size, etc.
         let thumbnailFrame = NSMakeRect(0.0,
                                         0.0,
-                                        CGFloat(BUFFOON_CONSTANTS.THUMBNAIL.ASPECT) * request.maximumSize.height,
+                                        CGFloat(Constants.THUMBNAIL.ASPECT) * request.maximumSize.height,
                                         request.maximumSize.height)
 
         // NOTE The `+2.0` is a hack to avoid a line above the image

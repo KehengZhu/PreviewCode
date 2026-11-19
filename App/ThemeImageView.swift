@@ -1,6 +1,6 @@
 /*
- *  PCImageView.swift
- *  PreviewCode
+ *  ThemeImageView.swift
+ *  Quicklook Anything
  *
  *  Created by Tony Smith on 18/06/2021.
  *  Copyright © 2026 Tony Smith. All rights reserved.
@@ -13,7 +13,7 @@ import Cocoa
  A very basic subclass so we can draw a line around theme mode icons in Preferences.
 */
 
-class PCImageView: NSImageView {
+class ThemeImageView: NSImageView {
 
     // MARK: - Private Properties
     

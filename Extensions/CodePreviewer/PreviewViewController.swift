@@ -1,6 +1,6 @@
 /*
  *  PreviewViewController.swift
- *  PreviewCode
+ *  Quicklook Anything
  *
  *  Created by Tony Smith on 30/05/2021.
  *  Copyright © 2026 Tony Smith. All rights reserved.
@@ -68,7 +68,7 @@ class PreviewViewController: NSViewController,
 
         // Get the file contents as a string
         guard let data = try? Data(contentsOf: url, options: [.uncached]) else {
-            throw makeError(BUFFOON_CONSTANTS.ERRORS.CODES.FILE_WONT_OPEN)
+            throw makeError(Constants.ERRORS.CODES.FILE_WONT_OPEN)
         }
 
         // LOCAL: most code is UTF-8, so only guess the encoding when it is not
@@ -77,14 +77,14 @@ class PreviewViewController: NSViewController,
         guard let code = utf8Code ?? String(data: data, encoding: encoding) else {
             // FROM 1.2.2
             // We couldn't convert to data to a valid encoding
-            throw makeError(BUFFOON_CONSTANTS.ERRORS.CODES.BAD_ENC_STRING, "unexpected encoding: \(encoding)")
+            throw makeError(Constants.ERRORS.CODES.BAD_ENC_STRING, "unexpected encoding: \(encoding)")
         }
 
         /*
          * Instantiate the common code within the closure
          */
-        guard let common = Common(forThumbnail: false, sharedHighlighter: true) else {
-            throw makeError(BUFFOON_CONSTANTS.ERRORS.CODES.BAD_HIGHLIGHTER)
+        guard let common = CodeRenderer(forThumbnail: false, sharedHighlighter: true) else {
+            throw makeError(Constants.ERRORS.CODES.BAD_HIGHLIGHTER)
         }
 
         /*
@@ -146,7 +146,7 @@ class PreviewViewController: NSViewController,
          */
 
         guard let renderTextStorage = self.renderTextView.textStorage else {
-            throw makeError(BUFFOON_CONSTANTS.ERRORS.CODES.BAD_TS_STRING)
+            throw makeError(Constants.ERRORS.CODES.BAD_TS_STRING)
         }
 
         /*
@@ -198,7 +198,7 @@ class PreviewViewController: NSViewController,
      - Returns: The index just after the last line of the first part, or `nil` if the
                 file should be highlighted in one go.
      */
-    private func firstScreensEnd(_ code: String, _ settings: PCSettings) -> String.Index? {
+    private func firstScreensEnd(_ code: String, _ settings: AppSettings) -> String.Index? {
 
         guard !settings.doShowLineNumbers else { return nil }
 
@@ -207,11 +207,11 @@ class PreviewViewController: NSViewController,
         var split: String.Index? = nil
         for index in utf8.indices where utf8[index] == 0x0A {
             lineCount += 1
-            if lineCount == BUFFOON_CONSTANTS.PROGRESSIVE.FIRST_LINES {
+            if lineCount == Constants.PROGRESSIVE.FIRST_LINES {
                 split = utf8.index(after: index)
             }
 
-            if lineCount >= BUFFOON_CONSTANTS.PROGRESSIVE.MIN_LINES {
+            if lineCount >= Constants.PROGRESSIVE.MIN_LINES {
                 return split
             }
         }
@@ -272,14 +272,14 @@ class PreviewViewController: NSViewController,
     private func updateTextScale() {
 
         guard let renderTextStorage = self.renderTextView?.textStorage, renderTextStorage.length > 0 else { return }
-        let small = self.view.bounds.width > 0 && self.view.bounds.width < BUFFOON_CONSTANTS.SMALL_PREVIEW_MAX_WIDTH
+        let small = self.view.bounds.width > 0 && self.view.bounds.width < Constants.SMALL_PREVIEW_MAX_WIDTH
         let scale = small ? self.smallPreviewScale : 1.0
         // A small preview has a fixed margin, the same as Markdown's; the text
         // container's line padding is part of it
         let padding = self.renderTextView.textContainer?.lineFragmentPadding ?? 0
-        let margin = small ? max(BUFFOON_CONSTANTS.SMALL_PREVIEW_MARGIN - padding, 0) : self.marginWidth
+        let margin = small ? max(Constants.SMALL_PREVIEW_MARGIN - padding, 0) : self.marginWidth
         if self.renderTextView.textContainerInset.width != margin {
-            self.renderTextView.textContainerInset = NSSize(width: margin, height: small ? BUFFOON_CONSTANTS.SMALL_PREVIEW_MARGIN : margin)
+            self.renderTextView.textContainerInset = NSSize(width: margin, height: small ? Constants.SMALL_PREVIEW_MARGIN : margin)
         }
         guard scale > 0, abs(scale - self.appliedScale) > 0.001 else { return }
         renderTextStorage.beginEditing()
@@ -322,21 +322,21 @@ class PreviewViewController: NSViewController,
         var errDesc: String
 
         switch(code) {
-            case BUFFOON_CONSTANTS.ERRORS.CODES.FILE_INACCESSIBLE:
-                errDesc = BUFFOON_CONSTANTS.ERRORS.MESSAGES.FILE_INACCESSIBLE
-            case BUFFOON_CONSTANTS.ERRORS.CODES.FILE_WONT_OPEN:
-                errDesc = BUFFOON_CONSTANTS.ERRORS.MESSAGES.FILE_WONT_OPEN
-            case BUFFOON_CONSTANTS.ERRORS.CODES.BAD_TS_STRING:
-                errDesc = BUFFOON_CONSTANTS.ERRORS.MESSAGES.BAD_TS_STRING
-            case BUFFOON_CONSTANTS.ERRORS.CODES.BAD_ENC_STRING:
-                errDesc = BUFFOON_CONSTANTS.ERRORS.MESSAGES.BAD_ENC_STRING + " \(extra)"
-            case BUFFOON_CONSTANTS.ERRORS.CODES.BAD_HIGHLIGHTER:
-                errDesc = BUFFOON_CONSTANTS.ERRORS.MESSAGES.BAD_HIGHLIGHTER
+            case Constants.ERRORS.CODES.FILE_INACCESSIBLE:
+                errDesc = Constants.ERRORS.MESSAGES.FILE_INACCESSIBLE
+            case Constants.ERRORS.CODES.FILE_WONT_OPEN:
+                errDesc = Constants.ERRORS.MESSAGES.FILE_WONT_OPEN
+            case Constants.ERRORS.CODES.BAD_TS_STRING:
+                errDesc = Constants.ERRORS.MESSAGES.BAD_TS_STRING
+            case Constants.ERRORS.CODES.BAD_ENC_STRING:
+                errDesc = Constants.ERRORS.MESSAGES.BAD_ENC_STRING + " \(extra)"
+            case Constants.ERRORS.CODES.BAD_HIGHLIGHTER:
+                errDesc = Constants.ERRORS.MESSAGES.BAD_HIGHLIGHTER
             default:
                 errDesc = "UNKNOWN ERROR"
         }
 
-        return NSError(domain: BUFFOON_CONSTANTS.APP_CODE_PREVIEWER,
+        return NSError(domain: Constants.APP_CODE_PREVIEWER,
                        code: code,
                        userInfo: [NSLocalizedDescriptionKey: errDesc])
     }
@@ -347,7 +347,7 @@ class PreviewViewController: NSViewController,
 
      FROM 2.2.4
     */
-    private func setPreviewWindowSize(_ settings: PCSettings) {
+    private func setPreviewWindowSize(_ settings: AppSettings) {
 
         // LOCAL: the width and height (in points) set in Advanced Settings; the
         // original code scaled the window to a fraction of the screen

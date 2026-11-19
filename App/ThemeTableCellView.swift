@@ -1,6 +1,6 @@
 /*
- *  PCThemeTableCellView.swift
- *  PreviewCode
+ *  ThemeTableCellView.swift
+ *  Quicklook Anything
  *
  *  Created by Tony Smith on 30/05/2021.
  *  Copyright © 2026 Tony Smith. All rights reserved.
@@ -13,7 +13,7 @@ import Cocoa
  A very basic subclass so we can store useful info within the cell.
 */
 
-class PCThemeTableCellView: NSTableCellView {
+class ThemeTableCellView: NSTableCellView {
 
     // MARK: - Class UI Properies
 

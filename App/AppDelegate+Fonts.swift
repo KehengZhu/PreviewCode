@@ -1,13 +1,26 @@
 /*
- *  PCAppDelegateFontHandling.swift
- *  PreviewCode
+ *  AppDelegate+Fonts.swift
+ *  Quicklook Anything
  *
- *  Created by Tony Smith on 18/06/2021.
- *  Copyright © 2026 Tony Smith. All rights reserved.
+ *  The monospace fonts and their styles, for the Code tab's Font and Style menus.
+ *  Based on PreviewCode, Copyright © 2026 Tony Smith (MIT License).
  */
 
 import AppKit
-import WebKit
+
+
+/**
+ Internal font record structure.
+ */
+
+struct FontRecord {
+
+    var postScriptName: String  = ""
+    var displayName: String     = ""
+    var styleName: String       = ""
+    var traits: UInt            = 0
+    var styles: [FontRecord]?       = nil
+}
 
 
 extension AppDelegate {
@@ -26,7 +39,7 @@ extension AppDelegate {
      */
     internal func asyncGetFonts() {
 
-        var cf: [PAFont] = []
+        var cf: [FontRecord] = []
 
         let monoTrait = NSFontTraitMask.fixedPitchFontMask.rawValue
 
@@ -42,13 +55,13 @@ extension AppDelegate {
             if let fonts = fm.availableMembers(ofFontFamily: family) {
                 // This will hold a font family: individual fonts will be added to
                 // the 'styles' array
-                var familyRecord = PAFont()
+                var familyRecord = FontRecord()
                 familyRecord.displayName = family
 
                 for font in fonts {
                     let fontTraits = font[3] as? UInt ?? 0
                     if monoTrait & fontTraits != 0 {
-                        var fontRecord = PAFont()
+                        var fontRecord = FontRecord()
                         // We can be fairly sure the following a typeable as described
                         fontRecord.postScriptName = font[0] as? String ?? "error"
                         fontRecord.styleName = font[1] as? String ?? "error"

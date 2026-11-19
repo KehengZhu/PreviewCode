@@ -65,8 +65,8 @@ final class MarkdownPreviewController: NSViewController, QLPreviewingController 
         }
 
         // The Quick Look window size (Advanced Settings) and text sizes (Markdown tab)
-        let settings = PCSettings()
-        settings.loadSettings(MNU_SECRETS.PID + BUFFOON_CONSTANTS.SUITE_NAME)
+        let settings = AppSettings()
+        settings.loadSettings(Constants.TEAM_ID + Constants.SUITE_NAME)
         self.preferredContentSize = NSSize(width: settings.previewWindowWidth, height: settings.previewWindowHeight)
 
         let renderer = WebViewPool.shared.acquire()

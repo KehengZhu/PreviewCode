@@ -1,6 +1,6 @@
 /*
- *  PAExtension.swift
- *  PreviewApps
+ *  Extensions.swift
+ *  Quicklook Anything
  *
  *  Created by Tony Smith on 18/06/2021.
  *  Copyright © 2026 Tony Smith. All rights reserved.
